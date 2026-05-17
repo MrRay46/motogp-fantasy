@@ -81,10 +81,7 @@ export default function EquipoPage() {
       ? pilotoReserva.puntosGP
       : 0;
 
-  const puntosEquipo =
-  puntosTitulares +
-  puntosReserva +
-  puntosMotor;
+  
 const marcas = [
   "Ducati",
   "Aprilia",
@@ -146,6 +143,10 @@ const puntosMotor =
         posicionMotor as keyof typeof puntosMotorFantasy
       ]
     : 0;
+    const puntosEquipo =
+  puntosTitulares +
+  puntosReserva +
+  puntosMotor;
   return (
     <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
       <Navbar />
