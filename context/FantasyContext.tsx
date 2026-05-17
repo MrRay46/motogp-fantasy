@@ -1,0 +1,103 @@
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+type EquipoJugador = {
+  fichados: string[];
+  reserva: string | null;
+  motor: string | null;
+};
+
+type FantasyContextType = {
+  equipos: {
+    [jugador: string]: EquipoJugador;
+  };
+
+  setEquipos: React.Dispatch<
+    React.SetStateAction<{
+      [jugador: string]: EquipoJugador;
+    }>
+  >;
+
+  jugadorActual: string;
+
+  setJugadorActual: React.Dispatch<
+    React.SetStateAction<string>
+  >;
+};
+
+const FantasyContext =
+  createContext<FantasyContextType | null>(
+    null
+  );
+
+export function FantasyProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [jugadorActual, setJugadorActual] =
+  useState(
+    localStorage.getItem("jugadorActual") ||
+      "De la Raya Jr"
+  );
+
+  const [equipos, setEquipos] =
+    useState<{
+      [jugador: string]: EquipoJugador;
+    }>({});
+
+  useEffect(() => {
+    const equiposGuardados =
+      localStorage.getItem("equipos");
+
+    if (equiposGuardados) {
+      setEquipos(
+        JSON.parse(equiposGuardados)
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "equipos",
+      JSON.stringify(equipos)
+    );
+  }, [equipos]);
+useEffect(() => {
+  localStorage.setItem(
+    "jugadorActual",
+    jugadorActual
+  );
+}, [jugadorActual]);
+  return (
+    <FantasyContext.Provider
+      value={{
+        equipos,
+        setEquipos,
+        jugadorActual,
+        setJugadorActual,
+      }}
+    >
+      {children}
+    </FantasyContext.Provider>
+  );
+}
+
+export function useFantasy() {
+  const context =
+    useContext(FantasyContext);
+
+  if (!context) {
+    throw new Error(
+      "useFantasy debe usarse dentro de FantasyProvider"
+    );
+  }
+
+  return context;
+}
