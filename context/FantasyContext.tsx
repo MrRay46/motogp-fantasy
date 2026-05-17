@@ -50,6 +50,7 @@ export function FantasyProvider({
     }>({});
 
   useEffect(() => {
+  if (typeof window !== "undefined") {
     const equiposGuardados =
       localStorage.getItem("equipos");
 
@@ -58,26 +59,33 @@ export function FantasyProvider({
         JSON.parse(equiposGuardados)
       );
     }
-  }, []);
+  }
+}, []);
 useEffect(() => {
-  const jugadorGuardado =
-    localStorage.getItem("jugadorActual");
+  if (typeof window !== "undefined") {
+    const jugadorGuardado =
+      localStorage.getItem("jugadorActual");
 
-  if (jugadorGuardado) {
-    setJugadorActual(jugadorGuardado);
+    if (jugadorGuardado) {
+      setJugadorActual(jugadorGuardado);
+    }
   }
 }, []);
   useEffect(() => {
+  if (typeof window !== "undefined") {
     localStorage.setItem(
       "equipos",
       JSON.stringify(equipos)
     );
-  }, [equipos]);
+  }
+}, [equipos]);
 useEffect(() => {
-  localStorage.setItem(
-    "jugadorActual",
-    jugadorActual
-  );
+  if (typeof window !== "undefined") {
+    localStorage.setItem(
+      "jugadorActual",
+      jugadorActual
+    );
+  }
 }, [jugadorActual]);
   return (
     <FantasyContext.Provider
