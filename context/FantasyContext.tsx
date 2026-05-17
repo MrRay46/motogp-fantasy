@@ -42,10 +42,7 @@ export function FantasyProvider({
   children: React.ReactNode;
 }) {
   const [jugadorActual, setJugadorActual] =
-  useState(
-    localStorage.getItem("jugadorActual") ||
-      "De la Raya Jr"
-  );
+  useState("De la Raya Jr");
 
   const [equipos, setEquipos] =
     useState<{
@@ -62,7 +59,14 @@ export function FantasyProvider({
       );
     }
   }, []);
+useEffect(() => {
+  const jugadorGuardado =
+    localStorage.getItem("jugadorActual");
 
+  if (jugadorGuardado) {
+    setJugadorActual(jugadorGuardado);
+  }
+}, []);
   useEffect(() => {
     localStorage.setItem(
       "equipos",
