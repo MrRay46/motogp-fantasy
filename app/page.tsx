@@ -1,5 +1,6 @@
 "use client";
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { jugadores } from "@/data/jugadores";
 import { pilotos } from "@/data/pilotos";
@@ -7,6 +8,18 @@ import { pilotos } from "@/data/pilotos";
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function Home() {
+  const router = useRouter();
+
+useEffect(() => {
+  const usuario =
+    localStorage.getItem(
+      "usuarioLogueado"
+    );
+
+  if (!usuario) {
+    router.push("/login");
+  }
+}, []);
  const {
   equipos,
   jugadorActual,
@@ -104,22 +117,9 @@ clasificacion.sort(
     Jugador:
   </label>
 
-  <select
-    value={jugadorActual}
-    onChange={(e) =>
-      setJugadorActual(e.target.value)
-    }
-    className="bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2"
-  >
-    {jugadores.map((jugador) => (
-      <option
-        key={jugador.nombre}
-        value={jugador.nombre}
-      >
-        {jugador.nombre}
-      </option>
-    ))}
-  </select>
+  <h2 className="text-3xl font-bold mb-6">
+  {jugadorActual}
+</h2>
 </div>
       <div className="grid md:grid-cols-3 gap-6 mb-10">
 
