@@ -143,11 +143,13 @@ const mercadoAbierto =
   )
 }
               onClick={() => {
-                if (
-                  fichados.includes(
-                    piloto.nombre
-                  )
-                ) {
+  if (!mercadoAbierto) return;
+
+  if (
+    fichados.includes(
+      piloto.nombre
+    )
+  ) {
                   setFichados(
                     fichados.filter(
                       (nombre) =>
@@ -184,9 +186,11 @@ const mercadoAbierto =
             {fichados.includes(piloto.nombre) && (
   <button
   disabled={!mercadoAbierto}
-    onClick={() =>
-      setReserva(piloto.nombre)
-    }
+   onClick={() => {
+  if (!mercadoAbierto) return;
+
+  setReserva(piloto.nombre);
+}}
     className="mt-2 ml-3 bg-blue-500 hover:bg-blue-400 transition px-4 py-2 rounded-xl"
   >
     {reserva === piloto.nombre
@@ -217,9 +221,11 @@ const mercadoAbierto =
 
       <button
       disabled={!mercadoAbierto}
-        onClick={() =>
-          setMotor(item.nombre)
-        }
+        onClick={() => {
+  if (!mercadoAbierto) return;
+
+  setMotor(item.nombre);
+}}
         className="mt-4 bg-red-500 hover:bg-red-400 transition px-4 py-2 rounded-xl"
       >
         {motor === item.nombre
