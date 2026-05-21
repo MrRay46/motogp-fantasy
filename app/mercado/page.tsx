@@ -96,14 +96,16 @@ const mercadoAbierto =
     <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
       <Navbar />
 
-      <h1 className="text-5xl font-bold text-red-500 mb-8">
-        Mercado
-        <p className="text-xl mb-6">
+    <h1 className="text-5xl font-bold text-red-500 mb-4">
+  Mercado
+</h1>
+
+<p className="text-xl mb-6">
   {mercadoAbierto
     ? "🟢 Mercado abierto"
     : "🔒 Mercado cerrado"}
 </p>
-      </h1>
+
 
       <p className="text-xl mb-6">
         💰 Presupuesto restante:{" "}
@@ -127,18 +129,19 @@ const mercadoAbierto =
 
             <button
               disabled={
-              
-                !fichados.includes(
-                  piloto.nombre
-                ) &&
-                (
-                  fichados.length >= 6 ||
-                  presupuestoUsado +
-                    piloto.precio >
-                    172
-                )
-              }
-              disabled={!mercadoAbierto}
+  !mercadoAbierto ||
+  (
+    !fichados.includes(
+      piloto.nombre
+    ) &&
+    (
+      fichados.length >= 6 ||
+      presupuestoUsado +
+        piloto.precio >
+        172
+    )
+  )
+}
               onClick={() => {
                 if (
                   fichados.includes(
