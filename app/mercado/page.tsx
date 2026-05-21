@@ -1,7 +1,7 @@
 "use client";
 import { motores } from "@/data/motores";
 import Navbar from "@/components/Navbar";
-
+import { ventanasMercado } from "@/data/mercado";
 import { pilotos } from "@/data/pilotos";
 
 import { useFantasy } from "@/context/FantasyContext";
@@ -75,13 +75,34 @@ const setMotor = (
 
   const presupuestoRestante =
     172 - presupuestoUsado;
+const hoy = new Date();
 
+const mercadoAbierto =
+  ventanasMercado.some((ventana) => {
+    const inicio = new Date(
+      ventana.inicio
+    );
+
+    const fin = new Date(
+      ventana.fin
+    );
+
+    return (
+      hoy >= inicio &&
+      hoy <= fin
+    );
+  });
   return (
     <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
       <Navbar />
 
       <h1 className="text-5xl font-bold text-red-500 mb-8">
         Mercado
+        <p className="text-xl mb-6">
+  {mercadoAbierto
+    ? "🟢 Mercado abierto"
+    : "🔒 Mercado cerrado"}
+</p>
       </h1>
 
       <p className="text-xl mb-6">
@@ -106,6 +127,7 @@ const setMotor = (
 
             <button
               disabled={
+              
                 !fichados.includes(
                   piloto.nombre
                 ) &&
@@ -116,6 +138,7 @@ const setMotor = (
                     172
                 )
               }
+              disabled={!mercadoAbierto}
               onClick={() => {
                 if (
                   fichados.includes(
@@ -157,6 +180,7 @@ const setMotor = (
             </button>
             {fichados.includes(piloto.nombre) && (
   <button
+  disabled={!mercadoAbierto}
     onClick={() =>
       setReserva(piloto.nombre)
     }
@@ -189,6 +213,7 @@ const setMotor = (
       </p>
 
       <button
+      disabled={!mercadoAbierto}
         onClick={() =>
           setMotor(item.nombre)
         }
