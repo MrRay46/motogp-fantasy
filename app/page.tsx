@@ -145,15 +145,15 @@ clasificacion.sort(
 
         <div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
           <h2 className="text-2xl font-bold mb-4">
-            🔥 Piloto en Forma
+            🏁 Próximo GP
           </h2>
 
           <p className="text-3xl font-bold">
-            Marco Bezzecchi
+            Autodromo Internazionale del Mugello
           </p>
 
           <p className="mt-2 text-zinc-400">
-            Líder fantasy actual
+            29 may - 31 may
           </p>
         </div>
       </div>
@@ -166,7 +166,7 @@ clasificacion.sort(
     </h2>
 
     <p className="text-3xl font-bold">
-      Jorge Martin
+      Di Giannantonio
     </p>
 
     <p className="mt-2 text-zinc-300">
@@ -180,7 +180,7 @@ clasificacion.sort(
     </h2>
 
     <p className="text-3xl font-bold">
-      Aprilia
+      Ducati
     </p>
 
     <p className="mt-2 text-zinc-300">
@@ -190,11 +190,11 @@ clasificacion.sort(
 
   <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl">
     <h2 className="text-2xl font-bold mb-4">
-      ⚡ Pole Position
+      🔥 Piloto en Forma
     </h2>
 
     <p className="text-3xl font-bold">
-      Marc Marquez
+      Marco Bezzecchi
     </p>
 
     <p className="mt-2 text-zinc-300">
@@ -208,7 +208,7 @@ clasificacion.sort(
     </h2>
 
     <p className="text-3xl font-bold">
-      Ducati
+      Aprilia
     </p>
 
     <p className="mt-2 text-zinc-300">
