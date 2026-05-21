@@ -75,21 +75,15 @@ const setMotor = (
 
   const presupuestoRestante =
     172 - presupuestoUsado;
-const hoy = new Date();
+const hoy = new Date()
+  .toISOString()
+  .split("T")[0];
 
 const mercadoAbierto =
   ventanasMercado.some((ventana) => {
-    const inicio = new Date(
-      ventana.inicio
-    );
-
-    const fin = new Date(
-      ventana.fin
-    );
-
     return (
-      hoy >= inicio &&
-      hoy <= fin
+      hoy >= ventana.inicio &&
+      hoy <= ventana.fin
     );
   });
   return (
