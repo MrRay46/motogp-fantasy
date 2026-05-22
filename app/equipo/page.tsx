@@ -31,7 +31,11 @@ export default function EquipoPage() {
 
   const motor =
     equipoActual.motor;
+const prediccionPiloto =
+  equipoActual.prediccionPiloto;
 
+const prediccionMotor =
+  equipoActual.prediccionMotor;
   const equipo = pilotos.filter(
     (piloto) =>
       fichados.includes(piloto.nombre)
@@ -258,6 +262,33 @@ const puntosMotor =
       ) : (
         <p>No tienes motor seleccionado.</p>
       )}
+      <h2 className="text-3xl font-semibold mt-10 mb-6">
+  🎯 Predicciones Temporada
+</h2>
+
+<div className="grid md:grid-cols-2 gap-6">
+  <div className="bg-zinc-900 border border-zinc-700 p-5 rounded-3xl">
+    <h3 className="text-2xl font-bold mb-3">
+      🏆 Piloto Campeón
+    </h3>
+
+    <p className="text-xl">
+      {prediccionPiloto ||
+        "Sin predicción"}
+    </p>
+  </div>
+
+  <div className="bg-zinc-900 border border-zinc-700 p-5 rounded-3xl">
+    <h3 className="text-2xl font-bold mb-3">
+      🏍️ Motor Campeón
+    </h3>
+
+    <p className="text-xl">
+      {prediccionMotor ||
+        "Sin predicción"}
+    </p>
+  </div>
+</div>
     </main>
   );
 }
