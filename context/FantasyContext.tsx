@@ -11,6 +11,9 @@ type EquipoJugador = {
   fichados: string[];
   reserva: string | null;
   motor: string | null;
+  
+  prediccionPiloto: string | null;
+prediccionMotor: string | null;
 };
 
 type FantasyContextType = {
