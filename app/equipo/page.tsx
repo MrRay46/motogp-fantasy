@@ -289,6 +289,9 @@ const puntosMotor =
     </p>
   </div>
 </div>
+<h2>
+  🎯 Predicciones Temporada
+</h2>
     </main>
   );
 }
