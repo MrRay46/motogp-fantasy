@@ -14,10 +14,13 @@ const {
 } = useFantasy();
 const equipoActual =
   equipos[jugadorActual] || {
-    fichados: [],
-    reserva: null,
-    motor: null,
-  };
+  fichados: [],
+  reserva: null,
+  motor: null,
+
+  prediccionPiloto: null,
+  prediccionMotor: null,
+}
 
 const fichados =
   equipoActual.fichados;
@@ -27,6 +30,11 @@ const reserva =
 
 const motor =
   equipoActual.motor;
+  const prediccionPiloto =
+  equipoActual.prediccionPiloto;
+
+const prediccionMotor =
+  equipoActual.prediccionMotor;
   const setFichados = (
   nuevosFichados: string[]
 ) => {
@@ -54,6 +62,7 @@ const setReserva = (
 };
 
 const setMotor = (
+  
   nuevoMotor: string | null
 ) => {
   setEquipos((prev) => ({
@@ -61,6 +70,29 @@ const setMotor = (
     [jugadorActual]: {
       ...equipoActual,
       motor: nuevoMotor,
+    },
+  }));
+};
+const setPrediccionPiloto = (
+  piloto: string
+) => {
+  setEquipos((prev) => ({
+    ...prev,
+    [jugadorActual]: {
+      ...equipoActual,
+      prediccionPiloto: piloto,
+    },
+  }));
+};
+
+const setPrediccionMotor = (
+  marca: string
+) => {
+  setEquipos((prev) => ({
+    ...prev,
+    [jugadorActual]: {
+      ...equipoActual,
+      prediccionMotor: marca,
     },
   }));
 };
@@ -228,6 +260,71 @@ const mercadoAbierto =
       </button>
     </div>
   ))}
+</div>
+<h2 className="text-4xl font-bold mt-12 mb-6">
+  🎯 Predicciones Temporada
+</h2>
+
+<div className="grid md:grid-cols-2 gap-6">
+  <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
+    <h3 className="text-2xl font-bold mb-4">
+      🏆 Piloto Campeón
+    </h3>
+
+    <div className="flex flex-wrap gap-3">
+      {pilotos.map((piloto) => (
+        <button
+          key={piloto.nombre}
+          disabled={!mercadoAbierto}
+          onClick={() => {
+            if (!mercadoAbierto) return;
+
+            setPrediccionPiloto(
+              piloto.nombre
+            );
+          }}
+          className={`px-4 py-2 rounded-xl transition ${
+            prediccionPiloto ===
+            piloto.nombre
+              ? "bg-green-500"
+              : "bg-zinc-800 hover:bg-zinc-700"
+          }`}
+        >
+          {piloto.nombre}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
+    <h3 className="text-2xl font-bold mb-4">
+      🏍️ Motor Campeón
+    </h3>
+
+    <div className="flex flex-wrap gap-3">
+      {motores.map((item) => (
+        <button
+          key={item.nombre}
+          disabled={!mercadoAbierto}
+          onClick={() => {
+            if (!mercadoAbierto) return;
+
+            setPrediccionMotor(
+              item.nombre
+            );
+          }}
+          className={`px-4 py-2 rounded-xl transition ${
+            prediccionMotor ===
+            item.nombre
+              ? "bg-green-500"
+              : "bg-zinc-800 hover:bg-zinc-700"
+          }`}
+        >
+          {item.nombre}
+        </button>
+      ))}
+    </div>
+  </div>
 </div>
     </main>
 

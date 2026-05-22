@@ -15,10 +15,13 @@ export default function EquipoPage() {
 
   const equipoActual =
     equipos[jugadorActual] || {
-      fichados: [],
-      reserva: null,
-      motor: null,
-    };
+  fichados: [],
+  reserva: null,
+  motor: null,
+
+  prediccionPiloto: null,
+  prediccionMotor: null,
+}
 
   const fichados =
     equipoActual.fichados;
