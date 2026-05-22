@@ -77,23 +77,23 @@ const puntosMotorFantasy = {
   const clasificacion = [
     {
       nombre: "Alejandro",
-      puntos: 321,
+      puntos: 388,
     },
     {
       nombre: "David",
-      puntos: 370,
+      puntos: 428,
     },
     {
       nombre: "De la Raya Jr",
-      puntos: 306,
+      puntos: 367,
     },
     {
       nombre: "De la Raya Sr",
-      puntos: 314,
+      puntos: 387,
     },
     {
       nombre: "José",
-      puntos: 241,
+      puntos: 285,
     },
   ];
 clasificacion.sort(
@@ -198,7 +198,7 @@ clasificacion.sort(
     </p>
 
     <p className="mt-2 text-zinc-300">
-      Récord del circuito
+      Lider del mundial y fantasy
     </p>
   </div>
 
