@@ -246,13 +246,17 @@ const mercadoAbierto =
       </p>
 
       <button
-      disabled={!mercadoAbierto}
+        disabled={!mercadoAbierto}
         onClick={() => {
-  if (!mercadoAbierto) return;
+          if (!mercadoAbierto) return;
 
-  setMotor(item.nombre);
-}}
-        className="mt-4 bg-red-500 hover:bg-red-400 transition px-4 py-2 rounded-xl"
+          setMotor(item.nombre);
+        }}
+        className={`mt-4 px-4 py-2 rounded-xl transition ${
+          mercadoAbierto
+            ? "bg-red-500 hover:bg-red-400"
+            : "bg-zinc-700 cursor-not-allowed opacity-50"
+        }`}
       >
         {motor === item.nombre
           ? "Seleccionado ✅"
@@ -261,6 +265,7 @@ const mercadoAbierto =
     </div>
   ))}
 </div>
+
 <h2 className="text-4xl font-bold mt-12 mb-6">
   🎯 Predicciones Temporada
 </h2>
@@ -287,7 +292,9 @@ const mercadoAbierto =
             prediccionPiloto ===
             piloto.nombre
               ? "bg-green-500"
-              : "bg-zinc-800 hover:bg-zinc-700"
+              : mercadoAbierto
+              ? "bg-zinc-800 hover:bg-zinc-700"
+              : "bg-zinc-700 opacity-50 cursor-not-allowed"
           }`}
         >
           {piloto.nombre}
@@ -317,7 +324,9 @@ const mercadoAbierto =
             prediccionMotor ===
             item.nombre
               ? "bg-green-500"
-              : "bg-zinc-800 hover:bg-zinc-700"
+              : mercadoAbierto
+              ? "bg-zinc-800 hover:bg-zinc-700"
+              : "bg-zinc-700 opacity-50 cursor-not-allowed"
           }`}
         >
           {item.nombre}
