@@ -20,7 +20,7 @@ const equipoActual =
 
   prediccionPiloto: null,
   prediccionMotor: null,
-}
+ };
 
 const fichados =
   equipoActual.fichados;
