@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { jugadores } from "@/data/jugadores";
 import { pilotos } from "@/data/pilotos";
-
+import { circuitos } from "@/data/circuitos";
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function Home() {
@@ -103,7 +103,15 @@ clasificacion.sort(
       (jugador) =>
         jugador.nombre === jugadorActual
     ) + 1;
+const hoy = new Date()
+  .toISOString()
+  .split("T")[0];
 
+const proximoCircuito =
+  circuitos.find(
+    (circuito) =>
+      circuito.fechaInicio >= hoy
+  );
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
       <Navbar />
@@ -146,16 +154,31 @@ clasificacion.sort(
 
         <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
           <h2 className="text-2xl font-bold mb-4">
-            🏁 Próximo GP
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">
+  🏁 Próximo GP
+</h2>
 
-          <p className="text-3xl font-bold">
-            Autodromo Internazionale del Mugello
-          </p>
+{proximoCircuito && (
+  <>
+    <img
+      src={proximoCircuito.imagen}
+      alt={proximoCircuito.nombre}
+      className="w-40 mx-auto mb-4 opacity-90"
+    />
 
-          <p className="mt-2 text-zinc-400">
-            29 may - 31 may
-          </p>
+    <p className="text-3xl font-bold text-center">
+      {proximoCircuito.nombre}
+    </p>
+
+    <p className="mt-2 text-zinc-400 text-center">
+      {proximoCircuito.pais}
+    </p>
+
+    <p className="mt-1 text-zinc-500 text-center">
+      {proximoCircuito.fechaInicio}
+    </p>
+  </>
+)}
         </div>
       </div>
 
