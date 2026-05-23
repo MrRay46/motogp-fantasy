@@ -105,12 +105,18 @@ clasificacion.sort(
     ) + 1;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
+    <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
       <Navbar />
 
-      <h1 className="text-6xl font-extrabold mb-10 text-red-500">
-        MotoGP Fantasy
-      </h1>
+      <div className="mb-12">
+  <h1 className="text-7xl font-black tracking-tight bg-gradient-to-r from-red-500 via-orange-400 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
+    MotoGP Fantasy
+  </h1>
+
+  <p className="text-zinc-400 text-xl mt-3">
+    Campeonato Fantasy 2025
+  </p>
+</div>
 <div className="mb-8">
   <h2 className="text-3xl font-bold mb-6">
     👤 {jugadorActual}
@@ -118,7 +124,7 @@ clasificacion.sort(
 </div>
       <div className="grid md:grid-cols-3 gap-6 mb-10">
 
-        <div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
+        <div className=" bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
           <h2 className="text-2xl font-bold mb-4">
             🏆 Tu Posición
           </h2>
@@ -128,7 +134,7 @@ clasificacion.sort(
           </p>
         </div>
 
-        <div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
+        <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
           <h2 className="text-2xl font-bold mb-4">
             📊 Tus Puntos
           </h2>
@@ -138,7 +144,7 @@ clasificacion.sort(
           </p>
         </div>
 
-        <div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
+        <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
           <h2 className="text-2xl font-bold mb-4">
             🏁 Próximo GP
           </h2>
@@ -155,7 +161,7 @@ clasificacion.sort(
 
       <div className="grid md:grid-cols-2 gap-6 mb-10">
 
-  <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl">
+  <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🏁 Último Ganador
     </h2>
@@ -169,7 +175,7 @@ clasificacion.sort(
     </p>
   </div>
 
-  <div className="bg-orange-900/40 border border-orange-500 p-6 rounded-3xl">
+  <div className="bg-orange-900/40 border border-orange-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🏍️ Motor Ganador
     </h2>
@@ -183,7 +189,7 @@ clasificacion.sort(
     </p>
   </div>
 
-  <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl">
+  <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🔥 Piloto en Forma
     </h2>
@@ -197,7 +203,7 @@ clasificacion.sort(
     </p>
   </div>
 
-  <div className="bg-yellow-900/40 border border-yellow-500 p-6 rounded-3xl">
+  <div className="bg-yellow-900/40 border border-yellow-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🔥 Motor en Forma
     </h2>
@@ -220,14 +226,20 @@ clasificacion.sort(
         Clasificación General
       </h2>
 
-      <div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
+      <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
         {clasificacion.map((jugador, index) => (
           <div
             key={jugador.nombre}
             className="flex justify-between py-3 border-b border-zinc-700"
           >
             <p className="text-xl">
-              {index + 1}. {jugador.nombre}
+              {index === 0
+  ? "🥇"
+  : index === 1
+  ? "🥈"
+  : index === 2
+  ? "🥉"
+  : `${index + 1}.`} {jugador.nombre}
             </p>
 
             <p className="text-xl font-bold">
@@ -240,7 +252,7 @@ clasificacion.sort(
   🏍️ Constructores Fantasy
 </h2>
 
-<div className="bg-zinc-900/80 border border-zinc-700 p-6 rounded-3xl">
+<div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
   {motoresOrdenados.map(
     (motor, index) => (
       <div
@@ -249,7 +261,13 @@ clasificacion.sort(
       >
         <div>
           <p className="text-xl font-bold">
-            {index + 1}. {motor.marca}
+            {index === 0
+  ? "🥇"
+  : index === 1
+  ? "🥈"
+  : index === 2
+  ? "🥉"
+  : `${index + 1}.`} {motor.marca}
           </p>
 
           <p className="text-zinc-400">
