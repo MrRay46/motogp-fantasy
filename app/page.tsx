@@ -166,15 +166,15 @@ const proximoCircuito =
       className="w-40 mx-auto mb-4 opacity-90"
     />
 
-    <p className="text-3xl font-bold text-center">
+    <p className="text-3xl font-bold text-center text-black">
       {proximoCircuito.nombre}
     </p>
 
-    <p className="mt-2 text-zinc-400 text-center">
+    <p className="mt-2 text-zinc-700 text-center">
       {proximoCircuito.pais}
     </p>
 
-    <p className="mt-1 text-zinc-500 text-center">
+    <p className="mt-1 text-zinc-600 text-center">
       {proximoCircuito.fechaInicio}
     </p>
   </>
@@ -184,7 +184,7 @@ const proximoCircuito =
 
       <div className="grid md:grid-cols-2 gap-6 mb-10">
 
-  <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+  <div className="bg-zinc-100/90 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🏁 Último Ganador
     </h2>
