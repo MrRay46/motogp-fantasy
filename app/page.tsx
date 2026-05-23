@@ -154,7 +154,7 @@ const proximoCircuito =
 
         <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
           <h2 className="text-2xl font-bold mb-4">
-          <h2 className="text-2xl font-bold mb-4">
+          
   🏁 Próximo GP
 </h2>
 
