@@ -166,15 +166,15 @@ const proximoCircuito =
       className="w-40 mx-auto mb-4 opacity-90"
     />
 
-    <p className="text-3xl font-bold text-center text-black">
+    <p className="text-3xl font-bold text-center text-white">
       {proximoCircuito.nombre}
     </p>
 
-    <p className="mt-2 text-zinc-700 text-center">
+    <p className="mt-2 text-zinc-300 text-center">
       {proximoCircuito.pais}
     </p>
 
-    <p className="mt-1 text-zinc-600 text-center">
+    <p className="mt-1 text-zinc-400 text-center">
       {proximoCircuito.fechaInicio}
     </p>
   </>
