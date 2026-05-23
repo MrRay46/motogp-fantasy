@@ -20,10 +20,9 @@ useEffect(() => {
     router.push("/login");
   }
 }, []);
- const {
+const {
   equipos,
   jugadorActual,
-  setJugadorActual,
 } = useFantasy();
 
  const equipoActual =
@@ -113,13 +112,9 @@ clasificacion.sort(
         MotoGP Fantasy
       </h1>
 <div className="mb-8">
-  <label className="text-xl mr-4">
-    Jugador:
-  </label>
-
   <h2 className="text-3xl font-bold mb-6">
-  {jugadorActual}
-</h2>
+    👤 {jugadorActual}
+  </h2>
 </div>
       <div className="grid md:grid-cols-3 gap-6 mb-10">
 

@@ -11,7 +11,7 @@ type EquipoJugador = {
   fichados: string[];
   reserva: string | null;
   motor: string | null;
-  
+
   prediccionPiloto: string | null;
 prediccionMotor: string | null;
 };
@@ -65,13 +65,13 @@ export function FantasyProvider({
   }
 }, []);
 useEffect(() => {
-  if (typeof window !== "undefined") {
-    const jugadorGuardado =
-      localStorage.getItem("jugadorActual");
+  const jugadorGuardado =
+    localStorage.getItem(
+      "usuarioLogueado"
+    );
 
-    if (jugadorGuardado) {
-      setJugadorActual(jugadorGuardado);
-    }
+  if (jugadorGuardado) {
+    setJugadorActual(jugadorGuardado);
   }
 }, []);
   useEffect(() => {
