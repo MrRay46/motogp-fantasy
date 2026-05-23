@@ -270,7 +270,8 @@ const mercadoAbierto =
   🎯 Predicciones Temporada
 </h2>
 
-<div className="grid md:grid-cols-2 gap-6">
+<div className="grid md:grid-cols-2 gap-6 mb-10">
+
   <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
     <h3 className="text-2xl font-bold mb-4">
       🏆 Piloto Campeón
@@ -334,6 +335,7 @@ const mercadoAbierto =
       ))}
     </div>
   </div>
+
 </div>
     </main>
 
