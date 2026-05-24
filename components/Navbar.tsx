@@ -1,6 +1,6 @@
 export default function Navbar() {
   return (
-    <nav className="bg-zinc-900/80 backdrop-blur border border-zinc-700 rounded-2xl p-4 flex flex-wrap gap-4 justify-center mb-10 text-xl font-semibold">
+    <nav className="bg-zinc-900/80 backdrop-blur border border-zinc-700 rounded-2xl p-4 flex flex-wrap gap-4 justify-center mb-10 text-base md:text-xl font-semibold">
       <a
         href="/"
         className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-400 transition"
