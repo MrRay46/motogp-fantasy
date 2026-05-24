@@ -35,10 +35,12 @@ const equipo = pilotos.filter((piloto) =>
   fichados.includes(piloto.nombre)
 );
 
-  const puntosEquipo = equipo.reduce(
-    (total, piloto) => total + piloto.puntos,
-    0
-  );
+  const puntosEquipo =
+  jugadores.find(
+    (jugador) =>
+      jugador.nombre ===
+      jugadorActual
+  )?.puntos || 0;
 const marcas = ["Ducati", "Aprilia", "KTM", "Honda", "Yamaha"];
 
 const resultadosMotores = marcas.map((marca) => {
@@ -73,28 +75,7 @@ const puntosMotorFantasy = {
   3: 4,
   4: 2,
 };
-  const clasificacion = [
-    {
-      nombre: "Alejandro",
-      puntos: 388,
-    },
-    {
-      nombre: "David",
-      puntos: 428,
-    },
-    {
-      nombre: "De la Raya Jr",
-      puntos: 367,
-    },
-    {
-      nombre: "De la Raya Sr",
-      puntos: 387,
-    },
-    {
-      nombre: "José",
-      puntos: 285,
-    },
-  ];
+  const clasificacion = [...jugadores];
 clasificacion.sort(
   (a, b) => b.puntos - a.puntos
 );
@@ -184,7 +165,7 @@ const proximoCircuito =
 
       <div className="grid md:grid-cols-2 gap-6 mb-10">
 
-  <div className="bg-zinc-100/90 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+  <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🏁 Último Ganador
     </h2>
