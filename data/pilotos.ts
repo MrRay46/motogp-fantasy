@@ -7,6 +7,7 @@ export const pilotos = [
     equipo: "Lenovo Team",
     marca: "Ducati",
     foto: "/pilotos/marc marquez.webp",
+    logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
     nombre: "Pedro Acosta",
@@ -15,7 +16,8 @@ export const pilotos = [
     puntosGP: 9,
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
-    foto: "/pilotos/pedro acosta.webp"
+    foto: "/pilotos/pedro acosta.webp",
+    logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
     nombre: "Maverick Viñales",
@@ -24,7 +26,8 @@ export const pilotos = [
     puntosGP: 3,
     equipo: "Red Bull Tech3",
     marca: "KTM",
-    foto: "/pilotos/maverick viñales.webp"
+    foto: "/pilotos/maverick viñales.webp",
+    logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
     nombre: "Alex Rins",
@@ -33,7 +36,8 @@ export const pilotos = [
     puntosGP: 5,
     equipo: "Monster Energy",
     marca: "Yamaha",
-    foto: "/pilotos/alex rins.webp"
+    foto: "/pilotos/alex rins.webp",
+    logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
     nombre: "Toprak Razgatlioglu",
@@ -42,7 +46,8 @@ export const pilotos = [
     puntosGP: 1,
     equipo: "Prima Pramac",
     marca: "Yamaha",
-    foto: "/pilotos/toprak razgatlioglu.webp"
+    foto: "/pilotos/toprak razgatlioglu.webp",
+    logoEquipo: "/equipos/Prima Pramac Yamaha.png",
   },
   {
     nombre: "Fabio Quartararo",
@@ -51,7 +56,8 @@ export const pilotos = [
     puntosGP: 10,
     equipo: "Monster Energy",
     marca: "Yamaha",
-    foto: "/pilotos/fabio quartararo.webp"
+    foto: "/pilotos/fabio quartararo.webp",
+    logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
     nombre: "Ai Ogura",
@@ -60,7 +66,8 @@ export const pilotos = [
     puntosGP: 9,
     equipo: "Trackhouse Team",
     marca: "Aprilia",
-    foto: "/pilotos/ai ogura.webp"
+    foto: "/pilotos/ai ogura.webp",
+    logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
     nombre: "Diogo Moreira",
@@ -69,7 +76,8 @@ export const pilotos = [
     puntosGP: 6,
     equipo: "LCR",
     marca: "Honda",
-    foto: "/pilotos/diogo moreira.webp"
+    foto: "/pilotos/diogo moreira.webp",
+    logoEquipo: "/equipos/CASTROL Honda LCR.png",
   },
   {
     nombre: "Franco Morbidelli",
@@ -78,7 +86,8 @@ export const pilotos = [
     puntosGP: 7,
     equipo: "VR46 Racing",
     marca: "Ducati",
-    foto: "/pilotos/franco morbidelli.webp"
+    foto: "/pilotos/franco morbidelli.webp",
+    logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
     nombre: "Joan Mir",
@@ -87,7 +96,8 @@ export const pilotos = [
     puntosGP: 20,
     equipo: "HRC Castrol",
     marca: "Honda",
-    foto: "/pilotos/joan mir.webp"
+    foto: "/pilotos/joan mir.webp",
+    logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
     nombre: "Jack Miller",
@@ -96,7 +106,8 @@ export const pilotos = [
     puntosGP: 2,
     equipo: "Prima Pramac",
     marca: "Yamaha",
-    foto: "/pilotos/jack miller.webp"
+    foto: "/pilotos/jack miller.webp",
+    logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
     nombre: "Jorge Martin",
@@ -105,7 +116,8 @@ export const pilotos = [
     puntosGP: 0,
     equipo: "Aprilia Racing",
     marca: "Aprilia",
-    foto: "/pilotos/jorge martin.webp"
+    foto: "/pilotos/jorge martin.webp",
+    logoEquipo: "/equipos/Aprilia racing.png",
   },
   {
     nombre: "Alex Marquez",
@@ -114,7 +126,8 @@ export const pilotos = [
     puntosGP: 12,
     equipo: "BK8 Gresini Racing",
     marca: "Ducati",
-    foto: "/pilotos/alex marquez.webp"
+    foto: "/pilotos/alex marquez.webp", 
+    logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
     nombre: "Fermin Aldeguer",
@@ -123,7 +136,8 @@ export const pilotos = [
     puntosGP: 16,
     equipo: "BK8 Gresini Racing",
     marca: "Ducati",
-    foto: "/pilotos/fermin aldeguer.webp"
+    foto: "/pilotos/fermin aldeguer.webp",
+    logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
     nombre: "Luca Marini",
@@ -132,7 +146,8 @@ export const pilotos = [
     puntosGP: 9,
     equipo: "HRC Castrol",
     marca: "Honda",
-    foto: "/pilotos/luca marini.webp"
+    foto: "/pilotos/luca marini.webp",
+    logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
     nombre: "Raul Fernandez",
@@ -141,7 +156,8 @@ export const pilotos = [
     puntosGP: 6,
     equipo: "Trackhouse Team",
     marca: "Aprilia",
-    foto: "/pilotos/raul fernandez.webp"
+    foto: "/pilotos/raul fernandez.webp",
+    logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
     nombre: "Fabio DiGiannantonio",
@@ -150,7 +166,8 @@ export const pilotos = [
     puntosGP: 32,
     equipo: "VR46 Racing",
     marca: "Ducati",
-    foto: "/pilotos/fabio digiannantonio.webp"
+    foto: "/pilotos/fabio digiannantonio.webp",
+    logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
     nombre: "Brad Binder",
@@ -159,7 +176,8 @@ export const pilotos = [
     puntosGP: 8,
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
-    foto: "/pilotos/brad binder.webp"
+    foto: "/pilotos/brad binder.webp",
+    logoEquipo: "/equipos/Red Bull Factory Racing.png",
   },
   {
     nombre: "Marco Bezzecchi",
@@ -168,7 +186,8 @@ export const pilotos = [
     puntosGP: 12,
     equipo: "Aprilia Racing",
     marca: "Aprilia",
-    foto: "/pilotos/marco bezzecchi.webp"
+    foto: "/pilotos/marco bezzecchi.webp",
+    logoEquipo: "/equipos/Aprilia racing.png",  
   },
   {
     nombre: "Enea Bastianini",
@@ -177,7 +196,8 @@ export const pilotos = [
     puntosGP: 0,
     equipo: "Red Bull Tech3",
     marca: "KTM",
-    foto: "/pilotos/enea bastianini.webp"
+    foto: "/pilotos/enea bastianini.webp",
+    logoEquipo: "/equipos/Red Bull Tech3.png",
   },
   {
     nombre: "Francesco Bagnaia",
@@ -186,7 +206,8 @@ export const pilotos = [
     puntosGP: 17,
     equipo: "Lenovo Team",
     marca: "Ducati",
-    foto: "/pilotos/francesco bagnaia.webp"
+    foto: "/pilotos/francesco bagnaia.webp",
+    logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
     nombre: "Johann Zarco",
@@ -195,6 +216,7 @@ export const pilotos = [
     puntosGP: 5,
     equipo: "LCR",
     marca: "Honda",
-    foto: "/pilotos/johann zarco.webp"
+    foto: "/pilotos/johann zarco.webp",
+    logoEquipo: "/equipos/CASTROL Honda LCR.png",
   },
 ];
