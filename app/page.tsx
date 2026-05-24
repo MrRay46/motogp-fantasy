@@ -163,100 +163,120 @@ const proximoCircuito =
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mb-10">
+      
+
+ <div className="grid md:grid-cols-2 gap-6 mb-10">
 
   <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+
     <h2 className="text-2xl font-bold mb-4">
       🏁 Último Ganador
     </h2>
-<div className="flex items-center gap-4 mb-4">
 
-  <img
-    src="/pilotos/diggia.png"
-    alt="Di Giannantonio"
-    className="w-20 h-20 object-cover rounded-2xl border border-red-500"
-  />
+    <div className="flex items-center gap-4">
 
-  <div>
-    <p className="text-3xl font-bold">
-      Di Giannantonio
-    </p>
+      <img
+        src="/pilotos/diggia.png"
+        alt="Di Giannantonio"
+        className="w-20 h-20 object-cover rounded-2xl border border-red-500"
+      />
 
-    <p className="mt-2 text-zinc-300">
-      GP de Cataluña
-    </p>
+      <div>
+        <p className="text-3xl font-bold">
+          Di Giannantonio
+        </p>
+
+        <p className="mt-2 text-zinc-300">
+          GP de Cataluña
+        </p>
+      </div>
+
+    </div>
+
   </div>
 
-</div>
-
   <div className="bg-orange-900/40 border border-orange-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+
     <h2 className="text-2xl font-bold mb-4">
       🏍️ Motor Ganador
     </h2>
-<div className="flex items-center gap-4 mb-4">
 
-  <img
-    src="/marcas/ducati.png"
-    alt="Ducati"
-    className="w-20 h-20 object-contain"
-  />
+    <div className="flex items-center gap-4">
 
-  <div>
-    <p className="text-3xl font-bold">
-      Ducati
-    </p>
+      <img
+        src="/marcas/ducati.png"
+        alt="Ducati"
+        className="w-20 h-20 object-contain"
+      />
 
-    <p className="mt-2 text-zinc-300">
-      Mejor constructor del GP
-    </p>
+      <div>
+        <p className="text-3xl font-bold">
+          Ducati
+        </p>
+
+        <p className="mt-2 text-zinc-300">
+          Mejor constructor del GP
+        </p>
+      </div>
+
+    </div>
+
   </div>
 
-</div>
+  <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
 
-  <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🔥 Piloto en Forma
     </h2>
-<div className="flex items-center gap-4 mb-4">
 
-  <img
-    src="/pilotos/bezzecchi.png"
-    alt="Bezzecchi"
-    className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
-  />
+    <div className="flex items-center gap-4">
 
-  <div>
-    <p className="text-3xl font-bold">
-      Marco Bezzecchi
-    </p>
+      <img
+        src="/pilotos/bezzecchi.png"
+        alt="Bezzecchi"
+        className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
+      />
 
-    <p className="mt-2 text-zinc-300">
-      Líder del mundial y fantasy
-    </p>
+      <div>
+        <p className="text-3xl font-bold">
+          Marco Bezzecchi
+        </p>
+
+        <p className="mt-2 text-zinc-300">
+          Líder del mundial y fantasy
+        </p>
+      </div>
+
+    </div>
+
   </div>
 
-</div>
-
   <div className="bg-yellow-900/40 border border-yellow-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+
     <h2 className="text-2xl font-bold mb-4">
       🔥 Motor en Forma
     </h2>
-<div className="flex items-center gap-4 mb-4">
 
-  <img
-    src="/marcas/aprilia.png"
-    alt="Aprilia"
-    className="w-20 h-20 object-contain"
-  />
+    <div className="flex items-center gap-4">
 
-  <div>
-    <p className="text-3xl font-bold">
-      Aprilia
-    </p>
+      <img
+        src="/marcas/aprilia.png"
+        alt="Aprilia"
+        className="w-20 h-20 object-contain"
+      />
 
-    <p className="mt-2 text-zinc-300">
-      Líder fantasy actual
-    </p>
+      <div>
+        <p className="text-3xl font-bold">
+          Aprilia
+        </p>
+
+        <p className="mt-2 text-zinc-300">
+          Líder fantasy actual
+        </p>
+      </div>
+
+    </div>
+
   </div>
 
 </div>
