@@ -267,9 +267,19 @@ const puntosMotor =
 
       {motorSeleccionado ? (
         <div className="bg-red-900/40 border border-red-500 p-5 rounded-3xl">
-          <h2 className="text-2xl font-bold">
-            {motorSeleccionado.nombre}
-          </h2>
+          <div className="flex items-center gap-4">
+
+  <img
+    src={motorSeleccionado.logo}
+    alt={motorSeleccionado.nombre}
+    className="w-16 h-16 object-contain"
+  />
+
+  <h2 className="text-2xl font-bold">
+    {motorSeleccionado.nombre}
+  </h2>
+
+</div>
 
           <p className="mt-3 text-lg">
             💰{" "}

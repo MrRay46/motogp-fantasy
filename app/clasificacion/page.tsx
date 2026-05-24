@@ -101,10 +101,19 @@ export default function ClasificacionPage() {
                 key={constructor.marca}
                 className="flex justify-between py-3 border-b border-zinc-800"
               >
-                <p className="text-xl font-semibold">
-                  {index + 1}.{" "}
-                  {constructor.marca}
-                </p>
+                <div className="flex items-center gap-4">
+
+  <img
+    src={`/marcas/${constructor.marca.toLowerCase()}.png`}
+    alt={constructor.marca}
+    className="w-12 h-12 object-contain"
+  />
+
+  <p className="text-xl font-semibold">
+    {index + 1}. {constructor.marca}
+  </p>
+
+</div>
 
                 <p className="text-xl font-bold text-orange-400">
                   {constructor.puntos}
