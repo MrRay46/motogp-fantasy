@@ -181,143 +181,260 @@ const puntosMotor =
         Titulares
       </h2>
 
-      <div className="grid gap-4 mb-10">
-        {titulares.map((piloto) => (
-          <div
-            key={piloto.nombre}
-            className="bg-zinc-900/80 border border-zinc-700 p-5 rounded-3xl"
-          >
-            <div className="flex items-center gap-4">
+ <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mb-10">
 
-  <img
-    src={piloto.foto}
-    alt={piloto.nombre}
-    className="w-20 h-20 object-cover rounded-2xl border border-zinc-700"
-  />
+  {titulares.map((piloto) => (
 
-  <h2 className="text-2xl font-bold">
-    {piloto.nombre}
-  </h2>
+    <div
+      key={piloto.nombre}
+      className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] hover:shadow-red-500/20 transition-all duration-300"
+    >
 
-</div>
+      <div className="relative">
 
-            <div className="flex gap-6 mt-3 text-lg">
-              <p>
-                🏁 GP:{" "}
-                {piloto.puntosGP}
-              </p>
+        <img
+          src={piloto.foto}
+          alt={piloto.nombre}
+          className="w-full h-72 object-contain bg-black"
+        />
 
-              <p>
-                🌍 Mundial:{" "}
-                {piloto.puntos}
-              </p>
+        <div className="absolute top-4 left-4 bg-black/70 px-3 py-1 rounded-xl text-sm font-bold">
+          {piloto.marca}
+        </div>
 
-              <p>
-                💰 {piloto.precio} M
-              </p>
-            </div>
-          </div>
-        ))}
+        <div className="absolute bottom-4 left-4">
+          <h2 className="text-3xl font-black">
+            {piloto.nombre}
+          </h2>
+        </div>
+
       </div>
 
+      <div className="p-5">
+
+        <div className="flex justify-between text-lg mb-3">
+
+          <p>
+            🏆 {piloto.puntosGP} pts
+          </p>
+
+          <p>
+            💰 {piloto.precio} M
+          </p>
+
+        </div>
+
+        <p className="text-zinc-300">
+          🌍 Mundial: {piloto.puntos}
+        </p>
+
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
       <h2 className="text-3xl font-semibold mb-6">
         Reserva
       </h2>
 
       {pilotoReserva ? (
-        <div className="bg-blue-900/40 border border-blue-500 p-5 rounded-3xl mb-10">
-          <div className="flex items-center gap-4">
 
-  <img
-    src={pilotoReserva.foto}
-    alt={pilotoReserva.nombre}
-    className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
-  />
+  <div className="mb-10 max-w-xl">
 
-  <h2 className="text-2xl font-bold">
-    {pilotoReserva.nombre}
-  </h2>
+    <div
+      className="bg-blue-900/30 backdrop-blur-xl border border-blue-500 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] transition-all duration-300"
+    >
 
-</div>
+      <div className="relative">
 
-          <div className="flex gap-6 mt-3 text-lg">
-            <p>
-              🏁 GP:{" "}
-              {pilotoReserva.puntosGP}
-            </p>
+        <img
+          src={pilotoReserva.foto}
+          alt={pilotoReserva.nombre}
+          className="w-full h-72 object-contain bg-black"
+        />
 
-            <p>
-              🌍 Mundial:{" "}
-              {pilotoReserva.puntos}
-            </p>
-
-            <p>
-              💰{" "}
-              {pilotoReserva.precio} M
-            </p>
-          </div>
+        <div className="absolute top-4 left-4 bg-blue-500/80 px-3 py-1 rounded-xl text-sm font-bold">
+          Reserva
         </div>
-      ) : (
-        <p>No tienes piloto reserva.</p>
-      )}
+
+        <div className="absolute bottom-4 left-4">
+          <h2 className="text-3xl font-black">
+            {pilotoReserva.nombre}
+          </h2>
+        </div>
+
+      </div>
+
+      <div className="p-5">
+
+        <div className="flex justify-between text-lg mb-3">
+
+          <p>
+            🏆 {pilotoReserva.puntosGP} pts
+          </p>
+
+          <p>
+            💰 {pilotoReserva.precio} M
+          </p>
+
+        </div>
+
+        <p className="text-zinc-300">
+          🌍 Mundial: {pilotoReserva.puntos}
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+) : (
+  <p>No tienes piloto reserva.</p>
+)}
 
       <h2 className="text-3xl font-semibold mb-6">
         Motor
       </h2>
 
       {motorSeleccionado ? (
-        <div className="bg-red-900/40 border border-red-500 p-5 rounded-3xl">
-          <div className="flex items-center gap-4">
 
-  <img
-    src={motorSeleccionado.logo}
-    alt={motorSeleccionado.nombre}
-    className="w-16 h-16 object-contain"
-  />
+  <div className="bg-red-900/30 backdrop-blur-xl border border-red-500 rounded-3xl overflow-hidden shadow-2xl mb-10 max-w-2xl">
+    <div className="p-8 flex flex-col md:flex-row items-center gap-8">
 
-  <h2 className="text-2xl font-bold">
-    {motorSeleccionado.nombre}
-  </h2>
+      <img
+        src={motorSeleccionado.logo}
+        alt={motorSeleccionado.nombre}
+        className="w-40 h-40 object-contain"
+      />
 
-</div>
+      <div>
 
-          <p className="mt-3 text-lg">
-            💰{" "}
-            {motorSeleccionado.precio} M
-            <p className="mt-2 text-lg">
-  🏆 {puntosMotor} pts fantasy
-</p>
+        <h2 className="text-5xl font-black mb-4">
+          {motorSeleccionado.nombre}
+        </h2>
+
+        <div className="flex flex-wrap gap-6 text-xl">
+
+          <p>
+            🏆 {puntosMotor} pts fantasy
           </p>
+
+          <p>
+            💰 {motorSeleccionado.precio} M
+          </p>
+
         </div>
-      ) : (
-        <p>No tienes motor seleccionado.</p>
-      )}
+
+      </div>
+
+    </div>
+
+  </div>
+
+) : (
+  <p>No tienes motor seleccionado.</p>
+)}
       <h2 className="text-3xl font-semibold mt-10 mb-6">
   🎯 Predicciones Temporada
 </h2>
 
 <div className="grid md:grid-cols-2 gap-6">
-  <div className="bg-zinc-900 border border-zinc-700 p-5 rounded-3xl">
-    <h3 className="text-2xl font-bold mb-3">
+
+  <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+
+    <h3 className="text-2xl font-bold mb-6">
       🏆 Piloto Campeón
     </h3>
 
-    <p className="text-xl">
-      {prediccionPiloto ||
-        "Sin predicción"}
-    </p>
+    {prediccionPiloto ? (
+
+      <div className="flex items-center gap-5">
+
+        <img
+          src={
+            pilotos.find(
+              (p) =>
+                p.nombre ===
+                prediccionPiloto
+            )?.foto
+          }
+          alt={prediccionPiloto}
+          className="w-24 h-24 object-contain"
+        />
+
+        <div>
+
+          <p className="text-3xl font-black">
+            {prediccionPiloto}
+          </p>
+
+          <p className="text-zinc-400 mt-2">
+            Predicción temporada
+          </p>
+
+        </div>
+
+      </div>
+
+    ) : (
+
+      <p className="text-zinc-400">
+        Sin predicción
+      </p>
+
+    )}
+
   </div>
 
-  <div className="bg-zinc-900 border border-zinc-700 p-5 rounded-3xl">
-    <h3 className="text-2xl font-bold mb-3">
+  <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+
+    <h3 className="text-2xl font-bold mb-6">
       🏍️ Motor Campeón
     </h3>
 
-    <p className="text-xl">
-      {prediccionMotor ||
-        "Sin predicción"}
-    </p>
+    {prediccionMotor ? (
+
+      <div className="flex items-center gap-5">
+
+        <img
+          src={
+            motores.find(
+              (m) =>
+                m.nombre ===
+                prediccionMotor
+            )?.logo
+          }
+          alt={prediccionMotor}
+          className="w-24 h-24 object-contain"
+        />
+
+        <div>
+
+          <p className="text-3xl font-black">
+            {prediccionMotor}
+          </p>
+
+          <p className="text-zinc-400 mt-2">
+            Predicción temporada
+          </p>
+
+        </div>
+
+      </div>
+
+    ) : (
+
+      <p className="text-zinc-400">
+        Sin predicción
+      </p>
+
+    )}
+
   </div>
+
 </div>
 
     </main>
