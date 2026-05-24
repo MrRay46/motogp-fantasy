@@ -20,7 +20,14 @@ export default function Navbar() {
         className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
       >
         Mercado
+  
       </a>
+      <a
+  href="/clasificacion"
+  className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+>
+  Clasificaciones
+</a>
     </nav>
   );
 }

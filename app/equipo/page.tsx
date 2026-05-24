@@ -187,9 +187,19 @@ const puntosMotor =
             key={piloto.nombre}
             className="bg-zinc-900/80 border border-zinc-700 p-5 rounded-3xl"
           >
-            <h2 className="text-2xl font-bold">
-              {piloto.nombre}
-            </h2>
+            <div className="flex items-center gap-4">
+
+  <img
+    src={piloto.foto}
+    alt={piloto.nombre}
+    className="w-20 h-20 object-cover rounded-2xl border border-zinc-700"
+  />
+
+  <h2 className="text-2xl font-bold">
+    {piloto.nombre}
+  </h2>
+
+</div>
 
             <div className="flex gap-6 mt-3 text-lg">
               <p>
@@ -216,9 +226,19 @@ const puntosMotor =
 
       {pilotoReserva ? (
         <div className="bg-blue-900/40 border border-blue-500 p-5 rounded-3xl mb-10">
-          <h2 className="text-2xl font-bold">
-            {pilotoReserva.nombre}
-          </h2>
+          <div className="flex items-center gap-4">
+
+  <img
+    src={pilotoReserva.foto}
+    alt={pilotoReserva.nombre}
+    className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
+  />
+
+  <h2 className="text-2xl font-bold">
+    {pilotoReserva.nombre}
+  </h2>
+
+</div>
 
           <div className="flex gap-6 mt-3 text-lg">
             <p>

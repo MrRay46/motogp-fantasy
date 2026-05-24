@@ -144,9 +144,19 @@ const mercadoAbierto =
             key={piloto.nombre}
             className="bg-zinc-900/80 backdrop-blur p-5 rounded-3xl border border-zinc-700"
           >
-            <h2 className="text-2xl font-bold">
-              {piloto.nombre}
-            </h2>
+            <div className="flex items-center gap-4">
+
+  <img
+    src={piloto.foto}
+    alt={piloto.nombre}
+    className="w-20 h-20 object-cover rounded-2xl border border-zinc-700"
+  />
+
+  <h2 className="text-2xl font-bold">
+    {piloto.nombre}
+  </h2>
+
+</div>
 
             <div className="flex gap-6 mt-3 text-lg">
               <p>🏆 {piloto.puntos} pts</p>
