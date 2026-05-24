@@ -226,70 +226,34 @@ const proximoCircuito =
         
       </div>
 
-      <h2 className="text-4xl font-bold mb-6">
-        Clasificación General
-      </h2>
-
-      <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-        {clasificacion.map((jugador, index) => (
-          <div
-            key={jugador.nombre}
-            className="flex justify-between py-3 border-b border-zinc-700"
-          >
-            <p className="text-xl">
-              {index === 0
-  ? "🥇"
-  : index === 1
-  ? "🥈"
-  : index === 2
-  ? "🥉"
-  : `${index + 1}.`} {jugador.nombre}
-            </p>
-
-            <p className="text-xl font-bold">
-              {jugador.puntos} pts
-            </p>
-          </div>
-        ))}
-      </div>
-      <h2 className="text-4xl font-bold mt-12 mb-6">
-  🏍️ Constructores Fantasy
+    <h2 className="text-4xl font-bold mb-6">
+  Clasificación General
 </h2>
 
 <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-  {motoresOrdenados.map(
-    (motor, index) => (
-      <div
-        key={motor.marca}
-        className="flex justify-between py-3 border-b border-zinc-700"
-      >
-        <div>
-          <p className="text-xl font-bold">
-            {index === 0
-  ? "🥇"
-  : index === 1
-  ? "🥈"
-  : index === 2
-  ? "🥉"
-  : `${index + 1}.`} {motor.marca}
-          </p>
+  {clasificacion.map((jugador, index) => (
+    <div
+      key={jugador.nombre}
+      className="flex justify-between py-3 border-b border-zinc-700"
+    >
+      <p className="text-xl">
+        {index === 0
+          ? "🥇"
+          : index === 1
+          ? "🥈"
+          : index === 2
+          ? "🥉"
+          : `${index + 1}.`}{" "}
+        {jugador.nombre}
+      </p>
 
-          <p className="text-zinc-400">
-            Suma GP: {motor.totalGP}
-          </p>
-        </div>
-
-        <p className="text-2xl font-extrabold text-red-500">
-          {
-            puntosMotorFantasy[
-              index as keyof typeof puntosMotorFantasy
-            ]
-          } pts
-        </p>
-      </div>
-    )
-  )}
+      <p className="text-xl font-bold">
+        {jugador.puntos} pts
+      </p>
+    </div>
+  ))}
 </div>
+
     </main>
   );
 }
