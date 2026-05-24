@@ -103,7 +103,7 @@ const proximoCircuito =
   </h1>
 
   <p className="text-zinc-400 text-xl mt-3">
-    Campeonato Fantasy 2025
+    Campeonato Fantasy 2026
   </p>
 </div>
 <div className="mb-8">
@@ -176,7 +176,7 @@ const proximoCircuito =
     <div className="flex items-center gap-4">
 
       <img
-        src="/pilotos/diggia.png"
+        src="/pilotos/fabio digiannantonio.webp"
         alt="Di Giannantonio"
         className="w-20 h-20 object-cover rounded-2xl border border-red-500"
       />
@@ -232,7 +232,7 @@ const proximoCircuito =
     <div className="flex items-center gap-4">
 
       <img
-        src="/pilotos/bezzecchi.png"
+        src="/pilotos/marco bezzecchi.webp"
         alt="Bezzecchi"
         className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
       />
