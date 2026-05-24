@@ -168,7 +168,7 @@ export default function MercadoPage() {
               <img
                 src={piloto.foto}
                 alt={piloto.nombre}
-                className="w-full h-72 object-cover"
+                className="w-full h-72 object-contain bg-gradient-to-b from-zinc-900 to-black p-4"
               />
 
               <div className="absolute top-4 left-4 bg-black/70 px-3 py-1 rounded-xl text-sm font-bold">
