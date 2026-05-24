@@ -169,7 +169,15 @@ const proximoCircuito =
     <h2 className="text-2xl font-bold mb-4">
       🏁 Último Ganador
     </h2>
+<div className="flex items-center gap-4 mb-4">
 
+  <img
+    src="/pilotos/diggia.png"
+    alt="Di Giannantonio"
+    className="w-20 h-20 object-cover rounded-2xl border border-red-500"
+  />
+
+  <div>
     <p className="text-3xl font-bold">
       Di Giannantonio
     </p>
@@ -179,11 +187,21 @@ const proximoCircuito =
     </p>
   </div>
 
+</div>
+
   <div className="bg-orange-900/40 border border-orange-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🏍️ Motor Ganador
     </h2>
+<div className="flex items-center gap-4 mb-4">
 
+  <img
+    src="/marcas/ducati.png"
+    alt="Ducati"
+    className="w-20 h-20 object-contain"
+  />
+
+  <div>
     <p className="text-3xl font-bold">
       Ducati
     </p>
@@ -193,25 +211,45 @@ const proximoCircuito =
     </p>
   </div>
 
+</div>
+
   <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🔥 Piloto en Forma
     </h2>
+<div className="flex items-center gap-4 mb-4">
 
+  <img
+    src="/pilotos/bezzecchi.png"
+    alt="Bezzecchi"
+    className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
+  />
+
+  <div>
     <p className="text-3xl font-bold">
       Marco Bezzecchi
     </p>
 
     <p className="mt-2 text-zinc-300">
-      Lider del mundial y fantasy
+      Líder del mundial y fantasy
     </p>
   </div>
+
+</div>
 
   <div className="bg-yellow-900/40 border border-yellow-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
     <h2 className="text-2xl font-bold mb-4">
       🔥 Motor en Forma
     </h2>
+<div className="flex items-center gap-4 mb-4">
 
+  <img
+    src="/marcas/aprilia.png"
+    alt="Aprilia"
+    className="w-20 h-20 object-contain"
+  />
+
+  <div>
     <p className="text-3xl font-bold">
       Aprilia
     </p>
@@ -221,10 +259,7 @@ const proximoCircuito =
     </p>
   </div>
 
-
-
-        
-      </div>
+</div>
 
     <h2 className="text-4xl font-bold mb-6">
   Clasificación General
