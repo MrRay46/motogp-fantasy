@@ -177,7 +177,7 @@ export const pilotos = [
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
     foto: "/pilotos/brad binder.webp",
-    logoEquipo: "/equipos/Red Bull Factory Racing.png",
+    logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
     nombre: "Marco Bezzecchi",
@@ -197,7 +197,7 @@ export const pilotos = [
     equipo: "Red Bull Tech3",
     marca: "KTM",
     foto: "/pilotos/enea bastianini.webp",
-    logoEquipo: "/equipos/Red Bull Tech3.png",
+    logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
     nombre: "Francesco Bagnaia",
