@@ -198,9 +198,19 @@ const puntosMotor =
           className="w-full h-72 object-contain bg-black"
         />
 
-        <div className="absolute top-4 left-4 bg-black/70 px-3 py-1 rounded-xl text-sm font-bold">
-          {piloto.marca}
-        </div>
+       <div className="absolute top-4 left-4 bg-black/70 px-3 py-2 rounded-xl flex items-center gap-2">
+
+  <img
+    src={piloto.logoEquipo}
+    alt={piloto.equipo}
+    className="w-8 h-8 object-contain"
+  />
+
+  <span className="text-sm font-bold">
+    {piloto.equipo}
+  </span>
+
+</div>
 
         <div className="absolute bottom-4 left-4">
           <h2 className="text-3xl font-black">
