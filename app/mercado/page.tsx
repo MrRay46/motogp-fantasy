@@ -46,7 +46,7 @@ export default function MercadoPage() {
     setEquipos((prev) => ({
       ...prev,
       [jugadorActual]: {
-        ...equipoActual,
+  ...prev[jugadorActual],
         fichados: nuevosFichados,
       },
     }));
@@ -58,7 +58,7 @@ export default function MercadoPage() {
     setEquipos((prev) => ({
       ...prev,
       [jugadorActual]: {
-        ...equipoActual,
+  ...prev[jugadorActual],
         reserva: nuevaReserva,
       },
     }));
@@ -70,7 +70,7 @@ export default function MercadoPage() {
     setEquipos((prev) => ({
       ...prev,
       [jugadorActual]: {
-        ...equipoActual,
+  ...prev[jugadorActual],
         motor: nuevoMotor,
       },
     }));
@@ -82,7 +82,7 @@ export default function MercadoPage() {
     setEquipos((prev) => ({
       ...prev,
       [jugadorActual]: {
-        ...equipoActual,
+  ...prev[jugadorActual],
         prediccionPiloto: piloto,
       },
     }));
@@ -94,7 +94,7 @@ export default function MercadoPage() {
     setEquipos((prev) => ({
       ...prev,
       [jugadorActual]: {
-        ...equipoActual,
+  ...prev[jugadorActual],
         prediccionMotor: marca,
       },
     }));
