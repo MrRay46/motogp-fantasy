@@ -91,25 +91,27 @@ export function FantasyProvider({
 
         if (data) {
 
-          setEquipos({
-            [jugadorActual]: {
+          setEquipos((prev) => ({
+  ...prev,
 
-              fichados:
-                data.fichados || [],
+  [jugadorActual]: {
 
-              reserva:
-                data.reserva,
+    fichados:
+      data.fichados || [],
 
-              motor:
-                data.motor,
+    reserva:
+      data.reserva,
 
-              prediccionPiloto:
-                data.prediccion_piloto,
+    motor:
+      data.motor,
 
-              prediccionMotor:
-                data.prediccion_motor,
-            },
-          });
+    prediccionPiloto:
+      data.prediccion_piloto,
+
+    prediccionMotor:
+      data.prediccion_motor,
+  },
+}));
 
         }
 
