@@ -1,7 +1,7 @@
 export const ventanasMercado = [
  {
     inicio: "2025-03-18",
-    fin: "2025-03-29",
+    fin: "2025-05-30",
   },
   {
     inicio: "2025-06-08",
