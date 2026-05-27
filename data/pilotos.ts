@@ -47,7 +47,7 @@ export const pilotos = [
     equipo: "Prima Pramac",
     marca: "Yamaha",
     foto: "/pilotos/toprak razgatlioglu.webp",
-    logoEquipo: "/equipos/Prima Pramac Yamaha.png",
+    logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
     nombre: "Fabio Quartararo",
