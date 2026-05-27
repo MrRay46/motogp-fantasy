@@ -1,7 +1,5 @@
 "use client";
 
-import { supabase } from "@/lib/supabase";
-
 import {
   createContext,
   useContext,
@@ -58,43 +56,7 @@ export function FantasyProvider({
   ] = useState<{
     [jugador: string]: EquipoJugador;
   }>({});
-const guardarEquipo =
-  async (
-    nuevosEquipos: typeof equipos
-  ) => {
 
-    const equipo =
-      nuevosEquipos[
-        jugadorActual
-      ];
-
-    if (!equipo) return;
-
-    await supabase
-      .from("equipos")
-      .upsert({
-
-        usuario:
-          jugadorActual,
-
-        fichados:
-          equipo.fichados,
-
-        reserva:
-          equipo.reserva,
-
-        motor:
-          equipo.motor,
-
-        prediccion_piloto:
-          equipo.prediccionPiloto,
-
-        prediccion_motor:
-          equipo.prediccionMotor,
-
-      });
-
-  };
   useEffect(() => {
 
     const jugadorGuardado =
@@ -112,52 +74,31 @@ const guardarEquipo =
 
   useEffect(() => {
 
-    const cargarEquipo =
-      async () => {
+    const equiposGuardados =
+      localStorage.getItem(
+        "equipos"
+      );
 
-        const { data } =
-          await supabase
-            .from("equipos")
-            .select("*")
-            .eq(
-              "usuario",
-              jugadorActual
-            )
-            .single();
+    if (equiposGuardados) {
 
-        if (data) {
+      setEquipos(
+        JSON.parse(
+          equiposGuardados
+        )
+      );
 
-          setEquipos((prev) => ({
-  ...prev,
+    }
 
-  [jugadorActual]: {
+  }, []);
 
-    fichados:
-      data.fichados || [],
+  useEffect(() => {
 
-    reserva:
-      data.reserva,
+    localStorage.setItem(
+      "equipos",
+      JSON.stringify(equipos)
+    );
 
-    motor:
-      data.motor,
-
-    prediccionPiloto:
-      data.prediccion_piloto,
-
-    prediccionMotor:
-      data.prediccion_motor,
-  },
-}));
-
-        }
-
-      };
-
-    cargarEquipo();
-
-  }, [jugadorActual]);
-
-
+  }, [equipos]);
 
   useEffect(() => {
 
