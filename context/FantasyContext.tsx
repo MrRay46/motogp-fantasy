@@ -58,7 +58,43 @@ export function FantasyProvider({
   ] = useState<{
     [jugador: string]: EquipoJugador;
   }>({});
+const guardarEquipo =
+  async (
+    nuevosEquipos: typeof equipos
+  ) => {
 
+    const equipo =
+      nuevosEquipos[
+        jugadorActual
+      ];
+
+    if (!equipo) return;
+
+    await supabase
+      .from("equipos")
+      .upsert({
+
+        usuario:
+          jugadorActual,
+
+        fichados:
+          equipo.fichados,
+
+        reserva:
+          equipo.reserva,
+
+        motor:
+          equipo.motor,
+
+        prediccion_piloto:
+          equipo.prediccionPiloto,
+
+        prediccion_motor:
+          equipo.prediccionMotor,
+
+      });
+
+  };
   useEffect(() => {
 
     const jugadorGuardado =
@@ -121,45 +157,7 @@ export function FantasyProvider({
 
   }, [jugadorActual]);
 
-  useEffect(() => {
 
-    const guardarEquipo =
-      async () => {
-
-        const equipo =
-          equipos[jugadorActual];
-
-        if (!equipo) return;
-
-        await supabase
-          .from("equipos")
-          .upsert({
-
-            usuario:
-              jugadorActual,
-
-            fichados:
-              equipo.fichados,
-
-            reserva:
-              equipo.reserva,
-
-            motor:
-              equipo.motor,
-
-            prediccion_piloto:
-              equipo.prediccionPiloto,
-
-            prediccion_motor:
-              equipo.prediccionMotor,
-
-          });
-
-      };
-
-    guardarEquipo();
-
-  }, [equipos, jugadorActual]);
 
   useEffect(() => {
 
