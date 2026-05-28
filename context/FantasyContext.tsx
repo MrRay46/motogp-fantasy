@@ -32,6 +32,8 @@ type FantasyContextType = {
   setJugadorActual: React.Dispatch<
     React.SetStateAction<string>
   >;
+
+  cargando: boolean;
 };
 
 const FantasyContext =
@@ -57,6 +59,9 @@ export function FantasyProvider({
     [jugador: string]: EquipoJugador;
   }>({});
 
+  const [cargando, setCargando] =
+    useState(true);
+
   useEffect(() => {
 
     const jugadorGuardado =
@@ -65,9 +70,11 @@ export function FantasyProvider({
       );
 
     if (jugadorGuardado) {
+
       setJugadorActual(
         jugadorGuardado
       );
+
     }
 
   }, []);
@@ -88,6 +95,8 @@ export function FantasyProvider({
       );
 
     }
+
+    setCargando(false);
 
   }, []);
 
@@ -116,6 +125,7 @@ export function FantasyProvider({
         setEquipos,
         jugadorActual,
         setJugadorActual,
+        cargando,
       }}
     >
       {children}
