@@ -160,13 +160,13 @@ const puntosMotor =
 }
   return (
     <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
-      <div className="absolute inset-0 opacity-30 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 opacity-30 pointer-events-none overflow-hidden">
 
   <img
-    src="/trofeo.png"
-    alt="Trofeo MotoGP"
-    className="absolute top-0 left-1/2 -translate-x-1/2 md:w-[2200px] w-[1200px] max-w-none object-cover"
-  />
+  src="/trofeo.png"
+  alt="Trofeo MotoGP"
+  className="w-full h-full object-cover scale-125"
+/>
 
 </div>
       <Navbar />
