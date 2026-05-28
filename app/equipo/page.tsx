@@ -410,7 +410,7 @@ const puntosMotor =
 
   </div>
 
-  <div className="bg-transparent backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
+  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
 
     <h3 className="text-2xl font-bold mb-6">
       🏍️ Motor Campeón
