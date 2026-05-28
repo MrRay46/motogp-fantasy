@@ -47,58 +47,6 @@ export default function Home() {
         jugadorActual
     )?.puntos || 0;
 
-  const marcas = [
-    "Ducati",
-    "Aprilia",
-    "KTM",
-    "Honda",
-    "Yamaha",
-  ];
-
-  const resultadosMotores =
-    marcas.map((marca) => {
-
-      const pilotosMarca = pilotos
-        .filter(
-          (piloto) =>
-            piloto.marca === marca
-        )
-        .sort(
-          (a, b) =>
-            b.puntosGP - a.puntosGP
-        );
-
-      const mejoresDos =
-        pilotosMarca.slice(0, 2);
-
-      const totalGP =
-        mejoresDos.reduce(
-          (total, piloto) =>
-            total + piloto.puntosGP,
-          0
-        );
-
-      return {
-        marca,
-        totalGP,
-      };
-
-    });
-
-  const motoresOrdenados =
-    resultadosMotores.sort(
-      (a, b) =>
-        b.totalGP - a.totalGP
-    );
-
-  const puntosMotorFantasy = {
-    0: 10,
-    1: 8,
-    2: 6,
-    3: 4,
-    4: 2,
-  };
-
   const clasificacion = [
     ...jugadores,
   ];
@@ -171,65 +119,103 @@ export default function Home() {
 
       </div>
 
-      {/* Cards Top */}
+      {/* TOP CARDS */}
       <div className="grid md:grid-cols-3 gap-6 mb-10 relative z-10">
 
-        {/* Posición */}
-        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+        {/* Rendimiento */}
+        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-8 rounded-3xl hover:scale-[1.02] transition-all duration-300">
 
-          <h2 className="text-2xl font-bold mb-4">
-            🏆 Tu Posición
+          <h2 className="text-2xl font-bold mb-8">
+            📊 Tu Rendimiento
           </h2>
 
-          <p className="text-5xl font-extrabold text-red-500">
-            #{posicion}
-          </p>
+          <div className="flex justify-between items-center">
+
+            <div className="text-center">
+
+              <p className="text-lg text-zinc-400 mb-2">
+                Posición
+              </p>
+
+              <p className="text-6xl font-extrabold text-red-500">
+                #{posicion}
+              </p>
+
+            </div>
+
+            <div className="w-px h-28 bg-zinc-700/40"></div>
+
+            <div className="text-center">
+
+              <p className="text-lg text-zinc-400 mb-2">
+                Puntos
+              </p>
+
+              <p className="text-6xl font-extrabold text-green-400">
+                {puntosEquipo}
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
 
-        {/* Puntos */}
-        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+        {/* Equipo del GP */}
+        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 shadow-2xl shadow-yellow-500/10 p-8 rounded-3xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-center">
 
-          <h2 className="text-2xl font-bold mb-4">
-            📊 Tus Puntos
+          <p className="text-yellow-300 text-lg font-semibold mb-3">
+            ⭐ Equipo del GP
+          </p>
+
+          <h2 className="text-5xl font-black mb-3">
+            De la Raya Sr
           </h2>
 
-          <p className="text-5xl font-extrabold text-green-400">
-            {puntosEquipo}
+          <p className="text-3xl text-yellow-100 font-bold">
+            73 pts
+          </p>
+
+          <p className="mt-4 text-zinc-300">
+            Mejor puntuación del GP de Cataluña
           </p>
 
         </div>
 
         {/* Próximo GP */}
-        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
+        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between">
 
-          <h2 className="text-2xl font-bold mb-4">
-            🏁 Próximo GP
-          </h2>
+          <div>
 
-          {proximoCircuito && (
-            <>
+            <h2 className="text-2xl font-bold mb-6">
+              🏁 Próximo GP
+            </h2>
 
-              <img
-                src={proximoCircuito.imagen}
-                alt={proximoCircuito.nombre}
-                className="w-40 mx-auto mb-4 opacity-90"
-              />
+            {proximoCircuito && (
+              <>
 
-              <p className="text-3xl font-bold text-center text-white">
-                {proximoCircuito.nombre}
-              </p>
+                <img
+                  src={proximoCircuito.imagen}
+                  alt={proximoCircuito.nombre}
+                  className="w-44 mx-auto mb-6 opacity-90"
+                />
 
-              <p className="mt-2 text-zinc-300 text-center">
-                {proximoCircuito.pais}
-              </p>
+                <p className="text-4xl font-bold text-center text-white">
+                  {proximoCircuito.nombre}
+                </p>
 
-              <p className="mt-1 text-zinc-400 text-center">
-                {proximoCircuito.fechaInicio}
-              </p>
+                <p className="mt-2 text-zinc-300 text-center text-lg">
+                  {proximoCircuito.pais}
+                </p>
 
-            </>
-          )}
+                <p className="mt-2 text-zinc-400 text-center">
+                  {proximoCircuito.fechaInicio}
+                </p>
+
+              </>
+            )}
+
+          </div>
 
         </div>
 
