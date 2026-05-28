@@ -196,7 +196,7 @@ const puntosMotor =
 
     <div
       key={piloto.nombre}
-      className="bg-black/40 backdrop-blur-xl border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
+      className="bg-transparent backdrop-blur-xl border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
     >
 
       <div className="relative bg-transparent">
@@ -267,7 +267,7 @@ const puntosMotor =
         <img
           src={pilotoReserva.foto}
           alt={pilotoReserva.nombre}
-          className="w-full h-72 object-contain bg-black"
+          className="w-full h-72 object-contain bg-transparent"
         />
 
         <div className="absolute top-4 left-4">
@@ -364,7 +364,7 @@ const puntosMotor =
 
 <div className="grid md:grid-cols-2 gap-6">
 
-  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl p-6">
+  <div className="bg-transparent backdrop-blur-xl border border-zinc-700/40 rounded-3xl p-6">
 
     <h3 className="text-2xl font-bold mb-6">
       🏆 Piloto Campeón
@@ -410,7 +410,7 @@ const puntosMotor =
 
   </div>
 
-  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
+  <div className="bg-transparent backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
 
     <h3 className="text-2xl font-bold mb-6">
       🏍️ Motor Campeón
