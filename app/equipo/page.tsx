@@ -169,7 +169,7 @@ w-full
 h-full
 object-top
 object-cover
-scale-[2.1]
+scale-[1.45]
 md:scale-100
 md:object-cover
 "
