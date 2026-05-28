@@ -156,12 +156,12 @@ const puntosMotor =
   puntosMotor;
   return (
     <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
-      <div className="absolute inset-0 flex justify-center items-center opacity-20 pointer-events-none">
+      <div className="absolute inset-0 flex justify-center items-center opacity-30 pointer-events-none">
 
   <img
     src="/trofeo.png"
     alt="Trofeo MotoGP"
-    className="w-[1800px] object-contain opacity-20 blur-[2px]"
+    className="w-[1800px] object-contain opacity-30 blur-[2px]"
   />
 
 </div>
@@ -364,7 +364,7 @@ const puntosMotor =
 
 <div className="grid md:grid-cols-2 gap-6">
 
-  <div className="bg-transparent backdrop-blur-xl border border-zinc-700/40 rounded-3xl p-6">
+  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl p-6">
 
     <h3 className="text-2xl font-bold mb-6">
       🏆 Piloto Campeón
