@@ -95,13 +95,20 @@ const proximoCircuito =
   );
   return (
     <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
-      <div className="absolute inset-0 flex justify-center items-center opacity-20 pointer-events-none">
-
+      <div className="absolute top-32 left-0 w-full h-full opacity-30 pointer-events-none overflow-hidden">
   <img
-    src="/trofeo.png"
-    alt="Trofeo MotoGP"
-    className="w-[1800px] object-contain opacity-20 blur-[2px]"
-  />
+  src="/trofeo.png"
+  alt="Trofeo MotoGP"
+  className="
+w-full
+h-full
+object-top
+object-cover
+scale-[1.2]
+md:scale-100
+md:object-cover
+"
+/>
 
 </div>
       <Navbar />
