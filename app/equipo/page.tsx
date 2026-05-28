@@ -364,7 +364,7 @@ const puntosMotor =
 
 <div className="grid md:grid-cols-2 gap-6">
 
-  <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+  <div className="bg-black/20 backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40"
 
     <h3 className="text-2xl font-bold mb-6">
       🏆 Piloto Campeón
@@ -410,7 +410,7 @@ const puntosMotor =
 
   </div>
 
-  <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-2xl">
+  <div className="bg-black/20 backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
 
     <h3 className="text-2xl font-bold mb-6">
       🏍️ Motor Campeón
