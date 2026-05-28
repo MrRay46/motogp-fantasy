@@ -167,7 +167,7 @@ const puntosMotor =
   className="
 w-full
 h-full
-object-top
+object-center
 object-cover
 scale-[1.2]
 md:scale-100
