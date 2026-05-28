@@ -214,7 +214,7 @@ export default function MercadoPage() {
                 className="w-full h-72 object-contain bg-gradient-to-b from-zinc-900 to-black p-4"
               />
 
-              <div className="absolute top-4 left-4 bg-zinc-900/80 backdrop-blur-md p-2 rounded-xl">
+              <div className="absolute top-4 left-4">
 
   <img
     src={piloto.logoEquipo}

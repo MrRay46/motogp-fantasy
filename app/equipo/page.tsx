@@ -261,7 +261,7 @@ const puntosMotor =
           className="w-full h-72 object-contain bg-black"
         />
 
-        <div className="absolute top-4 left-4 bg-zinc-900/80 backdrop-blur-md p-2 rounded-xl">
+        <div className="absolute top-4 left-4">
 
   <img
     src={pilotoReserva.logoEquipo}
