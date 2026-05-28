@@ -196,7 +196,7 @@ const puntosMotor =
 
     <div
       key={piloto.nombre}
-      className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] hover:shadow-red-500/20 transition-all duration-300"
+      className="bg-black/40 backdrop-blur-xl border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
     >
 
       <div className="relative">
