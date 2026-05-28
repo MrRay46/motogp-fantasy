@@ -94,7 +94,16 @@ const proximoCircuito =
       circuito.fechaInicio >= hoy
   );
   return (
-    <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
+    <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
+      <div className="absolute inset-0 flex justify-center items-center opacity-20 pointer-events-none">
+
+  <img
+    src="/trofeo.png"
+    alt="Trofeo MotoGP"
+    className="w-[1800px] object-contain opacity-20 blur-[2px]"
+  />
+
+</div>
       <Navbar />
 
       <div className="mb-12">
