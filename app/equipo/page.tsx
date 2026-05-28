@@ -8,10 +8,11 @@ import { motores } from "@/data/motores";
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function EquipoPage() {
-  const {
-    equipos,
-    jugadorActual,
-  } = useFantasy();
+ const {
+  equipos,
+  jugadorActual,
+  cargando,
+} = useFantasy();
 
   const equipoActual =
     equipos[jugadorActual] || {
@@ -154,6 +155,9 @@ const puntosMotor =
   puntosTitulares +
   puntosReserva +
   puntosMotor;
+  if (cargando) {
+  return null;
+}
   return (
     <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
       <div className="absolute inset-0 flex justify-center items-center opacity-30 pointer-events-none">
