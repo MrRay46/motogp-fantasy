@@ -200,7 +200,7 @@ const puntosMotor =
 
     <div
       key={piloto.nombre}
-      className="bg-transparent backdrop-blur-xl border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
+      className="bg-transparent  border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
     >
 
       <div className="relative bg-transparent">
@@ -263,7 +263,7 @@ const puntosMotor =
   <div className="mb-10 max-w-xl">
 
     <div
-      className="bg-blue-900/30 backdrop-blur-xl border border-blue-500 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] transition-all duration-300"
+      className="bg-blue-900/30 border border-blue-500 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] transition-all duration-300"
     >
 
       <div className="relative">
@@ -326,7 +326,7 @@ const puntosMotor =
 
       {motorSeleccionado ? (
 
-  <div className="bg-red-900/30 backdrop-blur-xl border border-red-500 rounded-3xl overflow-hidden shadow-2xl mb-10 max-w-2xl">
+  <div className="bg-red-900/30 border border-red-500 rounded-3xl overflow-hidden shadow-2xl mb-10 max-w-2xl">
     <div className="p-8 flex flex-col md:flex-row items-center gap-8">
 
       <img
@@ -368,7 +368,7 @@ const puntosMotor =
 
 <div className="grid md:grid-cols-2 gap-6">
 
-  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl p-6">
+  <div className="bg-black/05  border border-zinc-700/40 rounded-3xl p-6">
 
     <h3 className="text-2xl font-bold mb-6">
       🏆 Piloto Campeón
@@ -414,7 +414,7 @@ const puntosMotor =
 
   </div>
 
-  <div className="bg-black/05 backdrop-blur-xl border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
+  <div className="bg-black/05  border border-zinc-700/40 rounded-3xl overflow-hidden shadow-2xl shadow-black/40">
 
     <h3 className="text-2xl font-bold mb-6">
       🏍️ Motor Campeón
