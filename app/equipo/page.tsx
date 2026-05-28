@@ -199,12 +199,12 @@ const puntosMotor =
       className="bg-black/40 backdrop-blur-xl border border-zinc-700/50 rounded-3xl overflow-hidden shadow-2xl shadow-black/50"
     >
 
-      <div className="relative">
+      <div className="relative bg-transparent">
 
         <img
           src={piloto.foto}
           alt={piloto.nombre}
-          className="w-full h-72 object-contain bg-black"
+          className="w-full h-72 object-contain"
         />
 
        <div className="absolute top-4 left-4">
