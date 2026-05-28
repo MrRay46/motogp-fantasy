@@ -155,7 +155,16 @@ const puntosMotor =
   puntosReserva +
   puntosMotor;
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
+    <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
+      <div className="absolute inset-0 flex justify-center items-center opacity-10 pointer-events-none">
+
+  <img
+    src="/trofeo.png"
+    alt="Trofeo MotoGP"
+    className="w-[450px] object-contain"
+  />
+
+</div>
       <Navbar />
 
       <h1 className="text-5xl font-bold text-red-500 mb-8">
