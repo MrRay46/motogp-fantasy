@@ -164,7 +164,15 @@ const puntosMotor =
   <img
   src="/trofeo.png"
   alt="Trofeo MotoGP"
-  className="w-full h-full object-contain md:object-cover"
+  className="
+w-full
+h-full
+object-top
+object-cover
+scale-[2.1]
+md:scale-100
+md:object-cover
+"
 />
 
 </div>
