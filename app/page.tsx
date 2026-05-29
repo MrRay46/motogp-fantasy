@@ -125,9 +125,26 @@ useEffect(() => {
       {/* Usuario */}
       <div className="mb-8 relative z-10">
 
-        <h2 className="text-3xl font-bold mb-6">
-          👤 {jugadorActual}
-        </h2>
+        <div className="flex items-center gap-4 mb-6">
+  <img
+    src={`/avatars/${avatar}`}
+    alt="Avatar"
+    className="
+      w-16
+      h-16
+      rounded-full
+      object-contain
+      border-2
+      border-red-500
+      bg-black/30
+      p-1
+    "
+  />
+
+  <h2 className="text-3xl font-bold">
+    {jugadorActual}
+  </h2>
+</div>
 
       </div>
 
