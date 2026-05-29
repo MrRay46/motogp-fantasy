@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { jugadores } from "@/data/jugadores";
@@ -29,7 +29,19 @@ export default function Home() {
     equipos,
     jugadorActual,
   } = useFantasy();
+const [avatar, setAvatar] =
+  useState("avatar1.png");
 
+useEffect(() => {
+  const avatarGuardado =
+    localStorage.getItem(
+      "avatarSeleccionado"
+    );
+
+  if (avatarGuardado) {
+    setAvatar(avatarGuardado);
+  }
+}, []);
   const equipoActual =
     equipos[jugadorActual];
 
