@@ -84,9 +84,10 @@ export default function PerfilPage() {
               avatar,
           });
 
-      if (error) {
-        console.error(error);
-      }
+     if (error) {
+  console.log("ERROR SUPABASE:");
+  console.log(error);
+}
 
     };
 
