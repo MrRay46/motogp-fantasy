@@ -7,7 +7,7 @@ import { jugadores } from "@/data/jugadores";
 import { pilotos } from "@/data/pilotos";
 import { circuitos } from "@/data/circuitos";
 import { useFantasy } from "@/context/FantasyContext";
-
+import { supabase } from "@/lib/supabase";
 export default function Home() {
 
   const router = useRouter();
@@ -33,15 +33,41 @@ const [avatar, setAvatar] =
   useState("avatar1.png");
 
 useEffect(() => {
-  const avatarGuardado =
-    localStorage.getItem(
-      "avatarSeleccionado"
-    );
 
-  if (avatarGuardado) {
-    setAvatar(avatarGuardado);
-  }
-}, []);
+  const cargarAvatar =
+    async () => {
+
+      if (!jugadorActual)
+        return;
+
+      const { data, error } =
+        await supabase
+          .from("equipos")
+          .select("avatar")
+          .eq(
+            "usuario",
+            jugadorActual
+          )
+          .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      if (data?.avatar) {
+
+        setAvatar(
+          data.avatar
+        );
+
+      }
+
+    };
+
+  cargarAvatar();
+
+}, [jugadorActual]);
   const equipoActual =
     equipos[jugadorActual];
 
