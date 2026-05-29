@@ -74,15 +74,16 @@ export default function PerfilPage() {
         return;
 
       const { error } =
-        await supabase
-          .from("equipos")
-          .upsert({
-            usuario:
-              jugadorActual,
-
-            avatar:
-              avatar,
-          });
+  await supabase
+    .from("equipos")
+    .update({
+      avatar:
+        avatar,
+    })
+    .eq(
+      "usuario",
+      jugadorActual
+    );
 
      if (error) {
   console.log("ERROR SUPABASE:");
