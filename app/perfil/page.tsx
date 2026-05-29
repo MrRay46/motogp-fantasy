@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
 
 const avatars = [
   "avatar1.png",
@@ -20,31 +21,79 @@ const avatars = [
 ];
 
 export default function PerfilPage() {
-  const [avatarSeleccionado, setAvatarSeleccionado] =
-    useState("avatar1.png");
+
+  const [
+    avatarSeleccionado,
+    setAvatarSeleccionado,
+  ] = useState("avatar1.png");
+
+  const [
+    jugadorActual,
+    setJugadorActual,
+  ] = useState("");
 
   useEffect(() => {
+
+    const usuario =
+      localStorage.getItem(
+        "usuarioLogueado"
+      );
+
+    if (usuario) {
+      setJugadorActual(usuario);
+    }
+
     const avatarGuardado =
-      localStorage.getItem("avatarSeleccionado");
+      localStorage.getItem(
+        "avatarSeleccionado"
+      );
 
     if (avatarGuardado) {
-      setAvatarSeleccionado(avatarGuardado);
+      setAvatarSeleccionado(
+        avatarGuardado
+      );
     }
+
   }, []);
 
-  const seleccionarAvatar = (
-    avatar: string
-  ) => {
-    setAvatarSeleccionado(avatar);
+  const seleccionarAvatar =
+    async (
+      avatar: string
+    ) => {
 
-    localStorage.setItem(
-      "avatarSeleccionado",
-      avatar
-    );
-  };
+      setAvatarSeleccionado(
+        avatar
+      );
+
+      localStorage.setItem(
+        "avatarSeleccionado",
+        avatar
+      );
+
+      if (!jugadorActual)
+        return;
+
+      const { error } =
+        await supabase
+          .from("equipos")
+          .upsert({
+            usuario:
+              jugadorActual,
+
+            avatar:
+              avatar,
+          });
+
+      if (error) {
+        console.error(error);
+      }
+
+    };
 
   return (
+
     <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
+
       <Navbar />
 
       <h1 className="text-5xl font-bold text-red-500 mb-4">
@@ -56,11 +105,15 @@ export default function PerfilPage() {
       </p>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+
         {avatars.map((avatar) => (
+
           <button
             key={avatar}
             onClick={() =>
-              seleccionarAvatar(avatar)
+              seleccionarAvatar(
+                avatar
+              )
             }
             className={`
               p-4
@@ -75,14 +128,21 @@ export default function PerfilPage() {
               }
             `}
           >
+
             <img
               src={`/avatars/${avatar}`}
               alt={avatar}
               className="w-28 h-28 object-contain mx-auto"
             />
+
           </button>
+
         ))}
+
       </div>
+
     </main>
+
   );
+
 }
