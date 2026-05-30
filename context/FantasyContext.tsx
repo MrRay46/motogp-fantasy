@@ -168,44 +168,7 @@ const guardarEquiposSupabase = async () => {
 
   const equipo = equipos[jugador];
 
-  const titulares =
-    equipo.fichados.filter(
-      (nombre) =>
-        nombre !== equipo.reserva
-    );
-
-  const puntosPilotos =
-    titulares.reduce(
-      (total, nombre) => {
-
-        const piloto =
-          pilotos.find(
-            (p) =>
-              p.nombre === nombre
-          );
-
-        return (
-          total +
-          (piloto?.puntosGP || 0)
-        );
-
-      },
-      0
-    );
-
-  const motorSeleccionado =
-    motores.find(
-      (m) =>
-        m.nombre === equipo.motor
-    );
-
-  const puntosMotor =
-    motorSeleccionado?.puntos || 0;
-
-  const puntosTotales =
-    puntosPilotos +
-    puntosMotor;
-
+ 
   const { error } =
     await supabase
       .from("equipos")
@@ -219,7 +182,7 @@ const guardarEquiposSupabase = async () => {
         equipo.prediccionPiloto,
       prediccion_motor:
         equipo.prediccionMotor,
-        puntos: puntosTotales,
+        
     },
     {
       onConflict: "usuario",
