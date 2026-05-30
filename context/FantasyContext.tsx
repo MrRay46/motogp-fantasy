@@ -136,18 +136,22 @@ const guardarEquiposSupabase = async () => {
 
     const { error } =
       await supabase
-        .from("equipos")
-        .upsert({
-          usuario: jugador,
-          fichados: equipo.fichados,
-          reserva: equipo.reserva,
-          motor: equipo.motor,
-          prediccion_piloto:
-            equipo.prediccionPiloto,
-          prediccion_motor:
-            equipo.prediccionMotor,
-        });
-
+  .from("equipos")
+  .upsert(
+    {
+      usuario: jugador,
+      fichados: equipo.fichados,
+      reserva: equipo.reserva,
+      motor: equipo.motor,
+      prediccion_piloto:
+        equipo.prediccionPiloto,
+      prediccion_motor:
+        equipo.prediccionMotor,
+    },
+    {
+      onConflict: "usuario",
+    }
+  );
     if (error) {
       console.error(error);
     }
