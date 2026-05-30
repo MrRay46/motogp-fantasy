@@ -127,30 +127,11 @@ const cargarEquiposSupabase =
 
   }, []);
 
-  useEffect(() => {
-
-    const equiposGuardados =
-      localStorage.getItem(
-        "equipos"
-      );useEffect(() => {
+ useEffect(() => {
 
   cargarEquiposSupabase();
 
 }, []);
-
-    if (equiposGuardados) {
-
-      setEquipos(
-        JSON.parse(
-          equiposGuardados
-        )
-      );
-
-    }
-
-    setCargando(false);
-
-  }, []);
 
   useEffect(() => {
 
