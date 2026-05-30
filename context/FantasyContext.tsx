@@ -124,21 +124,33 @@ export function FantasyProvider({
 
   }, [jugadorActual]);
 const guardarEquiposSupabase = async () => {
+
+  console.log(
+    "GUARDANDO EN SUPABASE",
+    equipos
+  );
+
   for (const jugador in equipos) {
+
     const equipo = equipos[jugador];
 
-    await supabase
-      .from("equipos")
-      .upsert({
-        usuario: jugador,
-        fichados: equipo.fichados,
-        reserva: equipo.reserva,
-        motor: equipo.motor,
-        prediccion_piloto:
-          equipo.prediccionPiloto,
-        prediccion_motor:
-          equipo.prediccionMotor,
-      });
+    const { error } =
+      await supabase
+        .from("equipos")
+        .upsert({
+          usuario: jugador,
+          fichados: equipo.fichados,
+          reserva: equipo.reserva,
+          motor: equipo.motor,
+          prediccion_piloto:
+            equipo.prediccionPiloto,
+          prediccion_motor:
+            equipo.prediccionMotor,
+        });
+
+    if (error) {
+      console.error(error);
+    }
   }
 };
   return (
