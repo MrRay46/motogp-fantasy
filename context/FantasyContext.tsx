@@ -6,7 +6,8 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import { pilotos } from "@/data/pilotos";
+import { motores } from "@/data/motores";
 type EquipoJugador = {
   fichados: string[];
   reserva: string | null;
@@ -165,12 +166,50 @@ const guardarEquiposSupabase = async () => {
 
   for (const jugador in equipos) {
 
-    const equipo = equipos[jugador];
+  const equipo = equipos[jugador];
 
-    const { error } =
-      await supabase
-  .from("equipos")
-  .upsert(
+  const titulares =
+    equipo.fichados.filter(
+      (nombre) =>
+        nombre !== equipo.reserva
+    );
+
+  const puntosPilotos =
+    titulares.reduce(
+      (total, nombre) => {
+
+        const piloto =
+          pilotos.find(
+            (p) =>
+              p.nombre === nombre
+          );
+
+        return (
+          total +
+          (piloto?.puntosGP || 0)
+        );
+
+      },
+      0
+    );
+
+  const motorSeleccionado =
+    motores.find(
+      (m) =>
+        m.nombre === equipo.motor
+    );
+
+  const puntosMotor =
+    motorSeleccionado?.puntos || 0;
+
+  const puntosTotales =
+    puntosPilotos +
+    puntosMotor;
+
+  const { error } =
+    await supabase
+      .from("equipos")
+      .upsert(
     {
       usuario: jugador,
       fichados: equipo.fichados,
@@ -180,6 +219,7 @@ const guardarEquiposSupabase = async () => {
         equipo.prediccionPiloto,
       prediccion_motor:
         equipo.prediccionMotor,
+        puntos: puntosTotales,
     },
     {
       onConflict: "usuario",
