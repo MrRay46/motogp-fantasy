@@ -1,5 +1,5 @@
 "use client";
-
+import { supabase } from "@/lib/supabase";
 import {
   createContext,
   useContext,
@@ -102,12 +102,18 @@ export function FantasyProvider({
 
   useEffect(() => {
 
-    localStorage.setItem(
-      "equipos",
-      JSON.stringify(equipos)
-    );
+  localStorage.setItem(
+    "equipos",
+    JSON.stringify(equipos)
+  );
 
-  }, [equipos]);
+  if (
+    Object.keys(equipos).length > 0
+  ) {
+    guardarEquiposSupabase();
+  }
+
+}, [equipos]);
 
   useEffect(() => {
 
@@ -117,7 +123,24 @@ export function FantasyProvider({
     );
 
   }, [jugadorActual]);
+const guardarEquiposSupabase = async () => {
+  for (const jugador in equipos) {
+    const equipo = equipos[jugador];
 
+    await supabase
+      .from("equipos")
+      .upsert({
+        usuario: jugador,
+        fichados: equipo.fichados,
+        reserva: equipo.reserva,
+        motor: equipo.motor,
+        prediccion_piloto:
+          equipo.prediccionPiloto,
+        prediccion_motor:
+          equipo.prediccionMotor,
+      });
+  }
+};
   return (
     <FantasyContext.Provider
       value={{
