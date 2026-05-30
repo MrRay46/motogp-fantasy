@@ -1,7 +1,7 @@
 "use client";
 
 import Navbar from "@/components/Navbar";
-import { supabase } from "@/lib/supabase";
+
 import { motores } from "@/data/motores";
 import { pilotos } from "@/data/pilotos";
 import { ventanasMercado } from "@/data/mercado";
@@ -40,7 +40,7 @@ export default function MercadoPage() {
   const prediccionMotor =
     equipoActual.prediccionMotor;
 
-  const setFichados = async (
+ const setFichados = (
   nuevosFichados: string[]
 ) => {
 
@@ -61,37 +61,6 @@ export default function MercadoPage() {
   setEquipos(
     nuevosEquipos
   );
-
-  await supabase
-    .from("equipos")
-    .upsert({
-
-      usuario:
-        jugadorActual,
-
-      fichados:
-        nuevosFichados,
-
-      reserva:
-        nuevosEquipos[
-          jugadorActual
-        ].reserva,
-
-      motor:
-        nuevosEquipos[
-          jugadorActual
-        ].motor,
-
-      prediccion_piloto:
-        nuevosEquipos[
-          jugadorActual
-        ].prediccionPiloto,
-
-      prediccion_motor:
-        nuevosEquipos[
-          jugadorActual
-        ].prediccionMotor,
-    });
 
 };
 
