@@ -13,7 +13,13 @@ export default function EquipoPage() {
   jugadorActual,
   cargando,
 } = useFantasy();
-
+if (cargando) {
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      Cargando equipo...
+    </main>
+  );
+}
   const equipoActual =
     equipos[jugadorActual] || {
   fichados: [],
