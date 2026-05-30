@@ -61,7 +61,55 @@ export function FantasyProvider({
 
   const [cargando, setCargando] =
     useState(true);
+const cargarEquiposSupabase =
+  async () => {
 
+    const { data, error } =
+      await supabase
+        .from("equipos")
+        .select("*");
+
+    if (error) {
+      console.error(error);
+      setCargando(false);
+      return;
+    }
+
+    const equiposCargados: {
+      [jugador: string]: EquipoJugador;
+    } = {};
+
+    data.forEach((fila) => {
+
+      equiposCargados[
+        fila.usuario
+      ] = {
+
+        fichados:
+          fila.fichados || [],
+
+        reserva:
+          fila.reserva,
+
+        motor:
+          fila.motor,
+
+        prediccionPiloto:
+          fila.prediccion_piloto,
+
+        prediccionMotor:
+          fila.prediccion_motor,
+      };
+
+    });
+
+    setEquipos(
+      equiposCargados
+    );
+
+    setCargando(false);
+
+  };
   useEffect(() => {
 
     const jugadorGuardado =
@@ -84,7 +132,11 @@ export function FantasyProvider({
     const equiposGuardados =
       localStorage.getItem(
         "equipos"
-      );
+      );useEffect(() => {
+
+  cargarEquiposSupabase();
+
+}, []);
 
     if (equiposGuardados) {
 
