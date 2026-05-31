@@ -224,15 +224,15 @@ useEffect(() => {
           </p>
 
           <h2 className="text-5xl font-black mb-3">
-            De la Raya Sr
+            David
           </h2>
 
           <p className="text-3xl text-yellow-100 font-bold">
-            73 pts
+            89 pts
           </p>
 
           <p className="mt-4 text-zinc-300">
-            Mejor puntuación del GP de Cataluña
+            Mejor puntuación del GP de Mugello
           </p>
 
         </div>
@@ -289,19 +289,19 @@ useEffect(() => {
           <div className="flex items-center gap-4">
 
             <img
-              src="/pilotos/fabio digiannantonio.webp"
-              alt="Di Giannantonio"
+              src="/pilotos/marco bezzecchi.webp"
+              alt="Bezzecchi"
               className="w-20 h-20 object-cover rounded-2xl border border-red-500"
             />
 
             <div>
 
               <p className="text-3xl font-bold">
-                Di Giannantonio
+                Marco Bezzecchi
               </p>
 
               <p className="mt-2 text-zinc-300">
-                GP de Cataluña
+                GP de Mugello
               </p>
 
             </div>
@@ -320,15 +320,15 @@ useEffect(() => {
           <div className="flex items-center gap-4">
 
             <img
-              src="/marcas/ducati.png"
-              alt="Ducati"
+              src="/marcas/aprilia.png"
+              alt="Aprilia"
               className="w-20 h-20 object-contain"
             />
 
             <div>
 
               <p className="text-3xl font-bold">
-                Ducati
+                Aprilia
               </p>
 
               <p className="mt-2 text-zinc-300">
