@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { jugadores } from "@/data/jugadores";
+
 import { pilotos } from "@/data/pilotos";
 import { circuitos } from "@/data/circuitos";
 import { useFantasy } from "@/context/FantasyContext";
@@ -31,7 +31,14 @@ export default function Home() {
   } = useFantasy();
 const [avatar, setAvatar] =
   useState("avatar1.png");
+const [clasificacion, setClasificacion] =
+  useState<any[]>([]);
 
+const [puntosEquipo, setPuntosEquipo] =
+  useState(0);
+
+const [posicion, setPosicion] =
+  useState(0);
 useEffect(() => {
 
   const cargarAvatar =
@@ -66,8 +73,61 @@ useEffect(() => {
     };
 
   cargarAvatar();
+  }, [jugadorActual]);
+useEffect(() => {
+
+  const cargarClasificacion =
+    async () => {
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("equipos")
+        .select(
+          "usuario, avatar, puntos"
+        )
+        .order(
+          "puntos",
+          {
+            ascending: false,
+          }
+        );
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setClasificacion(
+        data || []
+      );
+
+      const jugador =
+        data?.find(
+          (j) =>
+            j.usuario ===
+            jugadorActual
+        );
+
+      setPuntosEquipo(
+        jugador?.puntos || 0
+      );
+
+      setPosicion(
+        (data?.findIndex(
+          (j) =>
+            j.usuario ===
+            jugadorActual
+        ) || 0) + 1
+      );
+
+    };
+
+  cargarClasificacion();
 
 }, [jugadorActual]);
+
   const equipoActual =
     equipos[jugadorActual];
 
@@ -78,28 +138,7 @@ useEffect(() => {
     fichados.includes(piloto.nombre)
   );
 
-  const puntosEquipo =
-    jugadores.find(
-      (jugador) =>
-        jugador.nombre ===
-        jugadorActual
-    )?.puntos || 0;
-
-  const clasificacion = [
-    ...jugadores,
-  ];
-
-  clasificacion.sort(
-    (a, b) =>
-      b.puntos - a.puntos
-  );
-
-  const posicion =
-    clasificacion.findIndex(
-      (jugador) =>
-        jugador.nombre ===
-        jugadorActual
-    ) + 1;
+ 
 
   const hoy = new Date()
     .toISOString()
@@ -416,7 +455,7 @@ useEffect(() => {
           (jugador, index) => (
 
             <div
-              key={jugador.nombre}
+              key={jugador.usuario}
               className="flex justify-between py-3 border-b border-zinc-700"
             >
 
@@ -430,7 +469,7 @@ useEffect(() => {
                   ? "🥉"
                   : `${index + 1}.`}{" "}
 
-                {jugador.nombre}
+                {jugador.usuario}
 
               </p>
 
