@@ -22,7 +22,7 @@ export const pilotos = [
   {
     nombre: "Maverick Viñales",
     precio: 16,
-    puntos: 3,
+    puntos: 5,
     puntosGP: 0,
     equipo: "Red Bull Tech3",
     marca: "KTM",
@@ -32,7 +32,7 @@ export const pilotos = [
   {
     nombre: "Alex Rins",
     precio: 15.8,
-    puntos: 12,
+    puntos: 9,
     puntosGP: 0,
     equipo: "Monster Energy",
     marca: "Yamaha",
@@ -42,7 +42,7 @@ export const pilotos = [
   {
     nombre: "Toprak Razgatlioglu",
     precio: 14.6,
-    puntos: 5,
+    puntos: 4,
     puntosGP: 0,
     equipo: "Prima Pramac",
     marca: "Yamaha",
@@ -52,7 +52,7 @@ export const pilotos = [
   {
     nombre: "Fabio Quartararo",
     precio: 22.1,
-    puntos: 36,
+    puntos: 37,
     puntosGP: 0,
     equipo: "Monster Energy",
     marca: "Yamaha",
@@ -62,7 +62,7 @@ export const pilotos = [
   {
     nombre: "Ai Ogura",
     precio: 22.9,
-    puntos: 91,
+    puntos: 92,
     puntosGP: 15,
     equipo: "Trackhouse Team",
     marca: "Aprilia",
@@ -72,7 +72,7 @@ export const pilotos = [
   {
     nombre: "Diogo Moreira",
     precio: 14.1,
-    puntos: 22,
+    puntos: 23,
     puntosGP: 6,
     equipo: "LCR",
     marca: "Honda",
@@ -82,7 +82,7 @@ export const pilotos = [
   {
     nombre: "Franco Morbidelli",
     precio: 27.9,
-    puntos: 36,
+    puntos: 38,
     puntosGP: 2,
     equipo: "VR46 Racing",
     marca: "Ducati",
@@ -92,7 +92,7 @@ export const pilotos = [
   {
     nombre: "Joan Mir",
     precio: 20,
-    puntos: 32,
+    puntos: 15,
     puntosGP: 4,
     equipo: "HRC Castrol",
     marca: "Honda",
@@ -102,7 +102,7 @@ export const pilotos = [
   {
     nombre: "Jack Miller",
     precio: 13.7,
-    puntos: 4,
+    puntos: 3,
     puntosGP: 1,
     equipo: "Prima Pramac",
     marca: "Yamaha",
@@ -132,7 +132,7 @@ export const pilotos = [
   {
     nombre: "Fermin Aldeguer",
     precio: 28.2,
-    puntos: 55,
+    puntos: 59,
     puntosGP: 12,
     equipo: "BK8 Gresini Racing",
     marca: "Ducati",
@@ -142,7 +142,7 @@ export const pilotos = [
   {
     nombre: "Luca Marini",
     precio: 20.3,
-    puntos: 45,
+    puntos: 46,
     puntosGP: 3,
     equipo: "HRC Castrol",
     marca: "Honda",
@@ -172,7 +172,7 @@ export const pilotos = [
   {
     nombre: "Brad Binder",
     precio: 23,
-    puntos: 41,
+    puntos: 42,
     puntosGP: 5,
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
@@ -182,7 +182,7 @@ export const pilotos = [
   {
     nombre: "Marco Bezzecchi",
     precio: 37.8,
-    puntos: 171,
+    puntos: 173,
     puntosGP: 31,
     equipo: "Aprilia Racing",
     marca: "Aprilia",
@@ -202,7 +202,7 @@ export const pilotos = [
   {
     nombre: "Francesco Bagnaia",
     precio: 37.7,
-    puntos: 79,
+    puntos: 82,
     puntosGP: 19,
     equipo: "Lenovo Team",
     marca: "Ducati",
