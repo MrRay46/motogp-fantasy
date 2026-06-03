@@ -19,10 +19,10 @@ export const resultadosGP = {
     puntosEquipoGP: 89,
 
     pilotoEnForma:
-      "Marc Marquez",
+      "Marco Bezzecchi",
 
     pilotoEnFormaFoto:
-      "/pilotos/marc marquez.webp",
+      "/pilotos/marco bezzecchi.webp",
 
     motorEnForma:
       "Aprilia",
