@@ -330,10 +330,16 @@ const ultimoResultado =
           <div className="flex items-center gap-4">
 
             <img
-              src="/pilotos/marco bezzecchi.webp"
-              alt="Bezzecchi"
-              className="w-20 h-20 object-cover rounded-2xl border border-red-500"
-            />
+  src={
+    ultimoResultado
+      .pilotoGanadorFoto
+  }
+  alt={
+    ultimoResultado
+      .pilotoGanador
+  }
+  className="w-20 h-20 object-cover rounded-2xl border border-red-500"
+/>
 
             <div>
 
@@ -361,10 +367,16 @@ const ultimoResultado =
           <div className="flex items-center gap-4">
 
             <img
-              src="/marcas/aprilia.png"
-              alt="Aprilia"
-              className="w-20 h-20 object-contain"
-            />
+  src={
+    ultimoResultado
+      .motorGanadorLogo
+  }
+  alt={
+    ultimoResultado
+      .motorGanador
+  }
+  className="w-20 h-20 object-contain"
+/>
 
             <div>
 
@@ -391,11 +403,17 @@ const ultimoResultado =
 
           <div className="flex items-center gap-4">
 
-            <img
-              src="/pilotos/marco bezzecchi.webp"
-              alt="Bezzecchi"
-              className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
-            />
+           <img
+  src={
+    ultimoResultado
+      .pilotoEnFormaFoto
+  }
+  alt={
+    ultimoResultado
+      .pilotoEnForma
+  }
+  className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
+/>
 
             <div>
 
@@ -422,11 +440,17 @@ const ultimoResultado =
 
           <div className="flex items-center gap-4">
 
-            <img
-              src="/marcas/aprilia.png"
-              alt="Aprilia"
-              className="w-20 h-20 object-contain"
-            />
+           <img
+  src={
+    ultimoResultado
+      .motorEnFormaLogo
+  }
+  alt={
+    ultimoResultado
+      .motorEnForma
+  }
+  className="w-20 h-20 object-contain"
+/>
 
             <div>
 
