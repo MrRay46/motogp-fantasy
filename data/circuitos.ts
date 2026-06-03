@@ -79,14 +79,7 @@ export const circuitos = [
     imagen: "/circuitos/assen.png",
   },
 
-  {
-    nombre: "Sachsenring",
-    pais: "Alemania",
-    fechaInicio: "2026-06-26",
-    fechaFin: "2026-06-28",
-    imagen: "/circuitos/Sachsenring.png",
-  },
-
+  
   {
     nombre: "Sachsenring",
     pais: "Alemania",

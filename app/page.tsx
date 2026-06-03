@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-
+import { resultadosGP } from "@/data/resultadosGP";
 import { pilotos } from "@/data/pilotos";
 import { circuitos } from "@/data/circuitos";
 import { useFantasy } from "@/context/FantasyContext";
@@ -149,6 +149,8 @@ useEffect(() => {
       (circuito) =>
         circuito.fechaInicio >= hoy
     );
+const ultimoResultado =
+  resultadosGP.mugello;
 
   return (
 
@@ -263,12 +265,12 @@ useEffect(() => {
           </p>
 
           <h2 className="text-5xl font-black mb-3">
-            David
-          </h2>
+  {ultimoResultado.equipoGP}
+</h2>
 
-          <p className="text-3xl text-yellow-100 font-bold">
-            89 pts
-          </p>
+<p className="text-3xl text-yellow-100 font-bold">
+  {ultimoResultado.puntosEquipoGP} pts
+</p>
 
           <p className="mt-4 text-zinc-300">
             Mejor puntuación del GP de Mugello
@@ -336,8 +338,8 @@ useEffect(() => {
             <div>
 
               <p className="text-3xl font-bold">
-                Marco Bezzecchi
-              </p>
+  {ultimoResultado.pilotoGanador}
+</p>
 
               <p className="mt-2 text-zinc-300">
                 GP de Mugello
@@ -367,8 +369,8 @@ useEffect(() => {
             <div>
 
               <p className="text-3xl font-bold">
-                Aprilia
-              </p>
+  {ultimoResultado.motorGanador}
+</p>
 
               <p className="mt-2 text-zinc-300">
                 Mejor constructor del GP
@@ -398,8 +400,8 @@ useEffect(() => {
             <div>
 
               <p className="text-3xl font-bold">
-                Marco Bezzecchi
-              </p>
+  {ultimoResultado.pilotoEnForma}
+</p>
 
               <p className="mt-2 text-zinc-300">
                 Líder del mundial y fantasy
@@ -429,8 +431,8 @@ useEffect(() => {
             <div>
 
               <p className="text-3xl font-bold">
-                Aprilia
-              </p>
+  {ultimoResultado.motorEnForma}
+</p>
 
               <p className="mt-2 text-zinc-300">
                 Líder fantasy actual
