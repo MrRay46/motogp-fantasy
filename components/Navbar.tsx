@@ -29,6 +29,12 @@ export default function Navbar() {
   Clasificaciones
 </a>
 <a
+  href="/reglas"
+  className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+>
+  Reglas
+</a>
+<a
   href="/perfil"
   className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
 >
