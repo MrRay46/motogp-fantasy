@@ -100,24 +100,122 @@ export default function ReglasPage() {
         </section>
 
         <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-          <h2 className="text-3xl font-bold mb-4">
-            ⭐ Sistema de puntuación
-          </h2>
+  <h2 className="text-3xl font-bold mb-4">
+    ⭐ Sistema de puntuación
+  </h2>
 
-          <p>
-            La puntuación fantasy de cada Gran Premio será la suma de:
-          </p>
+  <p>
+    La puntuación fantasy de cada Gran Premio será la suma de:
+  </p>
 
-          <ul className="list-disc ml-6 mt-3 space-y-2">
-            <li>Los puntos obtenidos por los 5 pilotos titulares.</li>
-            <li>Los puntos del piloto reserva si sustituye a un titular con 0 puntos.</li>
-            <li>Los puntos obtenidos por el constructor seleccionado.</li>
-          </ul>
+  <ul className="list-disc ml-6 mt-3 space-y-2">
+    <li>Los puntos obtenidos por los 5 pilotos titulares.</li>
+    <li>Los puntos del piloto reserva si sustituye a un titular con 0 puntos.</li>
+    <li>Los puntos obtenidos por el constructor seleccionado.</li>
+  </ul>
 
-          <p className="mt-4">
-            La clasificación general se calculará acumulando todos los puntos obtenidos durante la temporada.
-          </p>
-        </section>
+  <p className="mt-4">
+    Los pilotos sumarán exactamente los mismos puntos obtenidos durante el fin de semana oficial de MotoGP, incluyendo Sprint y Gran Premio.
+  </p>
+
+  <h3 className="text-xl font-bold mt-6 mb-3">
+    🏁 Puntuación Sprint
+  </h3>
+
+  <div className="space-y-1">
+    <p>1º → 12 pts</p>
+    <p>2º → 9 pts</p>
+    <p>3º → 7 pts</p>
+    <p>4º → 6 pts</p>
+    <p>5º → 5 pts</p>
+    <p>6º → 4 pts</p>
+    <p>7º → 3 pts</p>
+    <p>8º → 2 pts</p>
+    <p>9º → 1 pt</p>
+  </div>
+
+  <h3 className="text-xl font-bold mt-6 mb-3">
+    🏆 Puntuación Gran Premio
+  </h3>
+
+  <div className="space-y-1">
+    <p>1º → 25 pts</p>
+    <p>2º → 20 pts</p>
+    <p>3º → 16 pts</p>
+    <p>4º → 13 pts</p>
+    <p>5º → 11 pts</p>
+    <p>6º → 10 pts</p>
+    <p>7º → 9 pts</p>
+    <p>8º → 8 pts</p>
+    <p>9º → 7 pts</p>
+    <p>10º → 6 pts</p>
+    <p>11º → 5 pts</p>
+    <p>12º → 4 pts</p>
+    <p>13º → 3 pts</p>
+    <p>14º → 2 pts</p>
+    <p>15º → 1 pt</p>
+  </div>
+
+  <h3 className="text-xl font-bold mt-6 mb-3">
+    🏍️ Puntuación de Constructores
+  </h3>
+
+  <p>
+    Los constructores puntúan únicamente según el resultado de la carrera principal del domingo.
+  </p>
+
+  <p className="mt-3">
+    Solo se tendrá en cuenta la mejor moto clasificada de cada marca.
+  </p>
+
+  <p className="mt-3">
+    Si varias motos de una misma marca ocupan posiciones consecutivas, únicamente puntuará la primera de ellas.
+  </p>
+
+  <h4 className="text-lg font-bold mt-6 mb-3">
+    Ejemplo
+  </h4>
+
+  <div className="bg-black/40 border border-zinc-700 rounded-2xl p-4 mb-4">
+    <p>Clasificación GP</p>
+
+    <div className="mt-3 space-y-1">
+      <p>1º (Ducati)</p>
+      <p>2º (Ducati)</p>
+      <p>3º (Aprilia)</p>
+      <p>4º (Aprilia)</p>
+      <p>5º (Yamaha)</p>
+      <p>6º (KTM)</p>
+      <p>7º (Honda)</p>
+    </div>
+  </div>
+
+  <p className="mb-3">
+    El sistema asignará:
+  </p>
+
+  <div className="bg-black/40 border border-zinc-700 rounded-2xl p-4">
+    <div className="space-y-1">
+      <p>Ducati = 10 pts</p>
+      <p>Aprilia = 8 pts</p>
+      <p>Yamaha = 6 pts</p>
+      <p>KTM = 4 pts</p>
+      <p>Honda = 2 pts</p>
+    </div>
+  </div>
+
+  <div className="mt-6 space-y-1">
+    <p>1º constructor → 10 pts</p>
+    <p>2º constructor → 8 pts</p>
+    <p>3º constructor → 6 pts</p>
+    <p>4º constructor → 4 pts</p>
+    <p>5º constructor → 2 pts</p>
+  </div>
+
+  <p className="mt-6">
+    La clasificación general se calculará acumulando todos los puntos obtenidos durante la temporada.
+  </p>
+</section>
 
         <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
           <h2 className="text-3xl font-bold mb-4">
