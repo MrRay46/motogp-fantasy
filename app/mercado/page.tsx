@@ -159,15 +159,23 @@ export default function MercadoPage() {
       )
   );
 
-  const presupuestoUsado =
-    equipo.reduce(
-      (total, piloto) =>
-        total + piloto.precio,
-      0
-    );
+ const motorSeleccionado =
+  motores.find(
+    (m) => m.nombre === motor
+  );
 
-  const presupuestoRestante =
-    172 - presupuestoUsado;
+const precioMotor =
+  motorSeleccionado?.precio || 0;
+
+const presupuestoUsado =
+  equipo.reduce(
+    (total, piloto) =>
+      total + piloto.precio,
+    0
+  ) + precioMotor;
+
+const presupuestoRestante =
+  172 - presupuestoUsado;
 
   const hoy = new Date()
     .toISOString()
