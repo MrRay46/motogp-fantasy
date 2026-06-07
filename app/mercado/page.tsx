@@ -92,8 +92,11 @@ export default function MercadoPage() {
   piloto: string
 ) => {
   setEquipos((prev) => ({
+
     ...prev,
+
     [jugadorActual]: {
+
       ...prev[jugadorActual],
 
       prediccionPiloto: piloto,
@@ -102,16 +105,30 @@ export default function MercadoPage() {
         prev[jugadorActual]
           ?.prediccionPilotoOriginal ||
         piloto,
+
+      prediccionPilotoModificada:
+        prev[jugadorActual]
+          ?.prediccionPilotoOriginal &&
+        prev[jugadorActual]
+          ?.prediccionPilotoOriginal !== piloto
+          ? true
+          : prev[jugadorActual]
+              ?.prediccionPilotoModificada ||
+            false,
     },
+
   }));
 };
 
-  const setPrediccionMotor = (
+ const setPrediccionMotor = (
   marca: string
 ) => {
   setEquipos((prev) => ({
+
     ...prev,
+
     [jugadorActual]: {
+
       ...prev[jugadorActual],
 
       prediccionMotor: marca,
@@ -120,7 +137,18 @@ export default function MercadoPage() {
         prev[jugadorActual]
           ?.prediccionMotorOriginal ||
         marca,
+
+      prediccionMotorModificada:
+        prev[jugadorActual]
+          ?.prediccionMotorOriginal &&
+        prev[jugadorActual]
+          ?.prediccionMotorOriginal !== marca
+          ? true
+          : prev[jugadorActual]
+              ?.prediccionMotorModificada ||
+            false,
     },
+
   }));
 };
 
