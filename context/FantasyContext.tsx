@@ -17,6 +17,9 @@ type EquipoJugador = {
 
   prediccionPilotoOriginal: string | null;
   prediccionMotorOriginal: string | null;
+
+  prediccionPilotoModificada?: boolean;
+  prediccionMotorModificada?: boolean;
 };
 
 type FantasyContextType = {
@@ -108,6 +111,12 @@ const cargarEquiposSupabase =
 
 prediccionMotorOriginal:
   fila.prediccion_motor_original,
+
+  prediccionPilotoModificada:
+  fila.prediccion_piloto_modificada,
+
+prediccionMotorModificada:
+  fila.prediccion_motor_modificada,
       };
 
     });
@@ -194,6 +203,11 @@ const guardarEquiposSupabase = async () => {
   equipo.prediccionPilotoOriginal,
 prediccion_motor_original:
   equipo.prediccionMotorOriginal,
+  prediccion_piloto_modificada:
+  equipo.prediccionPilotoModificada,
+
+prediccion_motor_modificada:
+  equipo.prediccionMotorModificada,
     },
     {
       onConflict: "usuario",
