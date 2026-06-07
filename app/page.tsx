@@ -158,15 +158,8 @@ const indiceProximoGP =
       circuito.fechaInicio >= hoy
   );
 
-const ultimoGP =
-  indiceProximoGP > 0
-    ? ordenGPs[indiceProximoGP - 1]
-    : ordenGPs[0];
-
 const ultimoResultado =
-  resultadosGP[
-    ultimoGP as keyof typeof resultadosGP
-  ];
+  resultadosGP.balanton;
 
   return (
 
