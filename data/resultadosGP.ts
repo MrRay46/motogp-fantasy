@@ -5,7 +5,7 @@ export const resultadosGP = {
       "Marc Márquez",
 
     pilotoGanadorFoto:
-      "/pilotos/marc márquez.webp",
+      "/pilotos/marc marquez.webp",
 
     motorGanador:
       "Ducati",

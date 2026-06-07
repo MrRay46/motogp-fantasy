@@ -1,26 +1,26 @@
 export const jugadores = [
   {
     nombre: "David",
-    puntos: 517,
+    puntos: 570,
   },
 
   {
     nombre: "Alejandro",
-    puntos: 454,
+    puntos: 516,
   },
 
   {
     nombre: "De la Raya Jr",
-    puntos: 424,
+    puntos: 519,
   },
 
   {
     nombre: "De la Raya Sr",
-    puntos: 464,
+    puntos: 545,
   },
 
   {
     nombre: "José",
-    puntos: 325,
+    puntos: 419,
   },
 ];
