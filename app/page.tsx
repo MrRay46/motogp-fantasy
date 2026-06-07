@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { resultadosGP } from "@/data/resultadosGP";
+import {
+  resultadosGP,
+  ordenGPs,
+} from "@/data/resultadosGP";
 import { pilotos } from "@/data/pilotos";
 import { circuitos } from "@/data/circuitos";
 import { useFantasy } from "@/context/FantasyContext";
@@ -149,8 +152,21 @@ useEffect(() => {
       (circuito) =>
         circuito.fechaInicio >= hoy
     );
+const indiceProximoGP =
+  circuitos.findIndex(
+    (circuito) =>
+      circuito.fechaInicio >= hoy
+  );
+
+const ultimoGP =
+  indiceProximoGP > 0
+    ? ordenGPs[indiceProximoGP - 1]
+    : ordenGPs[0];
+
 const ultimoResultado =
-  resultadosGP.mugello;
+  resultadosGP[
+    ultimoGP as keyof typeof resultadosGP
+  ];
 
   return (
 

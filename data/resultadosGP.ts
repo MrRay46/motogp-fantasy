@@ -1,22 +1,22 @@
 export const resultadosGP = {
-  mugello: {
+  balanton: {
 
     pilotoGanador:
-      "Marco Bezzecchi",
+      "Marc Márquez",
 
     pilotoGanadorFoto:
-      "/pilotos/marco bezzecchi.webp",
+      "/pilotos/marc márquez.webp",
 
     motorGanador:
-      "Aprilia",
+      "Ducati",
 
     motorGanadorLogo:
-      "/marcas/aprilia.png",
+      "/marcas/ducati.png",
 
     equipoGP:
-      "David",
+      "De la Raya Jr",
 
-    puntosEquipoGP: 89,
+    puntosEquipoGP: 95,
 
     pilotoEnForma:
       "Marco Bezzecchi",
@@ -31,3 +31,20 @@ export const resultadosGP = {
       "/marcas/aprilia.png",
   },
 };
+export const ordenGPs = [
+  "balanton",
+  "brno",
+  "assen",
+  "sachsenring",
+  "silverstone",
+  "aragon",
+  "misano",
+  "spielberg",
+  "motegi",
+  "mandalika",
+  "phillipIsland",
+  "sepang",
+  "lusail",
+  "portimao",
+  "valencia",
+];
