@@ -6,8 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { pilotos } from "@/data/pilotos";
-import { motores } from "@/data/motores";
+
 type EquipoJugador = {
   fichados: string[];
   reserva: string | null;
@@ -15,6 +14,9 @@ type EquipoJugador = {
 
   prediccionPiloto: string | null;
   prediccionMotor: string | null;
+
+  prediccionPilotoOriginal: string | null;
+  prediccionMotorOriginal: string | null;
 };
 
 type FantasyContextType = {
@@ -100,6 +102,12 @@ const cargarEquiposSupabase =
 
         prediccionMotor:
           fila.prediccion_motor,
+
+          prediccionPilotoOriginal:
+  fila.prediccion_piloto_original,
+
+prediccionMotorOriginal:
+  fila.prediccion_motor_original,
       };
 
     });
@@ -182,7 +190,10 @@ const guardarEquiposSupabase = async () => {
         equipo.prediccionPiloto,
       prediccion_motor:
         equipo.prediccionMotor,
-        
+        prediccion_piloto_original:
+  equipo.prediccionPilotoOriginal,
+prediccion_motor_original:
+  equipo.prediccionMotorOriginal,
     },
     {
       onConflict: "usuario",
