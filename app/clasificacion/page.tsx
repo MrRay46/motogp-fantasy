@@ -3,9 +3,35 @@
 import Navbar from "@/components/Navbar";
 import { pilotos } from "@/data/pilotos";
 import { motores } from "@/data/motores";
-
+import { campeonTemporada } from "@/data/prediccionesTemporada";
 export default function ClasificacionPage() {
+const calcularBonusTemporada = (
+  equipo: any
+) => {
+  let bonus = 0;
 
+  if (
+    equipo.prediccionPilotoOriginal ===
+    campeonTemporada.piloto
+  ) {
+    bonus +=
+      equipo.prediccionPilotoModificada
+        ? 18.5
+        : 37;
+  }
+
+  if (
+    equipo.prediccionMotorOriginal ===
+    campeonTemporada.constructor
+  ) {
+    bonus +=
+      equipo.prediccionMotorModificada
+        ? 5
+        : 10;
+  }
+
+  return bonus;
+};
   const clasificacionPilotos =
     [...pilotos].sort(
       (a, b) => b.puntos - a.puntos

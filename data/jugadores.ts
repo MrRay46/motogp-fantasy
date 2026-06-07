@@ -1,7 +1,7 @@
 export const jugadores = [
   {
     nombre: "David",
-    puntos: 570,
+    puntos: 561,
   },
 
   {

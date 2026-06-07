@@ -112,8 +112,8 @@ export const pilotos = [
   {
     nombre: "Jorge Martin",
     precio: 31.6,
-    puntos: 156,
-    puntosGP: 0,
+    puntos: 160,
+    puntosGP: 4,
     equipo: "Aprilia Racing",
     marca: "Aprilia",
     foto: "/pilotos/jorge martin.webp",
