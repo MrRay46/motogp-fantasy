@@ -89,28 +89,40 @@ export default function MercadoPage() {
   };
 
   const setPrediccionPiloto = (
-    piloto: string
-  ) => {
-    setEquipos((prev) => ({
-      ...prev,
-      [jugadorActual]: {
-  ...prev[jugadorActual],
-        prediccionPiloto: piloto,
-      },
-    }));
-  };
+  piloto: string
+) => {
+  setEquipos((prev) => ({
+    ...prev,
+    [jugadorActual]: {
+      ...prev[jugadorActual],
+
+      prediccionPiloto: piloto,
+
+      prediccionPilotoOriginal:
+        prev[jugadorActual]
+          ?.prediccionPilotoOriginal ||
+        piloto,
+    },
+  }));
+};
 
   const setPrediccionMotor = (
-    marca: string
-  ) => {
-    setEquipos((prev) => ({
-      ...prev,
-      [jugadorActual]: {
-  ...prev[jugadorActual],
-        prediccionMotor: marca,
-      },
-    }));
-  };
+  marca: string
+) => {
+  setEquipos((prev) => ({
+    ...prev,
+    [jugadorActual]: {
+      ...prev[jugadorActual],
+
+      prediccionMotor: marca,
+
+      prediccionMotorOriginal:
+        prev[jugadorActual]
+          ?.prediccionMotorOriginal ||
+        marca,
+    },
+  }));
+};
 
   const equipo = pilotos.filter(
     (piloto) =>
