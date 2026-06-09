@@ -357,7 +357,7 @@ const ultimoResultado =
 </p>
 
               <p className="mt-2 text-zinc-300">
-                GP de Mugello
+                GP de Balanton
               </p>
 
             </div>
