@@ -282,7 +282,7 @@ const ultimoResultado =
 </p>
 
           <p className="mt-4 text-zinc-300">
-            Mejor puntuación del GP de Mugello
+            Mejor puntuación del ultimo GP
           </p>
 
         </div>
@@ -333,7 +333,7 @@ const ultimoResultado =
         <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
 
           <h2 className="text-2xl font-bold mb-4">
-            🏁 Último Ganador
+            🏁 Ganador de ultimo GP
           </h2>
 
           <div className="flex items-center gap-4">
@@ -356,9 +356,7 @@ const ultimoResultado =
   {ultimoResultado.pilotoGanador}
 </p>
 
-              <p className="mt-2 text-zinc-300">
-                GP de Balanton
-              </p>
+              
 
             </div>
 
