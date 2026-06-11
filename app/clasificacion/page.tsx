@@ -49,17 +49,21 @@ export default function ClasificacionPage() {
     }
 
     await supabase
-      .from("equipos")
-      .update({
-        puntos:
-          equipo.puntos + bonus,
-        bonus_temporada_aplicado:
-          true,
-      })
-      .eq(
-        "usuario",
-        equipo.usuario
-      );
+  .from("equipos")
+  .update({
+    puntos:
+      equipo.puntos + bonus,
+
+    bonus_temporada:
+      bonus,
+
+    bonus_temporada_aplicado:
+      true,
+  })
+  .eq(
+    "usuario",
+    equipo.usuario
+  );
   }
 
   alert(
