@@ -1,4 +1,4 @@
 export const campeonTemporada = {
-  piloto: "Marc Márquez",
+  piloto: "Marc Marquez",
   constructor: "Ducati",
 };
