@@ -14,11 +14,12 @@ export default function LoginPage() {
       async () => {
 
         const {
-          data,
-          error,
-        } = await supabase
-          .from("equipos")
-          .select("usuario");
+  data,
+  error,
+} = await supabase
+  .from("usuarios")
+  .select("usuario")
+  .eq("activo", true);
 
         if (error) {
           console.error(error);
