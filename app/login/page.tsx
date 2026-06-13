@@ -17,7 +17,7 @@ export default function LoginPage() {
   data,
   error,
 } = await supabase
-  .from("usuarios")
+  .from("usuario")
   .select("usuario")
   .eq("activo", true);
 console.log(data);
