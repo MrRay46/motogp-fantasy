@@ -20,7 +20,7 @@ export default function LoginPage() {
   .from("usuarios")
   .select("usuario")
   .eq("activo", true);
-
+console.log(data);
         if (error) {
           console.error(error);
           return;
