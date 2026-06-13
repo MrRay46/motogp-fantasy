@@ -1,151 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+
 import Navbar from "@/components/Navbar";
 import { pilotos } from "@/data/pilotos";
 import { motores } from "@/data/motores";
-import { campeonTemporada } from "@/data/prediccionesTemporada";
-import { supabase } from "@/lib/supabase";
 
 export default function ClasificacionPage() {
 
-  const [esAdmin, setEsAdmin] =
-  useState(false);
-
-  useEffect(() => {
-
-  const comprobarAdmin =
-    async () => {
-
-      const usuario =
-        localStorage.getItem(
-          "usuarioLogueado"
-        );
-
-      if (!usuario) return;
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("equipos")
-        .select("admin")
-        .eq(
-          "usuario",
-          usuario
-        )
-        .single();
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      setEsAdmin(
-        data?.admin || false
-      );
-
-    };
-
-  comprobarAdmin();
-
-}, []);
-
-  const aplicarBonusTemporada = async () => {
-
-    if (!esAdmin) {
-  alert("No autorizado");
-  return;
-}
-
-  const { data, error } =
-    await supabase
-      .from("equipos")
-      .select("*");
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  for (const equipo of data) {
-
-    if (
-      equipo.bonus_temporada_aplicado
-    ) {
-      continue;
-    }
-
-    let bonus = 0;
-
-    if (
-      equipo.prediccion_piloto_original ===
-      campeonTemporada.piloto
-    ) {
-      bonus +=
-        equipo.prediccion_piloto_modificada
-          ? 18.5
-          : 37;
-    }
-
-    if (
-      equipo.prediccion_motor_original ===
-      campeonTemporada.constructor
-    ) {
-      bonus +=
-        equipo.prediccion_motor_modificada
-          ? 5
-          : 10;
-    }
-
-    await supabase
-  .from("equipos")
-  .update({
-    puntos:
-      equipo.puntos + bonus,
-
-    bonus_temporada:
-      bonus,
-
-    bonus_temporada_aplicado:
-      true,
-  })
-  .eq(
-    "usuario",
-    equipo.usuario
-  );
-  }
-
-  alert(
-    "Bonus de temporada aplicado"
-  );
-};
-const calcularBonusTemporada = (
-  equipo: any
-) => {
-  let bonus = 0;
-
-  if (
-    equipo.prediccionPilotoOriginal ===
-    campeonTemporada.piloto
-  ) {
-    bonus +=
-      equipo.prediccionPilotoModificada
-        ? 18.5
-        : 37;
-  }
-
-  if (
-    equipo.prediccionMotorOriginal ===
-    campeonTemporada.constructor
-  ) {
-    bonus +=
-      equipo.prediccionMotorModificada
-        ? 5
-        : 10;
-  }
-
-  return bonus;
-};
   const clasificacionPilotos =
     [...pilotos].sort(
       (a, b) => b.puntos - a.puntos
@@ -165,22 +25,7 @@ const calcularBonusTemporada = (
       <h1 className="text-5xl font-bold text-red-500 mb-10">
         Clasificaciones Oficiales
       </h1>
-{esAdmin && (
-  <button
-    onClick={aplicarBonusTemporada}
-    className="
-      bg-yellow-600
-      hover:bg-yellow-500
-      px-6
-      py-3
-      rounded-xl
-      font-bold
-      mb-8
-    "
-  >
-    🏆 Calcular Bonus Temporada
-  </button>
-)}
+
       <h2 className="text-3xl font-bold mb-6">
         🏍️ Mundial de Pilotos
       </h2>
