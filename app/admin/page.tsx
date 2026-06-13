@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
 
@@ -9,47 +13,122 @@ export default function AdminPage() {
   const [linkInvitacion, setLinkInvitacion] =
     useState("");
 
-  const generarInvitacion = async () => {
+  const [usuarios, setUsuarios] =
+    useState<any[]>([]);
 
-    const token =
-      Math.random()
-        .toString(36)
-        .substring(2, 12)
-        .toUpperCase();
+  useEffect(() => {
 
-    const { error } =
-      await supabase
-        .from("invitaciones")
-        .insert([
-          {
-            token,
-            usado: false,
-          },
-        ]);
+    const cargarUsuarios =
+      async () => {
 
-    if (error) {
-      console.error(error);
-      return;
-    }
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("usuarios")
+          .select(
+            "usuario, activo"
+          )
+          .order("usuario");
 
-    const link =
-      `${window.location.origin}/registro?token=${token}`;
+        if (error) {
+          console.error(error);
+          return;
+        }
 
-    setLinkInvitacion(link);
+        setUsuarios(
+          data || []
+        );
 
-  };
+      };
 
-  const copiarLink = async () => {
+    cargarUsuarios();
 
-    await navigator.clipboard.writeText(
-      linkInvitacion
-    );
+  }, []);
 
-    alert(
-      "Enlace copiado al portapapeles"
-    );
+  const generarInvitacion =
+    async () => {
 
-  };
+      const token =
+        Math.random()
+          .toString(36)
+          .substring(2, 12)
+          .toUpperCase();
+
+      const { error } =
+        await supabase
+          .from(
+            "invitaciones"
+          )
+          .insert([
+            {
+              token,
+              usado: false,
+            },
+          ]);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const link =
+        `${window.location.origin}/registro?token=${token}`;
+
+      setLinkInvitacion(
+        link
+      );
+
+    };
+
+  const copiarLink =
+    async () => {
+
+      await navigator.clipboard.writeText(
+        linkInvitacion
+      );
+
+      alert(
+        "Enlace copiado al portapapeles"
+      );
+
+    };
+
+  const cambiarEstado =
+    async (
+      usuario: string,
+      activo: boolean
+    ) => {
+
+      const { error } =
+        await supabase
+          .from("usuarios")
+          .update({
+            activo: !activo,
+          })
+          .eq(
+            "usuario",
+            usuario
+          );
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setUsuarios(
+        usuarios.map((u) =>
+          u.usuario === usuario
+            ? {
+                ...u,
+                activo:
+                  !activo,
+              }
+            : u
+        )
+      );
+
+    };
 
   return (
 
@@ -70,7 +149,9 @@ export default function AdminPage() {
           </h2>
 
           <button
-            onClick={generarInvitacion}
+            onClick={
+              generarInvitacion
+            }
             className="
               bg-green-600
               hover:bg-green-500
@@ -93,7 +174,9 @@ export default function AdminPage() {
               </p>
 
               <button
-                onClick={copiarLink}
+                onClick={
+                  copiarLink
+                }
                 className="
                   bg-blue-600
                   hover:bg-blue-500
@@ -113,13 +196,73 @@ export default function AdminPage() {
 
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
 
-          <h2 className="text-2xl font-bold mb-3">
-            🚫 Expulsar participante
+          <h2 className="text-2xl font-bold mb-6">
+            🚫 Gestionar participantes
           </h2>
 
-          <p className="text-zinc-400">
-            Próximamente.
-          </p>
+          <div className="space-y-3">
+
+            {usuarios.map(
+              (usuario) => (
+
+                <div
+                  key={
+                    usuario.usuario
+                  }
+                  className="
+                    flex
+                    justify-between
+                    items-center
+                    bg-zinc-800
+                    rounded-xl
+                    p-3
+                  "
+                >
+
+                  <div>
+
+                    <p className="font-bold">
+                      {
+                        usuario.usuario
+                      }
+                    </p>
+
+                    <p className="text-sm text-zinc-400">
+
+                      {usuario.activo
+                        ? "Activo"
+                        : "Inactivo"}
+
+                    </p>
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      cambiarEstado(
+                        usuario.usuario,
+                        usuario.activo
+                      )
+                    }
+                    className={`px-4 py-2 rounded-xl font-bold transition ${
+                      usuario.activo
+                        ? "bg-red-600 hover:bg-red-500"
+                        : "bg-green-600 hover:bg-green-500"
+                    }`}
+                  >
+
+                    {usuario.activo
+                      ? "Desactivar"
+                      : "Reactivar"}
+
+                  </button>
+
+                </div>
+
+              )
+            )}
+
+          </div>
 
         </div>
 
