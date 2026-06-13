@@ -14,7 +14,8 @@ import { supabase } from "@/lib/supabase";
 export default function Home() {
 
   const router = useRouter();
-
+const [esAdmin, setEsAdmin] =
+  useState(false);
   useEffect(() => {
 
     const usuario =
@@ -27,7 +28,45 @@ export default function Home() {
     }
 
   }, []);
+useEffect(() => {
 
+  const comprobarAdmin =
+    async () => {
+
+      const usuario =
+        localStorage.getItem(
+          "usuarioLogueado"
+        );
+
+      if (!usuario)
+        return;
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("usuarios")
+        .select("admin")
+        .eq(
+          "usuario",
+          usuario
+        )
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setEsAdmin(
+        data?.admin || false
+      );
+
+    };
+
+  comprobarAdmin();
+
+}, []);
   const {
     equipos,
     jugadorActual,
