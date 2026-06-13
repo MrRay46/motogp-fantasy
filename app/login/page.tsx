@@ -17,10 +17,12 @@ export default function LoginPage() {
   data,
   error,
 } = await supabase
-  .from("usuario")
-  .select("usuario")
-  .eq("activo", true);
+  .from("usuarios")
+  .select("*");
+
 console.log(data);
+console.log(error);
+
         if (error) {
           console.error(error);
           return;
