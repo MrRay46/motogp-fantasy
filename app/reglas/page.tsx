@@ -259,7 +259,33 @@ export default function ReglasPage() {
             <li>Predicción modificada acertada del constructor campeón: +5 puntos.</li>
           </ul>
         </section>
+<section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+  <h2 className="text-3xl font-bold mb-4">
+    👑 Administrador
+  </h2>
 
+  <p>
+    La competición contará con un administrador responsable de la gestión general del MotoGP Fantasy.
+  </p>
+
+  <h3 className="text-xl font-bold mt-6 mb-2">
+    Funciones del administrador
+  </h3>
+
+  <ul className="list-disc ml-6 space-y-2">
+    <li>Aplicar las bonificaciones de predicción al finalizar la temporada.</li>
+    <li>Resolver incidencias relacionadas con la competición.</li>
+    <li>Verificar el correcto funcionamiento de la aplicación y de las clasificaciones.</li>
+  </ul>
+
+  <p className="mt-4">
+    Las herramientas de administración son exclusivas del administrador y no estarán disponibles para el resto de participantes.
+  </p>
+
+  <p className="mt-3">
+    Las decisiones adoptadas por el administrador para resolver incidencias serán definitivas.
+  </p>
+</section>
         <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
           <h2 className="text-3xl font-bold mb-4">
             🏆 Clasificación final
