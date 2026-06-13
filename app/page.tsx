@@ -67,6 +67,7 @@ useEffect(() => {
   comprobarAdmin();
 
 }, []);
+
   const {
     equipos,
     jugadorActual,
@@ -141,28 +142,47 @@ useEffect(() => {
         return;
       }
 
-      setClasificacion(
-        data || []
-      );
+     const { data: usuariosActivos } =
+  await supabase
+    .from("usuarios")
+    .select("usuario")
+    .eq("activo", true);
 
-      const jugador =
-        data?.find(
-          (j) =>
-            j.usuario ===
-            jugadorActual
-        );
+const nombresActivos =
+  usuariosActivos?.map(
+    (u) => u.usuario
+  ) || [];
 
-      setPuntosEquipo(
-        jugador?.puntos || 0
-      );
+const clasificacionFiltrada =
+  (data || []).filter(
+    (j) =>
+      nombresActivos.includes(
+        j.usuario
+      )
+  );
 
-      setPosicion(
-        (data?.findIndex(
-          (j) =>
-            j.usuario ===
-            jugadorActual
-        ) || 0) + 1
-      );
+setClasificacion(
+  clasificacionFiltrada
+);
+
+const jugador =
+  clasificacionFiltrada.find(
+    (j) =>
+      j.usuario ===
+      jugadorActual
+  );
+
+setPuntosEquipo(
+  jugador?.puntos || 0
+);
+
+setPosicion(
+  (clasificacionFiltrada.findIndex(
+    (j) =>
+      j.usuario ===
+      jugadorActual
+  ) || 0) + 1
+);
 
     };
 
