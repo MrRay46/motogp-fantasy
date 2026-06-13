@@ -257,6 +257,9 @@ export default function ReglasPage() {
             <li>Predicción modificada acertada del piloto campeón: +18,5 puntos.</li>
             <li>Predicción original acertada del constructor campeón: +10 puntos.</li>
             <li>Predicción modificada acertada del constructor campeón: +5 puntos.</li>
+            <p className="mt-4">
+  Las bonificaciones de predicción serán aplicadas por el administrador una única vez al finalizar la temporada.
+</p>
           </ul>
         </section>
 <section className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
