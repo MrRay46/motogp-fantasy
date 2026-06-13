@@ -111,7 +111,7 @@ export default function ReglasPage() {
   <ul className="list-disc ml-6 mt-3 space-y-2">
     <li>Los puntos obtenidos por los 5 pilotos titulares.</li>
     <li>Los puntos del piloto reserva si sustituyen a los del titular si el titular acaba al final del Gran Premio con 0 puntos.
-      ejemplo: si un piloto titular consigue 0 puntos en la carrera al sprint y 0 puntos en la carrera del domingo, si el piloto reserva consigue puntos a lo largo del fin de semana si se sumarian, pero si tu piloto titular consigue 1 punto al finalizar el GP al haber puntuado en el fin de semana, los puntos conseguidos por el piloto reserversa aunque sean mas no sumarian.
+      ejemplo: si un piloto titular consigue 0 puntos en la carrera al sprint y 0 puntos en la carrera del domingo, si el piloto reserva consigue puntos a lo largo del fin de semana si se sumarian, pero si tu piloto titular consigue al menos 1 punto al finalizar el GP al haber puntuado en el fin de semana, los puntos conseguidos por el piloto reserversa aunque sean mas no sumarian.
     </li>
     <li>Los puntos obtenidos por el constructor seleccionado.</li>
   </ul>
