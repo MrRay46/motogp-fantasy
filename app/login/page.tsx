@@ -1,55 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
 
-  const [jugadores, setJugadores] =
-    useState<any[]>([]);
+  const [usuario, setUsuario] =
+    useState("");
 
-  useEffect(() => {
+  const [password, setPassword] =
+    useState("");
 
-    const cargarJugadores =
-      async () => {
+  const iniciarSesion =
+    async () => {
 
-        const {
-  data,
-  error,
-} = await supabase
-  .from("usuarios")
-  .select("*");
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("usuarios")
+        .select("*")
+        .eq("usuario", usuario)
+        .eq("password", password)
+        .eq("activo", true)
+        .single();
 
-console.log(data);
-console.log(error);
+      if (error || !data) {
 
-        if (error) {
-          console.error(error);
-          return;
-        }
-
-        setJugadores(
-          data || []
+        alert(
+          "Usuario o contraseña incorrectos"
         );
 
-      };
+        return;
+      }
 
-    cargarJugadores();
+      localStorage.setItem(
+        "usuarioLogueado",
+        data.usuario
+      );
 
-  }, []);
-
-  const seleccionarJugador = (
-    jugador: string
-  ) => {
-
-    localStorage.setItem(
-      "usuarioLogueado",
-      jugador
-    );
-
-    window.location.href = "/";
-
-  };
+      window.location.href = "/";
+    };
 
   return (
 
@@ -59,30 +50,42 @@ console.log(error);
         MotoGP Fantasy
       </h1>
 
-      <div className="grid gap-6 w-full max-w-md">
+      <div className="w-full max-w-md space-y-4">
 
-        {jugadores.map(
-          (jugador) => (
+        <input
+          type="text"
+          placeholder="Usuario"
+          value={usuario}
+          onChange={(e) =>
+            setUsuario(
+              e.target.value
+            )
+          }
+          className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
+        />
 
-            <button
-              key={jugador.usuario}
-              onClick={() =>
-                seleccionarJugador(
-                  jugador.usuario
-                )
-              }
-              className="bg-zinc-900 border border-zinc-700 hover:border-red-500 transition p-6 rounded-3xl text-2xl font-bold"
-            >
-              {jugador.usuario}
-            </button>
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) =>
+            setPassword(
+              e.target.value
+            )
+          }
+          className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
+        />
 
-          )
-        )}
+        <button
+          onClick={iniciarSesion}
+          className="w-full bg-red-600 hover:bg-red-500 p-4 rounded-2xl font-bold"
+        >
+          Iniciar sesión
+        </button>
 
       </div>
 
     </main>
 
   );
-
 }
