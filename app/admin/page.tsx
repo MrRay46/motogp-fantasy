@@ -1,8 +1,55 @@
 "use client";
 
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
 
 export default function AdminPage() {
+
+  const [linkInvitacion, setLinkInvitacion] =
+    useState("");
+
+  const generarInvitacion = async () => {
+
+    const token =
+      Math.random()
+        .toString(36)
+        .substring(2, 12)
+        .toUpperCase();
+
+    const { error } =
+      await supabase
+        .from("invitaciones")
+        .insert([
+          {
+            token,
+            usado: false,
+          },
+        ]);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    const link =
+      `${window.location.origin}/registro?token=${token}`;
+
+    setLinkInvitacion(link);
+
+  };
+
+  const copiarLink = async () => {
+
+    await navigator.clipboard.writeText(
+      linkInvitacion
+    );
+
+    alert(
+      "Enlace copiado al portapapeles"
+    );
+
+  };
 
   return (
 
@@ -22,9 +69,45 @@ export default function AdminPage() {
             ➕ Añadir participante
           </h2>
 
-          <p className="text-zinc-400">
-            Próximamente.
-          </p>
+          <button
+            onClick={generarInvitacion}
+            className="
+              bg-green-600
+              hover:bg-green-500
+              px-5
+              py-3
+              rounded-xl
+              font-bold
+              mb-4
+            "
+          >
+            Generar invitación
+          </button>
+
+          {linkInvitacion && (
+
+            <div className="space-y-3">
+
+              <p className="text-green-400 break-all">
+                {linkInvitacion}
+              </p>
+
+              <button
+                onClick={copiarLink}
+                className="
+                  bg-blue-600
+                  hover:bg-blue-500
+                  px-4
+                  py-2
+                  rounded-xl
+                "
+              >
+                Copiar enlace
+              </button>
+
+            </div>
+
+          )}
 
         </div>
 
