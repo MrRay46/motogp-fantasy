@@ -82,6 +82,38 @@ const [puntosEquipo, setPuntosEquipo] =
 
 const [posicion, setPosicion] =
   useState(0);
+const [equipoVisible, setEquipoVisible] =
+  useState<any>(null);
+
+const [mostrarEquipo, setMostrarEquipo] =
+  useState(false);
+
+const verEquipo = async (
+  usuario: string
+) => {
+
+  const {
+    data,
+    error,
+  } = await supabase
+    .from("equipos")
+    .select("*")
+    .eq(
+      "usuario",
+      usuario
+    )
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setEquipoVisible(data);
+  setMostrarEquipo(true);
+
+};
+
 useEffect(() => {
 
   const cargarAvatar =
@@ -121,7 +153,31 @@ useEffect(() => {
 
   const cargarClasificacion =
     async () => {
+const verEquipo = async (
+  usuario: string
+) => {
 
+  const {
+    data,
+    error,
+  } = await supabase
+    .from("equipos")
+    .select("*")
+    .eq(
+      "usuario",
+      usuario
+    )
+    .single();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  setEquipoVisible(data);
+  setMostrarEquipo(true);
+
+};
       const {
         data,
         error,
@@ -551,19 +607,31 @@ const ultimoResultado =
               className="flex justify-between py-3 border-b border-zinc-700"
             >
 
-              <p className="text-xl">
+             <p
+  className="
+    text-xl
+    cursor-pointer
+    hover:text-yellow-400
+    transition
+  "
+  onClick={() =>
+    verEquipo(
+      jugador.usuario
+    )
+  }
+>
 
-                {index === 0
-                  ? "🥇"
-                  : index === 1
-                  ? "🥈"
-                  : index === 2
-                  ? "🥉"
-                  : `${index + 1}.`}{" "}
+  {index === 0
+    ? "🥇"
+    : index === 1
+    ? "🥈"
+    : index === 2
+    ? "🥉"
+    : `${index + 1}.`}{" "}
 
-                {jugador.usuario}
+  {jugador.usuario}
 
-              </p>
+</p>
 
               <p className="text-xl font-bold">
                 {jugador.puntos} pts
@@ -575,7 +643,84 @@ const ultimoResultado =
         )}
 
       </div>
+{mostrarEquipo &&
+  equipoVisible && (
 
+  <div
+    className="
+      fixed
+      inset-0
+      bg-black/80
+      flex
+      items-center
+      justify-center
+      z-50
+    "
+  >
+
+    <div
+      className="
+        bg-zinc-900
+        border
+        border-zinc-700
+        rounded-3xl
+        p-8
+        max-w-lg
+        w-full
+      "
+    >
+
+      <h2 className="text-3xl font-bold mb-6">
+        Equipo de {equipoVisible.usuario}
+      </h2>
+
+      <h3 className="text-yellow-400 font-bold mb-3">
+        Titulares
+      </h3>
+
+      <div className="space-y-2 mb-6">
+
+        {equipoVisible.fichados?.map(
+          (piloto: string) => (
+
+            <p key={piloto}>
+              🏍️ {piloto}
+            </p>
+
+          )
+        )}
+
+      </div>
+
+      <h3 className="text-blue-400 font-bold mb-3">
+        Reserva
+      </h3>
+
+      <p className="mb-6">
+        🪑 {equipoVisible.reserva}
+      </p>
+
+      <button
+        onClick={() =>
+          setMostrarEquipo(false)
+        }
+        className="
+          bg-red-600
+          hover:bg-red-500
+          px-5
+          py-3
+          rounded-xl
+          font-bold
+        "
+      >
+        Cerrar
+      </button>
+
+    </div>
+
+  </div>
+
+)}
     </main>
 
   );
