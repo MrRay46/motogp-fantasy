@@ -1,24 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
 
-  const [usuario, setUsuario] =
-    useState("");
+  const [esAdmin, setEsAdmin] =
+    useState(false);
 
   useEffect(() => {
 
-    const usuarioLogueado =
-      localStorage.getItem(
-        "usuarioLogueado"
-      );
+    const comprobarAdmin =
+      async () => {
 
-    if (usuarioLogueado) {
-      setUsuario(
-        usuarioLogueado
-      );
-    }
+        const usuario =
+          localStorage.getItem(
+            "usuarioLogueado"
+          );
+
+        if (!usuario)
+          return;
+
+        const {
+          data,
+          error,
+        } = await supabase
+          .from("usuarios")
+          .select("admin")
+          .eq(
+            "usuario",
+            usuario
+          )
+          .single();
+
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        setEsAdmin(
+          data?.admin || false
+        );
+
+      };
+
+    comprobarAdmin();
 
   }, []);
 
@@ -79,20 +105,23 @@ export default function Navbar() {
         Perfil
       </a>
 
-      <div className="flex items-center gap-3 ml-2">
+      {esAdmin && (
 
-        <span className="text-zinc-300 text-sm md:text-base">
-          {usuario}
-        </span>
-
-        <button
-          onClick={cerrarSesion}
-          className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white transition"
+        <a
+          href="/admin"
+          className="bg-yellow-600 px-4 py-2 rounded-xl hover:bg-yellow-500 transition text-white"
         >
-          Salir
-        </button>
+          ⚙️ Admin
+        </a>
 
-      </div>
+      )}
+
+      <button
+        onClick={cerrarSesion}
+        className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white transition"
+      >
+        Salir
+      </button>
 
     </nav>
 
