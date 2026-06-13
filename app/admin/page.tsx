@@ -7,6 +7,7 @@ import {
 
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
+import { campeonTemporada } from "@/data/prediccionesTemporada";
 
 export default function AdminPage() {
 
@@ -15,7 +16,72 @@ export default function AdminPage() {
 
   const [usuarios, setUsuarios] =
     useState<any[]>([]);
+const aplicarBonusTemporada = async () => {
 
+  const { data, error } =
+    await supabase
+      .from("equipos")
+      .select("*");
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  for (const equipo of data) {
+
+    if (
+      equipo.bonus_temporada_aplicado
+    ) {
+      continue;
+    }
+
+    let bonus = 0;
+
+    if (
+      equipo.prediccion_piloto_original ===
+      campeonTemporada.piloto
+    ) {
+      bonus +=
+        equipo.prediccion_piloto_modificada
+          ? 18.5
+          : 37;
+    }
+
+    if (
+      equipo.prediccion_motor_original ===
+      campeonTemporada.constructor
+    ) {
+      bonus +=
+        equipo.prediccion_motor_modificada
+          ? 5
+          : 10;
+    }
+
+    await supabase
+      .from("equipos")
+      .update({
+        puntos:
+          equipo.puntos + bonus,
+
+        bonus_temporada:
+          bonus,
+
+        bonus_temporada_aplicado:
+          true,
+      })
+      .eq(
+        "usuario",
+        equipo.usuario
+      );
+
+  }
+
+  alert(
+    "Bonus de temporada aplicado"
+  );
+
+};
   useEffect(() => {
 
     const cargarUsuarios =
@@ -268,13 +334,23 @@ export default function AdminPage() {
 
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6">
 
-          <h2 className="text-2xl font-bold mb-3">
-            🏆 Bonus de temporada
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">
+  🏆 Bonus de temporada
+</h2>
 
-          <p className="text-zinc-400">
-            Aplicar bonus finales.
-          </p>
+<button
+  onClick={aplicarBonusTemporada}
+  className="
+    bg-yellow-600
+    hover:bg-yellow-500
+    px-5
+    py-3
+    rounded-xl
+    font-bold
+  "
+>
+  Calcular Bonus Temporada
+</button>
 
         </div>
 
