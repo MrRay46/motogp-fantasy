@@ -18,6 +18,8 @@ export default function AdminPage() {
     useState<any[]>([]);
 const aplicarBonusTemporada = async () => {
 
+  let equiposActualizados = 0;
+
   const { data, error } =
     await supabase
       .from("equipos")
@@ -74,12 +76,12 @@ const aplicarBonusTemporada = async () => {
         "usuario",
         equipo.usuario
       );
-
+equiposActualizados++;
   }
 
-  alert(
-    "Bonus de temporada aplicado"
-  );
+ alert(
+  `Bonus aplicado a ${equiposActualizados} equipos`
+);
 
 };
   useEffect(() => {
