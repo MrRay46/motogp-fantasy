@@ -692,13 +692,20 @@ const ultimoResultado =
 
       </div>
 
-      <h3 className="text-blue-400 font-bold mb-3">
-        Reserva
-      </h3>
+      {equipoVisible.reserva &&
+ !equipoVisible.fichados.includes(
+   equipoVisible.reserva
+ ) && (
+  <>
+    <h3 className="text-blue-400 font-bold mt-6">
+      Reserva
+    </h3>
 
-      <p className="mb-6">
-        🪑 {equipoVisible.reserva}
-      </p>
+    <p className="mt-2">
+      🪑 {equipoVisible.reserva}
+    </p>
+  </>
+)}
 
       <button
         onClick={() =>
