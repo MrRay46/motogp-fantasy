@@ -674,9 +674,11 @@ const ultimoResultado =
         Equipo de {equipoVisible.usuario}
       </h2>
 
-      <h3 className="text-yellow-400 font-bold mb-3">
-        Titulares
-      </h3>
+      <h3 className="text-yellow-400 font-bold mb-4">
+
+  👥 Equipo Actual  🏍️
+
+</h3>
 
       <div className="space-y-2 mb-6">
 
