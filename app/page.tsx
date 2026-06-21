@@ -274,7 +274,7 @@ const indiceProximoGP =
   );
 
 const ultimoResultado =
-  resultadosGP.balanton;
+  resultadosGP.brno;
 
   return (
 
