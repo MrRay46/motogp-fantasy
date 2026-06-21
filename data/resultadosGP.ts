@@ -1,5 +1,5 @@
 export const resultadosGP = {
-  balanton: {
+  brno: {
 
     pilotoGanador:
       "Marc Márquez",
@@ -14,9 +14,9 @@ export const resultadosGP = {
       "/marcas/ducati.png",
 
     equipoGP:
-      "De la Raya Jr",
+      "De la Raya Sr",
 
-    puntosEquipoGP: 95,
+    puntosEquipoGP: 104,
 
     pilotoEnForma:
       "Marco Bezzecchi",
