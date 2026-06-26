@@ -60,9 +60,8 @@ export default function LoginPage() {
 </div>
 
       <p className="text-zinc-400 text-center mt-4 mb-10 leading-relaxed">
-        Tu equipo.<br />
-        Tus decisiones.<br />
-        Tu campeonato.
+        Tu equipo.<br />  Tus decisiones.<br /> Tu campeonato.
+        
       </p>
 
       <div className="w-full max-w-md space-y-4">
