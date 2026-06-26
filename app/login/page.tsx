@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default function LoginPage() {
 
@@ -46,9 +47,17 @@ export default function LoginPage() {
 
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
 
-      <h1 className="text-5xl font-bold text-red-500">
-        MotoGP Fantasy
-      </h1>
+      <div className="mb-10 flex justify-center">
+
+  <Image
+    src="/images/raygrid-logo.png"
+    alt="RayGrid"
+    width={340}
+    height={340}
+    priority
+  />
+
+</div>
 
       <p className="text-zinc-400 text-center mt-4 mb-10 leading-relaxed">
         Tu equipo.<br />
