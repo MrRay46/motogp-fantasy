@@ -2,31 +2,31 @@ export const motores = [
   {
     nombre: "Ducati",
     precio: 6,
-    puntos: 262,
+    puntos: 282,
     logo: "/marcas/ducati.png",
   },
   {
     nombre: "Aprilia",
     precio: 4.1,
-    puntos: 267,
+    puntos: 304,
     logo: "/marcas/aprilia.png",
   },
   {
     nombre: "KTM",
     precio: 3.4,
-    puntos: 163,
+    puntos: 175,
     logo: "/marcas/ktm.png",
   },
   {
     nombre: "Honda",
     precio: 2.3,
-    puntos: 95,
+    puntos: 101,
     logo: "/marcas/honda.png",
   },
   {
     nombre: "Yamaha",
     precio: 1.7,
-    puntos: 51, 
+    puntos: 59, 
     logo: "/marcas/yamaha.png",
   },
 ];
