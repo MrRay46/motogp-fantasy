@@ -274,7 +274,7 @@ const indiceProximoGP =
   );
 
 const ultimoResultado =
-  resultadosGP.brno;
+  resultadosGP.assen;
 
   return (
 

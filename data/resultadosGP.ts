@@ -1,28 +1,28 @@
 export const resultadosGP = {
-  brno: {
+  assen: {
 
     pilotoGanador:
-      "Marc Márquez",
+      "A. Ogura",
 
     pilotoGanadorFoto:
-      "/pilotos/marc marquez.webp",
+      "/pilotos/ai ogura.webp",
 
     motorGanador:
-      "Ducati",
+      "Aprilia",
 
     motorGanadorLogo:
-      "/marcas/ducati.png",
+      "/marcas/aprilia.png",
 
     equipoGP:
-      "De la Raya Sr",
+      "David",
 
-    puntosEquipoGP: 104,
+    puntosEquipoGP: 92,
 
     pilotoEnForma:
-      "Marco Bezzecchi",
+      "Jorge Martin",
 
     pilotoEnFormaFoto:
-      "/pilotos/marco bezzecchi.webp",
+      "/pilotos/jorge martin.webp",
 
     motorEnForma:
       "Aprilia",
