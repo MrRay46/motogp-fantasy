@@ -1,735 +1,121 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
-import {
-  resultadosGP,
-  ordenGPs,
-} from "@/data/resultadosGP";
-import { pilotos } from "@/data/pilotos";
-import { circuitos } from "@/data/circuitos";
-import { useFantasy } from "@/context/FantasyContext";
-import { supabase } from "@/lib/supabase";
+import Image from "next/image";
+
 export default function Home() {
-
-  const router = useRouter();
-const [esAdmin, setEsAdmin] =
-  useState(false);
-  useEffect(() => {
-
-    const usuario =
-      localStorage.getItem(
-        "usuarioLogueado"
-      );
-
-    if (!usuario) {
-      router.push("/login");
-    }
-
-  }, []);
-useEffect(() => {
-
-  const comprobarAdmin =
-    async () => {
-
-      const usuario =
-        localStorage.getItem(
-          "usuarioLogueado"
-        );
-
-      if (!usuario)
-        return;
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("usuarios")
-        .select("admin")
-        .eq(
-          "usuario",
-          usuario
-        )
-        .single();
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      setEsAdmin(
-        data?.admin || false
-      );
-
-    };
-
-  comprobarAdmin();
-
-}, []);
-
-  const {
-    equipos,
-    jugadorActual,
-  } = useFantasy();
-const [avatar, setAvatar] =
-  useState("avatar1.png");
-const [clasificacion, setClasificacion] =
-  useState<any[]>([]);
-
-const [puntosEquipo, setPuntosEquipo] =
-  useState(0);
-
-const [posicion, setPosicion] =
-  useState(0);
-const [equipoVisible, setEquipoVisible] =
-  useState<any>(null);
-
-const [mostrarEquipo, setMostrarEquipo] =
-  useState(false);
-
-const verEquipo = async (
-  usuario: string
-) => {
-
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("equipos")
-    .select("*")
-    .eq(
-      "usuario",
-      usuario
-    )
-    .single();
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  setEquipoVisible(data);
-  setMostrarEquipo(true);
-
-};
-
-useEffect(() => {
-
-  const cargarAvatar =
-    async () => {
-
-      if (!jugadorActual)
-        return;
-
-      const { data, error } =
-        await supabase
-          .from("equipos")
-          .select("avatar")
-          .eq(
-            "usuario",
-            jugadorActual
-          )
-          .single();
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      if (data?.avatar) {
-
-        setAvatar(
-          data.avatar
-        );
-
-      }
-
-    };
-
-  cargarAvatar();
-  }, [jugadorActual]);
-useEffect(() => {
-
-  const cargarClasificacion =
-    async () => {
-const verEquipo = async (
-  usuario: string
-) => {
-
-  const {
-    data,
-    error,
-  } = await supabase
-    .from("equipos")
-    .select("*")
-    .eq(
-      "usuario",
-      usuario
-    )
-    .single();
-
-  if (error) {
-    console.error(error);
-    return;
-  }
-
-  setEquipoVisible(data);
-  setMostrarEquipo(true);
-
-};
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("equipos")
-        .select(
-          "usuario, avatar, puntos"
-        )
-        .order(
-          "puntos",
-          {
-            ascending: false,
-          }
-        );
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-     const { data: usuariosActivos } =
-  await supabase
-    .from("usuarios")
-    .select("usuario")
-    .eq("activo", true);
-
-const nombresActivos =
-  usuariosActivos?.map(
-    (u) => u.usuario
-  ) || [];
-
-const clasificacionFiltrada =
-  (data || []).filter(
-    (j) =>
-      nombresActivos.includes(
-        j.usuario
-      )
-  );
-
-setClasificacion(
-  clasificacionFiltrada
-);
-
-const jugador =
-  clasificacionFiltrada.find(
-    (j) =>
-      j.usuario ===
-      jugadorActual
-  );
-
-setPuntosEquipo(
-  jugador?.puntos || 0
-);
-
-setPosicion(
-  (clasificacionFiltrada.findIndex(
-    (j) =>
-      j.usuario ===
-      jugadorActual
-  ) || 0) + 1
-);
-
-    };
-
-  cargarClasificacion();
-
-}, [jugadorActual]);
-
-  const equipoActual =
-    equipos[jugadorActual];
-
-  const fichados =
-    equipoActual?.fichados || [];
-
-  const equipo = pilotos.filter((piloto) =>
-    fichados.includes(piloto.nombre)
-  );
-
- 
-
-  const hoy = new Date()
-    .toISOString()
-    .split("T")[0];
-
-  const proximoCircuito =
-    circuitos.find(
-      (circuito) =>
-        circuito.fechaInicio >= hoy
-    );
-const indiceProximoGP =
-  circuitos.findIndex(
-    (circuito) =>
-      circuito.fechaInicio >= hoy
-  );
-
-const ultimoResultado =
-  resultadosGP.assen;
 
   return (
 
-    <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
 
-      {/* Fondo Copa */}
-      <div className="absolute top-32 left-0 w-full h-full opacity-30 pointer-events-none overflow-hidden">
+      <Image
+        src="/images/raygrid-logo.png"
+        alt="RayGrid"
+        width={320}
+        height={320}
+        priority
+      />
 
-        <img
-          src="/trofeo.png"
-          alt="Trofeo MotoGP"
+      <h1 className="text-5xl font-black mt-6">
+        RAYGRID
+      </h1>
+
+      <p className="text-zinc-400 text-center text-lg mt-4 max-w-xl">
+        Tu equipo. Tus decisiones. Tu campeonato.
+      </p>
+
+      <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
+
+        <button
+          onClick={() => window.location.href = "/login"}
           className="
-            w-full
-            h-full
-            object-cover
-            object-center
-            scale-[1.45]
-            md:scale-100
+            bg-orange-500
+            hover:bg-orange-400
+            transition
+            p-4
+            rounded-2xl
+            font-bold
+            text-lg
           "
-        />
+        >
+          Iniciar sesión
+        </button>
+
+        <button
+          onClick={() => window.location.href = "/registro"}
+          className="
+            border
+            border-zinc-700
+            hover:border-orange-500
+            hover:bg-zinc-900
+            transition
+            p-4
+            rounded-2xl
+            font-bold
+            text-lg
+          "
+        >
+          Crear una cuenta
+        </button>
 
       </div>
 
-      <Navbar />
+      <div className="mt-16 max-w-4xl grid md:grid-cols-3 gap-6">
 
-      {/* Header */}
-      <div className="mb-12 relative z-10">
+        <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
 
-        <h1 className="text-7xl font-black tracking-tight bg-gradient-to-r from-red-500 via-orange-400 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
-          MotoGP Fantasy
-        </h1>
-
-        <p className="text-zinc-400 text-xl mt-3">
-          Campeonato Fantasy 2026
-        </p>
-
-      </div>
-
-      {/* Usuario */}
-      <div className="mb-8 relative z-10">
-
-        <div className="flex items-center gap-4 mb-6">
-  <img
-    src={`/avatars/${avatar}`}
-    alt="Avatar"
-    className="
-      w-16
-      h-16
-      rounded-full
-      object-contain
-      border-2
-      border-red-500
-      bg-black/30
-      p-1
-    "
-  />
-
-  <h2 className="text-3xl font-bold">
-    {jugadorActual}
-  </h2>
-</div>
-
-      </div>
-
-      {/* TOP CARDS */}
-      <div className="grid md:grid-cols-3 gap-6 mb-10 relative z-10">
-
-        {/* Rendimiento */}
-        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-8 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-
-          <h2 className="text-2xl font-bold mb-8">
-            📊 Tu Rendimiento
+          <h2 className="text-2xl mb-3">
+            🏆
           </h2>
 
-          <div className="flex justify-between items-center">
+          <h3 className="font-bold text-xl mb-2">
+            Compite
+          </h3>
 
-            <div className="text-center">
-
-              <p className="text-lg text-zinc-400 mb-2">
-                Posición
-              </p>
-
-              <p className="text-6xl font-extrabold text-red-500">
-                #{posicion}
-              </p>
-
-            </div>
-
-            <div className="w-px h-28 bg-zinc-700/40"></div>
-
-            <div className="text-center">
-
-              <p className="text-lg text-zinc-400 mb-2">
-                Puntos
-              </p>
-
-              <p className="text-6xl font-extrabold text-green-400">
-                {puntosEquipo}
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Equipo del GP */}
-        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 shadow-2xl shadow-yellow-500/10 p-8 rounded-3xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-center">
-
-          <p className="text-yellow-300 text-lg font-semibold mb-3">
-            ⭐ Equipo del GP
-          </p>
-
-          <h2 className="text-5xl font-black mb-3">
-  {ultimoResultado.equipoGP}
-</h2>
-
-<p className="text-3xl text-yellow-100 font-bold">
-  {ultimoResultado.puntosEquipoGP} pts
-</p>
-
-          <p className="mt-4 text-zinc-300">
-            Mejor puntuación del ultimo GP
+          <p className="text-zinc-400">
+            Crea ligas privadas y demuestra quién es el mejor manager.
           </p>
 
         </div>
 
-        {/* Próximo GP */}
-        <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between">
+        <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
 
-          <div>
+          <h2 className="text-2xl mb-3">
+            📊
+          </h2>
 
-            <h2 className="text-2xl font-bold mb-6">
-              🏁 Próximo GP
-            </h2>
+          <h3 className="font-bold text-xl mb-2">
+            Gestiona
+          </h3>
 
-            {proximoCircuito && (
-              <>
+          <p className="text-zinc-400">
+            Elige pilotos, controla tu presupuesto y toma las mejores decisiones.
+          </p>
 
-                <img
-                  src={proximoCircuito.imagen}
-                  alt={proximoCircuito.nombre}
-                  className="w-44 mx-auto mb-6 opacity-90"
-                />
+        </div>
 
-                <p className="text-4xl font-bold text-center text-white">
-                  {proximoCircuito.nombre}
-                </p>
+        <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
 
-                <p className="mt-2 text-zinc-300 text-center text-lg">
-                  {proximoCircuito.pais}
-                </p>
+          <h2 className="text-2xl mb-3">
+            🏁
+          </h2>
 
-                <p className="mt-2 text-zinc-400 text-center">
-                  {proximoCircuito.fechaInicio}
-                </p>
+          <h3 className="font-bold text-xl mb-2">
+            Vive MotoGP
+          </h3>
 
-              </>
-            )}
-
-          </div>
+          <p className="text-zinc-400">
+            Sigue toda la temporada y lucha por el campeonato con tus amigos.
+          </p>
 
         </div>
 
       </div>
 
-      {/* Cards inferiores */}
-      <div className="grid md:grid-cols-2 gap-6 mb-10 relative z-10">
+      <p className="mt-16 text-zinc-600 text-sm">
+        v0.9 Alpha
+      </p>
 
-        {/* Último ganador */}
-        <div className="bg-red-900/40 border border-red-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-
-          <h2 className="text-2xl font-bold mb-4">
-            🏁 Ganador de ultimo GP
-          </h2>
-
-          <div className="flex items-center gap-4">
-
-            <img
-  src={
-    ultimoResultado
-      .pilotoGanadorFoto
-  }
-  alt={
-    ultimoResultado
-      .pilotoGanador
-  }
-  className="w-20 h-20 object-cover rounded-2xl border border-red-500"
-/>
-
-            <div>
-
-              <p className="text-3xl font-bold">
-  {ultimoResultado.pilotoGanador}
-</p>
-
-              
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Motor ganador */}
-        <div className="bg-orange-900/40 border border-orange-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-
-          <h2 className="text-2xl font-bold mb-4">
-            🏍️ Motor Ganador
-          </h2>
-
-          <div className="flex items-center gap-4">
-
-            <img
-  src={
-    ultimoResultado
-      .motorGanadorLogo
-  }
-  alt={
-    ultimoResultado
-      .motorGanador
-  }
-  className="w-20 h-20 object-contain"
-/>
-
-            <div>
-
-              <p className="text-3xl font-bold">
-  {ultimoResultado.motorGanador}
-</p>
-
-              <p className="mt-2 text-zinc-300">
-                Mejor constructor del GP
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Piloto en forma */}
-        <div className="bg-blue-900/40 border border-blue-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-
-          <h2 className="text-2xl font-bold mb-4">
-            🔥 Piloto en Forma
-          </h2>
-
-          <div className="flex items-center gap-4">
-
-           <img
-  src={
-    ultimoResultado
-      .pilotoEnFormaFoto
-  }
-  alt={
-    ultimoResultado
-      .pilotoEnForma
-  }
-  className="w-20 h-20 object-cover rounded-2xl border border-blue-500"
-/>
-
-            <div>
-
-              <p className="text-3xl font-bold">
-  {ultimoResultado.pilotoEnForma}
-</p>
-
-              <p className="mt-2 text-zinc-300">
-                Líder del mundial y fantasy
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Motor en forma */}
-        <div className="bg-yellow-900/40 border border-yellow-500 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300">
-
-          <h2 className="text-2xl font-bold mb-4">
-            🔥 Motor en Forma
-          </h2>
-
-          <div className="flex items-center gap-4">
-
-           <img
-  src={
-    ultimoResultado
-      .motorEnFormaLogo
-  }
-  alt={
-    ultimoResultado
-      .motorEnForma
-  }
-  className="w-20 h-20 object-contain"
-/>
-
-            <div>
-
-              <p className="text-3xl font-bold">
-  {ultimoResultado.motorEnForma}
-</p>
-
-              <p className="mt-2 text-zinc-300">
-                Líder fantasy actual
-              </p>
-
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* Clasificación */}
-      <h2 className="text-4xl font-bold mb-6 relative z-10">
-        Clasificación General
-      </h2>
-
-      <div className="bg-black/20 border border-zinc-700/40 shadow-2xl shadow-black/40 p-6 rounded-3xl hover:scale-[1.02] transition-all duration-300 relative z-10">
-
-        {clasificacion.map(
-          (jugador, index) => (
-
-            <div
-              key={jugador.usuario}
-              className="flex justify-between py-3 border-b border-zinc-700"
-            >
-
-             <p
-  className="
-    text-xl
-    cursor-pointer
-    hover:text-yellow-400
-    transition
-  "
-  onClick={() =>
-    verEquipo(
-      jugador.usuario
-    )
-  }
->
-
-  {index === 0
-    ? "🥇"
-    : index === 1
-    ? "🥈"
-    : index === 2
-    ? "🥉"
-    : `${index + 1}.`}{" "}
-
-  {jugador.usuario}
-
-</p>
-
-              <p className="text-xl font-bold">
-                {jugador.puntos} pts
-              </p>
-
-            </div>
-
-          )
-        )}
-
-      </div>
-{mostrarEquipo &&
-  equipoVisible && (
-
-  <div
-    className="
-      fixed
-      inset-0
-      bg-black/80
-      flex
-      items-center
-      justify-center
-      z-50
-    "
-  >
-
-    <div
-      className="
-        bg-zinc-900
-        border
-        border-zinc-700
-        rounded-3xl
-        p-8
-        max-w-lg
-        w-full
-      "
-    >
-
-      <h2 className="text-3xl font-bold mb-6">
-        Equipo de {equipoVisible.usuario}
-      </h2>
-
-      <h3 className="text-yellow-400 font-bold mb-4">
-
-  👥 Equipo Actual  🏍️
-
-</h3>
-
-      <div className="space-y-2 mb-6">
-
-        {equipoVisible.fichados?.map(
-          (piloto: string) => (
-
-            <p key={piloto}>
-              🏍️ {piloto}
-            </p>
-
-          )
-        )}
-
-      </div>
-
-      {equipoVisible.reserva &&
- !equipoVisible.fichados.includes(
-   equipoVisible.reserva
- ) && (
-  <>
-    <h3 className="text-blue-400 font-bold mt-6">
-      Reserva
-    </h3>
-
-    <p className="mt-2">
-      🪑 {equipoVisible.reserva}
-    </p>
-  </>
-)}
-
-      <button
-        onClick={() =>
-          setMostrarEquipo(false)
-        }
-        className="
-          bg-red-600
-          hover:bg-red-500
-          px-5
-          py-3
-          rounded-xl
-          font-bold
-        "
-      >
-        Cerrar
-      </button>
-
-    </div>
-
-  </div>
-
-)}
     </main>
 
   );
