@@ -304,7 +304,7 @@ const ultimoResultado =
       <div className="mb-12 relative z-10">
 
         <h1 className="text-7xl font-black tracking-tight bg-gradient-to-r from-red-500 via-orange-400 to-red-600 bg-clip-text text-transparent drop-shadow-lg">
-          MotoGP Fantasy
+          RayonGrid
         </h1>
 
         <p className="text-zinc-400 text-xl mt-3">
