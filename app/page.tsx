@@ -17,7 +17,7 @@ export default function Home() {
       />
 
       <h1 className="text-5xl font-black mt-6">
-        RAYGRID
+        RAYONGRID
       </h1>
 
       <p className="text-zinc-400 text-center text-lg mt-4 max-w-xl">
