@@ -9,8 +9,8 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
 
       <Image
-        src="/images/raygrid-logo.png"
-        alt="RayGrid"
+        src="/images/rayongrid-logo.png"
+        alt="Rayongrid"
         width={320}
         height={320}
         priority

@@ -10,7 +10,7 @@ Historial oficial de versiones del proyecto.
 
 ## ✨ Nuevo
 
-- Nuevo nombre oficial: **RayGrid**
+- Nuevo nombre oficial: **RayonGrid**
 - Branding completo.
 - Logo oficial.
 - Eslogan principal.
@@ -47,7 +47,7 @@ Historial oficial de versiones del proyecto.
 
 ## v1.0
 
-Publicación oficial de RayGrid.
+Publicación oficial de RayonGrid.
 
 - Android.
 - iPhone.
