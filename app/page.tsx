@@ -6,6 +6,20 @@ import SplashScreen from "@/components/SplashScreen";
 
 export default function Home() {
 
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   const [mostrarSplash, setMostrarSplash] =
     useState(true);
 
