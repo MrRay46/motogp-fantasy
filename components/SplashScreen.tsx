@@ -51,17 +51,21 @@ export default function SplashScreen() {
       {/* Título */}
       <motion.h1
         className="
-          text-6xl
-          font-black
-          mt-8
-          tracking-widest
-          bg-gradient-to-r
-          from-white
-          via-zinc-200
-          to-white
-          bg-clip-text
-          text-transparent
-        "
+  text-4xl
+  sm:text-5xl
+  md:text-6xl
+  font-black
+  mt-8
+  tracking-wide
+  sm:tracking-widest
+  bg-gradient-to-r
+  from-white
+  via-zinc-200
+  to-white
+  bg-clip-text
+  text-transparent
+  text-center
+"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{
