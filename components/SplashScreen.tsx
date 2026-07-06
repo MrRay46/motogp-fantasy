@@ -107,7 +107,7 @@ export default function SplashScreen() {
   animate={{ opacity: 1 }}
   transition={{
     delay: 1.2,
-    duration: 0.6,
+    duration: 1,
   }}
 >
   Tu equipo · Tus decisiones · Tu campeonato
