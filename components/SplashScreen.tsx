@@ -73,7 +73,7 @@ export default function SplashScreen() {
           duration: 0.6,
         }}
       >
-        RAYONGRID
+        
       </motion.h1>
 
       {/* Eslogan */}
