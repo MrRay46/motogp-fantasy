@@ -78,20 +78,24 @@ export default function SplashScreen() {
 
       {/* Eslogan */}
       <motion.p
-        className="text-zinc-400 mt-4 text-xl text-center leading-relaxed"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          delay: 1.2,
-          duration: 0.6,
-        }}
-      >
-        Tu equipo.
-        <br />
-        Tus decisiones.
-        <br />
-        Tu campeonato.
-      </motion.p>
+  className="
+    text-zinc-400
+    mt-8
+    text-base
+    md:text-xl
+    text-center
+    tracking-wide
+    px-6
+  "
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{
+    delay: 1.2,
+    duration: 0.6,
+  }}
+>
+  Tu equipo · Tus decisiones · Tu campeonato
+</motion.p>
 
       {/* Barra */}
       <div className="mt-12 w-72 h-2 rounded-full bg-zinc-800 overflow-hidden">

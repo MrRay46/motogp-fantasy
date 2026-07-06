@@ -32,13 +32,19 @@ export default function Home() {
         priority
       />
 
-      <h1 className="text-5xl font-black mt-6">
-        RAYONGRID
-      </h1>
+      
 
-      <p className="text-zinc-400 text-center text-lg mt-4 max-w-xl">
-        Tu equipo. Tus decisiones. Tu campeonato.
-      </p>
+      <p className="
+  text-zinc-400
+  text-center
+  text-base
+  md:text-xl
+  mt-8
+  max-w-xl
+  tracking-wide
+">
+  Tu equipo · Tus decisiones · Tu campeonato
+</p>
 
       <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
 
