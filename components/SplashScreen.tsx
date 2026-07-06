@@ -5,8 +5,24 @@ import { motion } from "framer-motion";
 
 export default function SplashScreen() {
   return (
-    <div className="fixed inset-0 bg-black flex flex-col items-center justify-center overflow-hidden z-50">
+    <div className="fixed inset-0 overflow-hidden bg-black flex flex-col items-center justify-center z-50">
+<div
+  className="
+    absolute
+    inset-0
+    bg-[radial-gradient(circle_at_center,#1a1a1a_0%,#000_70%)]
+  "
+/>
 
+<div
+  className="
+    absolute
+    inset-0
+    opacity-[0.04]
+    bg-[url('/images/carbon.png')]
+    bg-repeat
+  "
+/>
       {/* Halo animado */}
       <motion.div
         className="absolute w-80 h-80 rounded-full bg-red-600/20 blur-[90px]"
