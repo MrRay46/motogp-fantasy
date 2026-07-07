@@ -6,6 +6,9 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Divider from "@/components/ui/Divider";
 import SplashScreen from "@/components/SplashScreen";
+import { Trophy, BarChart3, Flag } from "lucide-react";
+import FeatureCard from "@/components/ui/FeatureCard";
+
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -62,35 +65,36 @@ export default function Home() {
 
         <Card>
 
-          <h2 className="text-3xl mb-4">🏆</h2>
+          <div className="max-w-6xl w-full grid md:grid-cols-3 gap-6">
 
-          <h3 className="font-bold text-xl mb-2">
-            Compite
-          </h3>
+  <FeatureCard
+    icon={Trophy}
+    title="Compite"
+    description="Crea ligas privadas y demuestra quién es el mejor manager."
+  />
 
-          <p className="text-zinc-400">
-            Crea ligas privadas y demuestra quién es el mejor manager.
-          </p>
+  <FeatureCard
+    icon={BarChart3}
+    title="Gestiona"
+    description="Elige pilotos, controla tu presupuesto y toma las mejores decisiones."
+  />
 
-        </Card>
+  <FeatureCard
+    icon={Flag}
+    title="Vive MotoGP"
+    description="Sigue toda la temporada y lucha por el campeonato con tus amigos."
+  />
 
-        <Card>
-
-          <h2 className="text-3xl mb-4">📊</h2>
-
-          <h3 className="font-bold text-xl mb-2">
-            Gestiona
-          </h3>
-
-          <p className="text-zinc-400">
-            Elige pilotos, controla tu presupuesto y toma las mejores decisiones.
-          </p>
+</div>
 
         </Card>
 
         <Card>
 
-          <h2 className="text-3xl mb-4">🏁</h2>
+          <Flag
+  size={34}
+  className="text-orange-500 mb-4"
+/>
 
           <h3 className="font-bold text-xl mb-2">
             Vive MotoGP
