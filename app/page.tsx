@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Logo from "@/components/ui/Logo";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Divider from "@/components/ui/Divider";
 import SplashScreen from "@/components/SplashScreen";
 
 export default function Home() {
@@ -24,13 +27,7 @@ export default function Home() {
 
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
 
-      <Image
-        src="/images/rayongrid-logo.png"
-        alt="Rayongrid"
-        width={320}
-        height={320}
-        priority
-      />
+      <Logo size={300} />
 
       
 
@@ -48,56 +45,39 @@ export default function Home() {
 
       <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
 
-        <button
-          onClick={() => window.location.href = "/login"}
-          className="
-            bg-orange-500
-            hover:bg-orange-400
-            transition
-            p-4
-            rounded-2xl
-            font-bold
-            text-lg
-          "
-        >
-          Iniciar sesión
-        </button>
+        <Button
+  onClick={() => window.location.href = "/login"}
+>
+  Iniciar sesión →
+</Button>
 
-        <button
-          onClick={() => window.location.href = "/registro"}
-          className="
-            border
-            border-zinc-700
-            hover:border-orange-500
-            hover:bg-zinc-900
-            transition
-            p-4
-            rounded-2xl
-            font-bold
-            text-lg
-          "
-        >
-          Crear una cuenta
-        </button>
+        <Button
+  variant="secondary"
+  onClick={() => window.location.href = "/registro"}
+>
+  Crear una cuenta
+</Button>
 
       </div>
 
       <div className="mt-16 max-w-4xl grid md:grid-cols-3 gap-6">
+<Divider />
+        <Card>
 
-        <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
+  <h2 className="text-3xl mb-4">
+    🏆
+  </h2>
 
-          <h2 className="text-2xl mb-3">🏆</h2>
+  <h3 className="font-bold text-xl mb-2">
+    Compite
+  </h3>
 
-          <h3 className="font-bold text-xl mb-2">
-            Compite
-          </h3>
+  <p className="text-zinc-400">
+    Crea ligas privadas y demuestra quién es el mejor manager.
+  </p>
 
-          <p className="text-zinc-400">
-            Crea ligas privadas y demuestra quién es el mejor manager.
-          </p>
-
-        </div>
-
+</Card>
+<Divider />
         <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800">
 
           <h2 className="text-2xl mb-3">📊</h2>
