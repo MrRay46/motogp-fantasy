@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 import Logo from "@/components/ui/Logo";
 import Button from "@/components/ui/Button";
@@ -75,23 +76,50 @@ export default function Home() {
 
         <div className="grid gap-6 md:grid-cols-3">
 
-          <FeatureCard
-            icon={Trophy}
-            title="Compite"
-            description="Crea ligas privadas y demuestra quién es el mejor manager."
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.15,
+            }}
+          >
+            <FeatureCard
+              icon={Trophy}
+              title="Compite"
+              description="Crea ligas privadas y demuestra quién es el mejor manager."
+            />
+          </motion.div>
 
-          <FeatureCard
-            icon={BarChart3}
-            title="Gestiona"
-            description="Elige pilotos, controla tu presupuesto y toma las mejores decisiones."
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.30,
+            }}
+          >
+            <FeatureCard
+              icon={BarChart3}
+              title="Gestiona"
+              description="Elige pilotos, controla tu presupuesto y toma las mejores decisiones."
+            />
+          </motion.div>
 
-          <FeatureCard
-            icon={Flag}
-            title="Vive MotoGP"
-            description="Sigue toda la temporada y lucha por el campeonato con tus amigos."
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.45,
+            }}
+          >
+            <FeatureCard
+              icon={Flag}
+              title="Vive MotoGP"
+              description="Sigue toda la temporada y lucha por el campeonato con tus amigos."
+            />
+          </motion.div>
 
         </div>
 
