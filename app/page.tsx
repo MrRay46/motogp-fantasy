@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
-import Logo from "@/components/ui/Logo";
+import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 import FeatureCard from "@/components/ui/FeatureCard";
@@ -37,21 +37,7 @@ export default function Home() {
 
     <main className="min-h-screen bg-black text-white flex flex-col items-center px-6 py-12">
 
-      <Logo size={300} />
-
-      <p
-        className="
-          mt-8
-          text-center
-          text-base
-          md:text-xl
-          text-zinc-400
-          tracking-wide
-          max-w-xl
-        "
-      >
-        Tu equipo · Tus decisiones · Tu campeonato
-      </p>
+      <PageHeader logoSize={300} />
 
       <div className="flex flex-col gap-4 w-full max-w-sm mt-12">
 

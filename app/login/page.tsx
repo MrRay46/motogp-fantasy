@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-import Logo from "@/components/ui/Logo";
+import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 
@@ -45,21 +45,7 @@ export default function LoginPage() {
 
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
 
-      <Logo size={280} />
-
-      <p
-        className="
-          mt-8
-          text-center
-          text-base
-          md:text-lg
-          text-zinc-400
-          tracking-wide
-          max-w-xl
-        "
-      >
-        Tu equipo · Tus decisiones · Tu campeonato
-      </p>
+      <PageHeader />
 
       <div className="w-full max-w-md mt-12 space-y-4">
 
