@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import Image from "next/image";
+
+import Logo from "@/components/ui/Logo";
+import Button from "@/components/ui/Button";
+import Divider from "@/components/ui/Divider";
 
 export default function LoginPage() {
 
@@ -40,25 +43,25 @@ export default function LoginPage() {
 
   return (
 
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
+    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
 
-      <div className="mb-8 flex justify-center">
+      <Logo size={280} />
 
-        <Image
-          src="/images/raygrid-logo.png"
-          alt="RayGrid"
-          width={340}
-          height={340}
-          priority
-        />
-
-      </div>
-
-      <p className="text-zinc-400 text-center text-lg tracking-wide mb-10">
-        Tu equipo. Tus decisiones. Tu campeonato.
+      <p
+        className="
+          mt-8
+          text-center
+          text-base
+          md:text-lg
+          text-zinc-400
+          tracking-wide
+          max-w-xl
+        "
+      >
+        Tu equipo · Tus decisiones · Tu campeonato
       </p>
 
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-md mt-12 space-y-4">
 
         <input
           type="text"
@@ -96,51 +99,36 @@ export default function LoginPage() {
           "
         />
 
-        <button
-          onClick={iniciarSesion}
-          className="
-            w-full
-            bg-gradient-to-r
-            from-orange-500
-            to-red-600
-            hover:from-orange-400
-            hover:to-red-500
-            transition-all
-            duration-300
-            p-4
-            rounded-2xl
-            font-bold
-            shadow-lg
-            shadow-red-900/30
-          "
-        >
-          Iniciar sesión
-        </button>
-
-        <div className="text-center pt-6 border-t border-zinc-800">
-
-          <p className="text-zinc-500 text-sm">
-            ¿No tienes cuenta?
-          </p>
-
-          <button
-            onClick={() => window.location.href = "/registro"}
-            className="
-              mt-2
-              text-orange-400
-              hover:text-orange-300
-              font-semibold
-              transition-colors
-            "
-          >
-            Crear cuenta
-          </button>
-
-        </div>
+        <Button onClick={iniciarSesion}>
+          Iniciar sesión →
+        </Button>
 
       </div>
 
-      <p className="mt-12 text-xs text-zinc-600">
+      <Divider />
+
+      <div className="text-center">
+
+        <p className="text-zinc-500">
+          ¿No tienes cuenta?
+        </p>
+
+        <button
+          onClick={() => (window.location.href = "/registro")}
+          className="
+            mt-3
+            text-orange-400
+            hover:text-orange-300
+            transition-colors
+            font-semibold
+          "
+        >
+          Crear cuenta
+        </button>
+
+      </div>
+
+      <p className="mt-10 text-xs text-zinc-600">
         v0.9 Alpha
       </p>
 

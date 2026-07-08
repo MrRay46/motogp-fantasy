@@ -54,8 +54,8 @@ export default function Navbar() {
       "usuarioLogueado"
     );
 
-    window.location.href =
-      "/login";
+    // Volver a la Landing
+    window.location.href = "/";
 
   };
 
@@ -64,8 +64,8 @@ export default function Navbar() {
     <nav className="bg-zinc-900/80 backdrop-blur border border-zinc-700 rounded-2xl p-4 flex flex-wrap gap-4 justify-center items-center mb-10 text-base md:text-xl font-semibold">
 
       <a
-        href="/"
-        className="bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-400 transition"
+        href="/dashboard"
+        className="bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-400 transition"
       >
         Inicio
       </a>
