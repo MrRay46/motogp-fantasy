@@ -18,50 +18,68 @@ export default function PaddockFeed() {
 
   useEffect(() => {
 
-    const cargarNoticias = async () => {
-
-      const hace30Dias = new Date();
-      hace30Dias.setDate(hace30Dias.getDate() - 30);
-
-      const { data, error } = await supabase
-        .from("noticias")
-        .select("*")
-        .eq("visible", true)
-        .gte("fecha", hace30Dias.toISOString())
-        .order("fecha", { ascending: false })
-        .limit(5);
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      setNoticias(data || []);
-
-    };
-
     cargarNoticias();
 
   }, []);
 
+  async function cargarNoticias() {
+
+    const hace30Dias = new Date();
+
+    hace30Dias.setDate(
+      hace30Dias.getDate() - 30
+    );
+
+    const { data, error } = await supabase
+      .from("noticias")
+      .select("*")
+      .eq("visible", true)
+      .gte(
+        "fecha",
+        hace30Dias.toISOString()
+      )
+      .order("fecha", {
+        ascending: false,
+      });
+
+    if (error) {
+
+      console.error(error);
+      return;
+
+    }
+
+    setNoticias(data || []);
+
+  }
+
   function tiempo(fecha: string) {
 
     const ahora = new Date();
-    const publicada = new Date(fecha);
+
+    const publicada =
+      new Date(fecha);
 
     const horas =
-      (ahora.getTime() - publicada.getTime()) /
-      1000 /
-      60 /
-      60;
+      Math.floor(
+        (ahora.getTime() -
+          publicada.getTime()) /
+          3600000
+      );
+
+    if (horas < 1)
+      return "Hace unos minutos";
 
     if (horas < 24)
-      return "🟢 Hace unas horas";
+      return `Hace ${horas} h`;
 
-    if (horas < 48)
-      return "🟡 Ayer";
+    const dias =
+      Math.floor(horas / 24);
 
-    return "⚪ Hace unos días";
+    if (dias === 1)
+      return "Ayer";
+
+    return `Hace ${dias} días`;
 
   }
 
@@ -70,7 +88,9 @@ export default function PaddockFeed() {
     <div className="bg-zinc-900 rounded-3xl p-8">
 
       <h2 className="text-2xl font-bold mb-6">
+
         🏍 PADDOCK
+
       </h2>
 
       <div className="space-y-4">

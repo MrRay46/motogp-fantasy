@@ -3,11 +3,9 @@
 import { motion } from "framer-motion";
 
 interface Props {
-
   tipo: string;
   titulo: string;
   hora: string;
-
 }
 
 export default function PaddockPost({
@@ -18,21 +16,35 @@ export default function PaddockPost({
 
   return (
 
-    <div className="border-b border-zinc-800 pb-4">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="
+        border
+        border-zinc-800
+        rounded-2xl
+        p-5
+        bg-zinc-950
+        hover:border-zinc-700
+        hover:bg-zinc-900
+        transition-all
+      "
+    >
 
-      <p className="text-sm font-semibold text-orange-400">
+      <p className="text-sm font-bold text-orange-400">
         {tipo}
       </p>
 
-      <p className="text-white font-semibold mt-1">
+      <p className="mt-2 text-lg font-semibold">
         {titulo}
       </p>
 
-      <p className="text-xs text-zinc-500 mt-2">
+      <p className="mt-3 text-xs text-zinc-500">
         {hora}
       </p>
 
-    </div>
+    </motion.div>
 
   );
 
