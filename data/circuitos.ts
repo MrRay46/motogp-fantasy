@@ -85,7 +85,7 @@ export const circuitos = [
     pais: "Alemania",
     fechaInicio: "2026-07-10",
     fechaFin: "2026-07-12",
-    imagen: "/circuitos/Sachsenring.png",
+    imagen: "/circuitos/sachsenring.png",
   },
 
   {
@@ -93,7 +93,7 @@ export const circuitos = [
     pais: "Gran Bretaña",
     fechaInicio: "2026-08-07",
     fechaFin: "2026-08-09",
-    imagen: "/circuitos/Silverstone.png",
+    imagen: "/circuitos/silverstone.png",
   },
 
   {
@@ -101,7 +101,7 @@ export const circuitos = [
     pais: "España",
     fechaInicio: "2026-08-28",
     fechaFin: "2026-08-30",
-    imagen: "/circuitos/Aragon.png",
+    imagen: "/circuitos/aragon.png",
   },
 
    {
@@ -173,6 +173,6 @@ export const circuitos = [
     pais: "España",
     fechaInicio: "2026-11-27",
     fechaFin: "2026-11-29",
-    imagen: "/circuitos/ricardo tormo cheste.png",
+    imagen: "/circuitos/cheste.png",
   },
 ];

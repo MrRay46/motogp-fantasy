@@ -1,49 +1,50 @@
 import PaddockPost from "./PaddockPost";
 
-export default function PaddockFeed(){
+export default function PaddockFeed() {
+  return (
+    <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
 
-return(
+      <h2 className="text-2xl font-bold mb-8">
+        🏍 PADDOCK
+      </h2>
 
-<div className="bg-zinc-900 rounded-3xl p-8">
+      <div className="space-y-4">
 
-<h2 className="text-2xl font-bold mb-6">
+        <PaddockPost
+          icon="🩺"
+          category="Lesión"
+          title="Jorge Martín será baja este GP."
+          time="Hace 1 h"
+        />
 
-🏍 PADDOCK
+        <PaddockPost
+          icon="🟠"
+          category="Rumor"
+          title="Pedro Acosta podría cambiar de fabricante."
+          time="Hace 3 h"
+        />
 
-</h2>
+        <PaddockPost
+          icon="🏁"
+          category="Oficial"
+          title="Ducati confirma la evolución del motor para Sachsenring."
+          time="Hace 5 h"
+        />
 
-<PaddockPost
+      </div>
 
-tipo="🔴 LESIÓN"
+      <button
+        className="
+          mt-8
+          text-orange-400
+          hover:text-orange-300
+          font-semibold
+          transition-colors
+        "
+      >
+        Ver todas las noticias →
+      </button>
 
-titulo="Jorge Martín será baja este GP."
-
-hora="Hace 1 h"
-
-/>
-
-<PaddockPost
-
-tipo="🟠 RUMOR"
-
-titulo="Pedro Acosta podría cambiar de fabricante."
-
-hora="Hace 3 h"
-
-/>
-
-<PaddockPost
-
-tipo="🔵 OFICIAL"
-
-titulo="Ducati confirma evolución del motor."
-
-hora="Hace 5 h"
-
-/>
-
-</div>
-
-);
-
+    </div>
+  );
 }
