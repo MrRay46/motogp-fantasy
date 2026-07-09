@@ -31,16 +31,11 @@ export default function PaddockFeed() {
     );
 
     const { data, error } = await supabase
-      .from("noticias")
-      .select("*")
-      .eq("visible", true)
-      .gte(
-        "fecha",
-        hace30Dias.toISOString()
-      )
-      .order("fecha", {
-        ascending: false,
-      });
+  .from("noticias")
+  .select("*");
+
+console.log("DATA:", data);
+console.log("ERROR:", error);
 
     if (error) {
 
