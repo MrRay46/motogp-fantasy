@@ -18,7 +18,7 @@ Historial oficial de versiones del proyecto.
 - Landing Page.
 - Login renovado.
 - Dashboard independiente.
-- Nueva identidad visual.
+- Nueva identidad visual..
 
 ## 🔧 Mejoras
 
