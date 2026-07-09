@@ -73,7 +73,7 @@ export default function DashboardPage() {
     <div className="text-center">
 
       <img
-        src="/circuitos/sachsenring.png"
+        src="/circuitos/Sachsenring.png"
         className="w-40 mx-auto mb-6"
       />
 
