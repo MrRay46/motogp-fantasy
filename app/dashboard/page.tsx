@@ -3,6 +3,7 @@
 import Navbar from "@/components/Navbar";
 import GreetingHeader from "@/components/dashboard/GreetingHeader";
 import StatCard from "@/components/dashboard/StatCard";
+import PaddockFeed from "@/components/dashboard/PaddockFeed";
 
 export default function DashboardPage() {
   return (
@@ -73,7 +74,7 @@ export default function DashboardPage() {
     <div className="text-center">
 
       <img
-        src="/circuitos/Sachsenring.png"
+        src="/circuitos/sachsenring.png"
         className="w-40 mx-auto mb-6"
       />
 
@@ -91,6 +92,11 @@ export default function DashboardPage() {
 
     </div>
 
+<section className="mt-12">
+
+  <PaddockFeed />
+
+</section>
   </StatCard>
 
 </section>
