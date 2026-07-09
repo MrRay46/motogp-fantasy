@@ -93,11 +93,11 @@ console.log("ERROR:", error);
         {noticias.map((noticia) => (
 
           <PaddockPost
-            key={noticia.id}
-            tipo={noticia.tipo}
-            titulo={noticia.titulo}
-            hora={tiempo(noticia.fecha)}
-          />
+   tipo={noticia.tipo}
+   titulo={noticia.titulo}
+   contenido={noticia.contenido}
+   hora={calcularHora(noticia.fecha)}
+/>
 
         ))}
 
