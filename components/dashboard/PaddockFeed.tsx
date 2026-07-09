@@ -1,50 +1,95 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import PaddockPost from "./PaddockPost";
 
-export default function PaddockFeed() {
-  return (
-    <div className="bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
+interface Noticia {
+  id: number;
+  tipo: string;
+  titulo: string;
+  contenido: string;
+  fecha: string;
+}
 
-      <h2 className="text-2xl font-bold mb-8">
+export default function PaddockFeed() {
+
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
+
+  useEffect(() => {
+
+    const cargarNoticias = async () => {
+
+      const hace30Dias = new Date();
+      hace30Dias.setDate(hace30Dias.getDate() - 30);
+
+      const { data, error } = await supabase
+        .from("noticias")
+        .select("*")
+        .eq("visible", true)
+        .gte("fecha", hace30Dias.toISOString())
+        .order("fecha", { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      setNoticias(data || []);
+
+    };
+
+    cargarNoticias();
+
+  }, []);
+
+  function tiempo(fecha: string) {
+
+    const ahora = new Date();
+    const publicada = new Date(fecha);
+
+    const horas =
+      (ahora.getTime() - publicada.getTime()) /
+      1000 /
+      60 /
+      60;
+
+    if (horas < 24)
+      return "🟢 Hace unas horas";
+
+    if (horas < 48)
+      return "🟡 Ayer";
+
+    return "⚪ Hace unos días";
+
+  }
+
+  return (
+
+    <div className="bg-zinc-900 rounded-3xl p-8">
+
+      <h2 className="text-2xl font-bold mb-6">
         🏍 PADDOCK
       </h2>
 
       <div className="space-y-4">
 
-        <PaddockPost
-          icon="🩺"
-          category="Lesión"
-          title="Jorge Martín será baja este GP."
-          time="Hace 1 h"
-        />
+        {noticias.map((noticia) => (
 
-        <PaddockPost
-          icon="🟠"
-          category="Rumor"
-          title="Pedro Acosta podría cambiar de fabricante."
-          time="Hace 3 h"
-        />
+          <PaddockPost
+            key={noticia.id}
+            tipo={noticia.tipo}
+            titulo={noticia.titulo}
+            hora={tiempo(noticia.fecha)}
+          />
 
-        <PaddockPost
-          icon="🏁"
-          category="Oficial"
-          title="Ducati confirma la evolución del motor para Sachsenring."
-          time="Hace 5 h"
-        />
+        ))}
 
       </div>
 
-      <button
-        className="
-          mt-8
-          text-orange-400
-          hover:text-orange-300
-          font-semibold
-          transition-colors
-        "
-      >
-        Ver todas las noticias →
-      </button>
-
     </div>
+
   );
+
 }
