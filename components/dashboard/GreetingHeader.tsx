@@ -1,42 +1,50 @@
 "use client";
 
-export default function GreetingHeader({
+import { useEffect, useState } from "react";
 
-  nombre,
+export default function GreetingHeader() {
 
-}:{
+  const [usuario, setUsuario] = useState("");
+  const [saludo, setSaludo] = useState("");
 
-  nombre:string;
+  useEffect(() => {
 
-}) {
+    const nombre =
+      localStorage.getItem("usuarioLogueado") || "";
 
-  const hora = new Date().getHours();
+    setUsuario(nombre);
 
-  let saludo = "Buenas noches";
+    const hora = new Date().getHours();
 
-  if (hora >= 6 && hora < 12)
-    saludo = "Buenos días";
+    if (hora < 12) {
 
-  else if (hora >= 12 && hora < 21)
-    saludo = "Buenas tardes";
+      setSaludo("🌅 Buenos días,");
+
+    } else if (hora < 20) {
+
+      setSaludo("☀️ Buenas tardes,");
+
+    } else {
+
+      setSaludo("🌙 Buenas noches,");
+
+    }
+
+  }, []);
 
   return (
 
-    <div className="mb-10">
+    <section className="mb-12">
 
       <p className="text-zinc-400 text-lg">
-
-        👋 {saludo}
-
+        {saludo}
       </p>
 
-      <h1 className="text-4xl font-black mt-2">
-
-        {nombre}
-
+      <h1 className="text-5xl md:text-6xl font-black mt-2">
+        {usuario}
       </h1>
 
-    </div>
+    </section>
 
   );
 

@@ -1,60 +1,55 @@
-import DashboardCard from "./DashboardCard";
-
-type Props={
-
-titulo:string;
-
-valor:string;
-
-estado?:"good"|"neutral"|"bad";
-
-};
+interface StatCardProps {
+  title: string;
+  children: React.ReactNode;
+  color?: "neutral" | "success" | "danger" | "gold";
+}
 
 export default function StatCard({
+  title,
+  children,
+  color = "neutral",
+}: StatCardProps) {
 
-titulo,
+  const styles = {
+    neutral:
+      "bg-zinc-900/70 border-zinc-800",
 
-valor,
+    success:
+      "bg-green-500/10 border-green-500/30",
 
-estado="neutral",
+    danger:
+      "bg-red-500/10 border-red-500/30",
 
-}:Props){
+    gold:
+      "bg-yellow-500/10 border-yellow-500/30",
+  };
 
-const colores={
+  return (
 
-good:"border-green-500/30 shadow-green-500/10",
+    <div
+      className={`
+        rounded-3xl
+        border
+        p-8
+        backdrop-blur
+        transition-all
+        duration-300
+        hover:scale-[1.02]
+        hover:border-orange-500/40
+        ${styles[color]}
+      `}
+    >
 
-neutral:"",
+      <h2 className="text-xl font-bold text-zinc-300 mb-6">
 
-bad:"border-red-500/30 shadow-red-500/10",
+        {title}
 
-};
+      </h2>
 
-return(
+      {children}
 
-<DashboardCard
+    </div>
 
-className={`
-shadow-lg
-${colores[estado]}
-`}
-
->
-
-<p className="text-zinc-400">
-
-{titulo}
-
-</p>
-
-<h2 className="text-4xl font-black mt-3">
-
-{valor}
-
-</h2>
-
-</DashboardCard>
-
-);
+  );
 
 }
