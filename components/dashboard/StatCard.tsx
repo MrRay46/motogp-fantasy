@@ -1,5 +1,5 @@
 interface StatCardProps {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   color?: "neutral" | "success" | "danger" | "gold";
 }
@@ -40,11 +40,11 @@ export default function StatCard({
       `}
     >
 
-      <h2 className="text-xl font-bold text-zinc-300 mb-6">
-
-        {title}
-
-      </h2>
+      {title && (
+        <h2 className="text-xl font-bold text-zinc-300 mb-6">
+          {title}
+        </h2>
+      )}
 
       {children}
 

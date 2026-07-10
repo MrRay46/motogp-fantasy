@@ -53,19 +53,41 @@ export default function DashboardPage() {
 
           </StatCard>
 
-          <StatCard
-            title="⭐ Equipo del GP"
-            color="gold"
-          >
+          <StatCard color="gold">
 
-            <h3 className="text-4xl font-black">
-              David
-            </h3>
+           <div className="flex flex-col items-center justify-center h-full text-center">
 
-            <p className="mt-2 text-2xl">
-              92 pts
-            </p>
+  <h3 className="text-lg font-semibold text-yellow-400">
+    🏆 Ganador del GP Sachsenring
+  </h3>
 
+  <div className="mt-8">
+
+    <h2 className="text-4xl font-black">
+      🥇 David
+    </h2>
+
+    <p className="text-2xl text-zinc-300 mt-2">
+      92 pts
+    </p>
+
+  </div>
+
+  <img
+    src="/avatars/david.png"
+    className="
+      w-24
+      h-24
+      rounded-full
+      object-cover
+      border-4
+      border-yellow-500
+      mt-8
+      shadow-lg
+    "
+  />
+
+</div>
           </StatCard>
 
           <StatCard
