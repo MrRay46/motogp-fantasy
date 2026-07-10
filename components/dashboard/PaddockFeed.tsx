@@ -69,7 +69,7 @@ export default function PaddockFeed() {
 
       <div className="space-y-4">
 
-        {noticias.slice(0, 5).map((noticia) => (
+        {noticias.map((noticia) => (
 
           <PaddockPost
             key={noticia.id}
