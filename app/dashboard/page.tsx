@@ -58,7 +58,7 @@ export default function DashboardPage() {
            <div className="flex flex-col items-center justify-center h-full text-center">
 
   <h3 className="text-lg font-semibold text-yellow-400">
-    🏆 Ganador del GP Sachsenring
+    🏆 Ganador del GP ASSEN
   </h3>
 
   <div className="mt-8">
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   </div>
 
   <img
-    src="/avatars/david.png"
+    src="/avatars/David.png"
     className="
       w-24
       h-24
