@@ -26,7 +26,8 @@ export default function PaddockFeed() {
       .from("noticias")
       .select("*")
       .eq("visible", true)
-      .order("fecha", { ascending: false });
+      .order("fecha", { ascending: false })
+.limit(5);
 
     if (error) {
       console.error(error);
