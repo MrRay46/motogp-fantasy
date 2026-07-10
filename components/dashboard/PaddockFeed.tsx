@@ -68,7 +68,7 @@ export default function PaddockFeed() {
 
       <div className="space-y-4">
 
-        {noticias.map((noticia) => (
+        {noticias.slice(0, 5).map((noticia) => (
 
           <PaddockPost
             key={noticia.id}
@@ -82,8 +82,24 @@ export default function PaddockFeed() {
 
       </div>
 
-    </div>
+   
+<div className="flex justify-center mt-8">
 
-  );
+  <button
+    onClick={() => window.location.href = "/paddock"}
+    className="
+      text-orange-400
+      hover:text-orange-300
+      font-semibold
+      transition-colors
+    "
+  >
+    Ver todas las noticias →
+  </button>
 
+</div>
+
+</div>
+
+);
 }
