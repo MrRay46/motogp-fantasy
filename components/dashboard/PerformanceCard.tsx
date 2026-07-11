@@ -1,76 +1,139 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import StatCard from "./StatCard";
 
 export default function PerformanceCard() {
+  const [equipo, setEquipo] = useState<any>(null);
+  const [posicion, setPosicion] = useState(0);
+  const [color, setColor] = useState<
+    "success" | "danger" | undefined
+  >();
 
-  // Datos de ejemplo (los conectaremos después a Supabase)
-  const posicion = 5;
-  const puntos = 645;
+  const [mensaje, setMensaje] = useState("");
 
-  // Diferencia con el líder
-  // Negativo = recortas
-  // Positivo = te saca más
-  // 0 = igual
+  const [flecha, setFlecha] = useState("");
 
-  const diferencia = -12;
+  useEffect(() => {
+    cargarDatos();
+  }, []);
 
-  let color: "success" | "neutral" | "danger" = "neutral";
-  let mensaje = "";
+  async function cargarDatos() {
+    const usuario =
+      localStorage.getItem("usuarioLogueado");
 
-  if (diferencia < 0) {
+    if (!usuario) return;
 
-    color = "success";
-    mensaje = `Has recortado ${Math.abs(diferencia)} pts al líder`;
+    const { data } = await supabase
+      .from("equipos")
+      .select("*")
+      .order("puntos", {
+        ascending: false,
+      });
 
+    if (!data) return;
+
+    const indice = data.findIndex(
+      (e) => e.usuario === usuario
+    );
+
+    if (indice === -1) return;
+
+    const miEquipo = data[indice];
+
+    setEquipo(miEquipo);
+
+    const posicionActual = indice + 1;
+
+    setPosicion(posicionActual);
+
+    //---------------------------------
+    // CAMBIO DE POSICIÓN
+    //---------------------------------
+
+    if (
+      miEquipo.posicion_anterior > 0
+    ) {
+      if (
+        posicionActual <
+        miEquipo.posicion_anterior
+      ) {
+        setFlecha("▲");
+      } else if (
+        posicionActual >
+        miEquipo.posicion_anterior
+      ) {
+        setFlecha("▼");
+      }
+    }
+
+    //---------------------------------
+    // DIFERENCIA CON EL LÍDER
+    //---------------------------------
+
+    const lider = data[0];
+
+    const diferenciaActual =
+      lider.puntos - miEquipo.puntos;
+
+    const cambio =
+      miEquipo.diferencia_lider_anterior -
+      diferenciaActual;
+
+    if (cambio > 0) {
+      setColor("success");
+      setMensaje(
+        `Has recortado ${cambio} pts al líder`
+      );
+    } else if (cambio < 0) {
+      setColor("danger");
+      setMensaje(
+        `El líder te ha sacado ${Math.abs(
+          cambio
+        )} pts`
+      );
+    }
   }
 
-  if (diferencia > 0) {
-
-    color = "danger";
-    mensaje = `El líder te saca ${diferencia} pts más`;
-
-  }
+  if (!equipo) return null;
 
   return (
-
     <StatCard
       title="📊 Tu rendimiento"
       color={color}
     >
-
       <div className="text-center">
 
         <h2 className="text-6xl font-black">
 
           #{posicion}
 
-        </h2>
-
-        <p className="text-3xl font-bold text-white mt-3">
-
-          {puntos} pts
-
-        </p>
-
-        <div className="h-8 mt-5">
-
-          {mensaje && (
-
-            <p className="text-sm text-zinc-300">
-
-              {mensaje}
-
-            </p>
-
+          {flecha === "▲" && (
+            <span className="text-green-400 ml-2">
+              ▲
+            </span>
           )}
 
-        </div>
+          {flecha === "▼" && (
+            <span className="text-red-500 ml-2">
+              ▼
+            </span>
+          )}
+
+        </h2>
+
+        <p className="text-4xl font-bold mt-4">
+          {equipo.puntos} pts
+        </p>
+
+        {mensaje && (
+          <p className="mt-6 text-zinc-300">
+            {mensaje}
+          </p>
+        )}
 
       </div>
-
     </StatCard>
-
   );
-
 }
