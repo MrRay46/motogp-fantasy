@@ -21,7 +21,7 @@ export default function DashboardPage() {
         <section className="grid gap-6 md:grid-cols-3">
 
           {/* Rendimiento */}
-          
+          <PerformanceCard />
 
           {/* Ganador del GP */}
           <WinnerCard />
