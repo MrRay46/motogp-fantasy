@@ -5,6 +5,7 @@ import GreetingHeader from "@/components/dashboard/GreetingHeader";
 import StatCard from "@/components/dashboard/StatCard";
 import PaddockFeed from "@/components/dashboard/PaddockFeed";
 import WinnerCard from "@/components/dashboard/WinnerCard";
+import PerformanceCard from "@/components/dashboard/PerformanceCard";
 
 export default function DashboardPage() {
   return (
@@ -20,40 +21,7 @@ export default function DashboardPage() {
         <section className="grid gap-6 md:grid-cols-3">
 
           {/* Rendimiento */}
-          <StatCard
-            title="📊 Tu rendimiento"
-            color="success"
-          >
-
-            <div className="flex justify-between items-center">
-
-              <div>
-
-                <p className="text-zinc-400">
-                  Posición
-                </p>
-
-                <h3 className="text-5xl font-black">
-                  #3
-                </h3>
-
-              </div>
-
-              <div>
-
-                <p className="text-zinc-400">
-                  Puntos
-                </p>
-
-                <h3 className="text-5xl font-black text-green-400">
-                  645
-                </h3>
-
-              </div>
-
-            </div>
-
-          </StatCard>
+          
 
           {/* Ganador del GP */}
           <WinnerCard />
