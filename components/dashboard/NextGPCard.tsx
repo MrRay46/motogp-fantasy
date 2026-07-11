@@ -4,16 +4,31 @@ import StatCard from "./StatCard";
 import { circuitos } from "@/data/circuitos";
 
 export default function NextGPCard() {
+
   const hoy = new Date();
 
-  const proximoGP =
-    circuitos.find(
-      (gp) => new Date(gp.fechaInicio) > hoy
-    ) || circuitos[0];
+  let gpActual = null;
+  let proximoGP = null;
 
-  const fecha = new Date(proximoGP.fechaInicio);
+  for (const gp of circuitos) {
 
-  const dia = fecha.getDate();
+    const inicio = new Date(gp.fechaInicio);
+    const fin = new Date(gp.fechaFin);
+
+    if (hoy >= inicio && hoy <= fin) {
+      gpActual = gp;
+      break;
+    }
+
+    if (!proximoGP && hoy < inicio) {
+      proximoGP = gp;
+    }
+
+  }
+
+  const gp = gpActual || proximoGP || circuitos[0];
+
+  const fecha = new Date(gp.fechaInicio);
 
   const meses = [
     "Enero",
@@ -31,30 +46,51 @@ export default function NextGPCard() {
   ];
 
   return (
-    <StatCard title="🏁 Próximo GP">
+
+    <StatCard
+      title={
+        gpActual
+          ? `🏁 ${gp.nombre}`
+          : "🏁 Próximo GP"
+      }
+    >
 
       <div className="text-center">
 
         <img
-          src={proximoGP.imagen}
-          alt={proximoGP.nombre}
+          src={gp.imagen}
+          alt={gp.nombre}
           className="w-40 mx-auto mb-6"
         />
 
-        <h3 className="text-3xl font-bold">
-          {proximoGP.nombre}
-        </h3>
+        {!gpActual && (
+          <h3 className="text-3xl font-bold">
+            {gp.nombre}
+          </h3>
+        )}
 
         <p className="text-zinc-400 mt-2">
-          {proximoGP.pais}
+          {gp.pais}
         </p>
 
-        <p className="text-orange-400 mt-1">
-          {dia} {meses[fecha.getMonth()]}
-        </p>
+        {gpActual ? (
+
+          <p className="text-green-400 mt-2 font-semibold">
+            En curso
+          </p>
+
+        ) : (
+
+          <p className="text-orange-400 mt-2">
+            {fecha.getDate()} {meses[fecha.getMonth()]}
+          </p>
+
+        )}
 
       </div>
 
     </StatCard>
+
   );
+
 }

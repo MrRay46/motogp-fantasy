@@ -41,7 +41,7 @@ export const circuitos = [
     pais: "Francia",
     fechaInicio: "2026-05-08",
     fechaFin: "2026-05-10",
-    imagen: "/circuitos/le mans.png",
+    imagen: "/circuitos/lemans.png",
   },
 
   {
@@ -50,7 +50,7 @@ export const circuitos = [
     pais: "España",
     fechaInicio: "2026-05-15",
     fechaFin: "2026-05-17",
-    imagen: "/circuitos/cataluña.png",
+    imagen: "/circuitos/catalunya.png",
   },
 
   {
@@ -77,7 +77,7 @@ export const circuitos = [
     pais: "Republica Checa",
     fechaInicio: "2026-06-19",
     fechaFin: "2026-06-21",
-    imagen: "/circuitos/republica checa.png",
+    imagen: "/circuitos/republicacheca.png",
   },
 
   {
@@ -159,7 +159,7 @@ export const circuitos = [
     pais: "Australia",
     fechaInicio: "2026-10-22",
     fechaFin: "2026-10-25",
-    imagen: "/circuitos/phillip island.png",
+    imagen: "/circuitos/phillipisland.png",
   },
 
   {
