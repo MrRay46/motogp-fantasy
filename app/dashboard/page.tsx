@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import GreetingHeader from "@/components/dashboard/GreetingHeader";
 import StatCard from "@/components/dashboard/StatCard";
 import PaddockFeed from "@/components/dashboard/PaddockFeed";
+import WinnerCard from "@/components/dashboard/WinnerCard";
 
 export default function DashboardPage() {
   return (
@@ -18,6 +19,7 @@ export default function DashboardPage() {
         {/* Tarjetas superiores */}
         <section className="grid gap-6 md:grid-cols-3">
 
+          {/* Rendimiento */}
           <StatCard
             title="📊 Tu rendimiento"
             color="success"
@@ -53,54 +55,18 @@ export default function DashboardPage() {
 
           </StatCard>
 
-          <StatCard color="gold">
+          {/* Ganador del GP */}
+          <WinnerCard />
 
-           <div className="flex flex-col items-center justify-center h-full text-center">
-
-  <h3 className="text-lg font-semibold text-yellow-400">
-    🏆 Ganador del GP ASSEN
-  </h3>
-
-  <div className="mt-8">
-
-    <h2 className="text-4xl font-black">
-      🥇 David
-    </h2>
-
-    <p className="text-2xl text-zinc-300 mt-2">
-      92 pts
-    </p>
-
-  </div>
-
-  <img
-    src="/avatars/David.png"
-    className="
-      w-24
-      h-24
-      rounded-full
-      object-cover
-      border-4
-      border-yellow-500
-      mt-8
-      shadow-lg
-    "
-  />
-
-</div>
-          </StatCard>
-
-          <StatCard
-            title="🏁 Próximo GP"
-          >
+          {/* Próximo GP */}
+          <StatCard title="🏁 Próximo GP">
 
             <div className="text-center">
 
               <img
-                src="/circuitos/Sachsenring.png"
+                src="/circuitos/sachsenring.png"
                 alt="Sachsenring"
                 className="w-40 mx-auto mb-6"
-              
               />
 
               <h3 className="text-3xl font-bold">

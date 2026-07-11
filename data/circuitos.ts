@@ -1,5 +1,6 @@
 export const circuitos = [
      {
+      id: "chang",
     nombre: "Chang International Circuit",
     pais: "Thailandia",
     fechaInicio: "2026-02-27",
@@ -8,6 +9,7 @@ export const circuitos = [
   },
 
    {
+    id: "brasil",
     nombre: "Ayrton Senna",
     pais: "Brasil",
     fechaInicio: "2026-03-20",
@@ -16,6 +18,7 @@ export const circuitos = [
   },
 
   {
+    id: "americas",
     nombre: "Circuit Of The Americas",
     pais: "USA",
     fechaInicio: "2026-03-27",
@@ -24,6 +27,7 @@ export const circuitos = [
   },
 
   {
+    id: "jerez",
     nombre: "Circuito de Jerez - Ángel Nieto",
     pais: "España",
     fechaInicio: "2026-04-24",
@@ -32,6 +36,7 @@ export const circuitos = [
   },
 
   {
+    id: "lemans",
     nombre: "Le Mans",
     pais: "Francia",
     fechaInicio: "2026-05-08",
@@ -40,6 +45,7 @@ export const circuitos = [
   },
 
   {
+    id: "catalunya",
     nombre: "Circuit de Barcelona-Catalunya",
     pais: "España",
     fechaInicio: "2026-05-15",
@@ -48,6 +54,7 @@ export const circuitos = [
   },
 
   {
+    id: "mugello",
     nombre: "Mugello",
     pais: "Italia",
     fechaInicio: "2026-05-29",
@@ -56,6 +63,7 @@ export const circuitos = [
   },
 
   {
+    id: "balaton",
     nombre: "Balaton Park",
     pais: "Hungria",
     fechaInicio: "2026-06-05",
@@ -64,6 +72,7 @@ export const circuitos = [
   },
 
   {
+    id: "brno",
     nombre: "Automotodrom Brno",
     pais: "Republica Checa",
     fechaInicio: "2026-06-19",
@@ -72,6 +81,7 @@ export const circuitos = [
   },
 
   {
+    id: "assen",
     nombre: "TT Circuit Assen",
     pais: "Holanda",
     fechaInicio: "2026-06-26",
@@ -81,6 +91,7 @@ export const circuitos = [
 
   
   {
+    id: "sachsenring",
     nombre: "Sachsenring",
     pais: "Alemania",
     fechaInicio: "2026-07-10",
@@ -89,6 +100,7 @@ export const circuitos = [
   },
 
   {
+    id: "silverstone",
     nombre: "Silverstone Circuit",
     pais: "Gran Bretaña",
     fechaInicio: "2026-08-07",
@@ -97,6 +109,7 @@ export const circuitos = [
   },
 
   {
+    id: "aragon",
     nombre: "MotorLand Aragón",
     pais: "España",
     fechaInicio: "2026-08-28",
@@ -105,6 +118,7 @@ export const circuitos = [
   },
 
    {
+    id: "misano",
     nombre: "Misano World Circuit Marco Simoncelli",
     pais: "Misano",
     fechaInicio: "2026-09-11",
@@ -113,6 +127,7 @@ export const circuitos = [
   },
 
   {
+    id: "spielberg",
     nombre: "Red Bull Ring - Spielberg",
     pais: "Austria",
     fechaInicio: "2026-09-18",
@@ -121,6 +136,7 @@ export const circuitos = [
   },
 
   {
+    id: "motegi",
     nombre: "Mobility Resort Motegi",
     pais: "Japon",
     fechaInicio: "2026-10-01",
@@ -129,6 +145,7 @@ export const circuitos = [
   },
 
   {
+    id: "mandalika",
     nombre: "Pertamina Mandalika",
     pais: "Indonesia",
     fechaInicio: "2026-10-09",
@@ -137,6 +154,7 @@ export const circuitos = [
   },
 
    {
+    id: "phillipisland",
     nombre: "Phillip Island",
     pais: "Australia",
     fechaInicio: "2026-10-22",
@@ -145,6 +163,7 @@ export const circuitos = [
   },
 
   {
+    id: "sepang",
     nombre: "Sepang",
     pais: "Malasia",
     fechaInicio: "2026-10-30",
@@ -153,6 +172,7 @@ export const circuitos = [
   },
 
    {
+    id: "lusail",
     nombre: "Lusail",
     pais: "Qatar",
     fechaInicio: "2026-11-06",
@@ -161,6 +181,7 @@ export const circuitos = [
   },
 
   {
+    id: "algarve",
     nombre: "Autódromo Internacional do Algarve",
     pais: "Portugal",
     fechaInicio: "2026-11-20",
@@ -169,6 +190,7 @@ export const circuitos = [
   },
 
    {
+    id: "cheste",
     nombre: "Circuit Ricardo Tormo",
     pais: "España",
     fechaInicio: "2026-11-27",
