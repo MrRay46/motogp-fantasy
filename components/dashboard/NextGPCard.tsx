@@ -63,6 +63,10 @@ export default function NextGPCard() {
           className="w-40 mx-auto mb-6"
         />
 
+<p className="text-xs text-zinc-500 break-all">
+  {gp.imagen}
+</p>
+
         {!gpActual && (
           <h3 className="text-3xl font-bold">
             {gp.nombre}
