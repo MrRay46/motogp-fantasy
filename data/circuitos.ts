@@ -92,7 +92,7 @@ export const circuitos = [
   
   {
     id: "sachsenring",
-    nombre: "sachsenring",
+    nombre: "Sachsenring",
     pais: "Alemania",
     fechaInicio: "2026-07-10",
     fechaFin: "2026-07-12",
