@@ -91,12 +91,12 @@ export const circuitos = [
 
   
   {
-    id: "sachsenring",
+    id: "Sachsenring",
     nombre: "Sachsenring",
     pais: "Alemania",
     fechaInicio: "2026-07-10",
     fechaFin: "2026-07-12",
-    imagen: "/circuitos/sachsenring.png",
+    imagen: "/circuitos/Sachsenring.png",
   },
 
   {
