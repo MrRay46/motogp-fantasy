@@ -101,7 +101,7 @@ export const circuitos = [
 
   {
     id: "silverstone",
-    nombre: "Silverstone Circuit",
+    nombre: "silverstone circuit",
     pais: "Gran Bretaña",
     fechaInicio: "2026-08-07",
     fechaFin: "2026-08-09",
