@@ -1,22 +1,22 @@
 export const resultadosGP = {
-  assen: {
+  sachsenring: {
 
     pilotoGanador:
-      "A. Ogura",
+      "Marc Marquez",
 
     pilotoGanadorFoto:
-      "/pilotos/ai ogura.webp",
+      "/pilotos/marc marquez.webp",
 
     motorGanador:
-      "Aprilia",
+      "ducati",
 
     motorGanadorLogo:
-      "/marcas/aprilia.png",
+      "/marcas/ducati.png",
 
     equipoGP:
-      "David",
+      "De la Raya Sr",
 
-    puntosEquipoGP: 92,
+    puntosEquipoGP: 102,
 
     pilotoEnForma:
       "Jorge Martin",
