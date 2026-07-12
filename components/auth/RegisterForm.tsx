@@ -22,9 +22,107 @@ export default function RegisterForm() {
 
   async function registrarUsuario() {
 
-    // La lógica irá aquí en el siguiente paso
+  setError("");
+
+  if (
+    !usuario ||
+    !email ||
+    !password ||
+    !confirmarPassword
+  ) {
+    setError("Debes completar todos los campos.");
+    return;
+  }
+
+  if (password !== confirmarPassword) {
+    setError("Las contraseñas no coinciden.");
+    return;
+  }
+
+  if (password.length < 6) {
+    setError("La contraseña debe tener al menos 6 caracteres.");
+    return;
+  }
+
+  setLoading(true);
+
+  // Comprobar usuario
+
+  const {
+    data: usuarioExistente,
+  } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("usuario", usuario)
+    .maybeSingle();
+
+  if (usuarioExistente) {
+
+    setError("Ese nombre de usuario ya existe.");
+    setLoading(false);
+    return;
 
   }
+
+  // Comprobar email
+
+  const {
+    data: emailExistente,
+  } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (emailExistente) {
+
+    setError("Ese correo electrónico ya está registrado.");
+    setLoading(false);
+    return;
+
+  }
+
+  // Crear usuario
+
+  const { error } = await supabase
+    .from("usuarios")
+    .insert([
+      {
+        usuario,
+        email,
+        password,
+        avatar,
+
+        activo: true,
+
+        admin_liga: false,
+
+        super_admin: false,
+
+        liga_id: null,
+      },
+    ]);
+
+  if (error) {
+
+    console.error(error);
+
+    setError("Ha ocurrido un error creando la cuenta.");
+
+    setLoading(false);
+
+    return;
+
+  }
+
+  localStorage.setItem(
+    "usuarioLogueado",
+    usuario
+  );
+
+  window.location.href = "/bienvenida";
+
+}
 
   return (
 
