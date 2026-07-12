@@ -105,7 +105,7 @@ export const circuitos = [
     pais: "Gran Bretaña",
     fechaInicio: "2026-08-07",
     fechaFin: "2026-08-09",
-    imagen: "/circuitos/silverstone.png",
+    imagen: "/circuitos/Silverstone.png",
   },
 
   {
