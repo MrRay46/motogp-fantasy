@@ -116,11 +116,15 @@ export default function RegisterForm() {
   }
 
   localStorage.setItem(
-    "usuarioLogueado",
-    usuario
-  );
+  "rayongrid_user",
+  JSON.stringify({
+    usuario,
+    email,
+    avatar,
+  })
+);
 
-  window.location.href = "/bienvenida";
+window.location.href = "/bienvenida";
 
 }
 
