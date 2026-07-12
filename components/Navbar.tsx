@@ -26,7 +26,7 @@ export default function Navbar() {
           error,
         } = await supabase
           .from("usuarios")
-          .select("admin")
+          .select("admin_liga")
           .eq(
             "usuario",
             usuario
@@ -39,7 +39,7 @@ export default function Navbar() {
         }
 
         setEsAdmin(
-          data?.admin || false
+          data?.admin_liga || false
         );
 
       };
