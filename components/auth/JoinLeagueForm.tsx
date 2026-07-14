@@ -95,7 +95,55 @@ async function unirseLiga() {
     })
     .eq("id", usuario.id);
 
-  // Crear equipo
+const { data: equipoExistente } = await supabase
+  .from("equipos")
+  .select("id")
+  .eq("usuario_id", usuario.id)
+  .eq("liga_id", liga.id)
+  .maybeSingle();
+
+ if (!equipoExistente) {
+
+  const { error: errorEquipo } =
+    await supabase
+      .from("equipos")
+      .insert([
+        {
+        usuario_id: usuario.id,
+liga_id: liga.id,
+
+usuario: usuario.usuario,
+avatar: usuario.avatar,
+
+puntos: 0,
+posicion_anterior: 0,
+diferencia_lider_anterior: 0,
+
+admin: false,
+
+fichados: [],
+reserva: "",
+motor: "",
+
+prediccion_piloto: "",
+prediccion_motor: "",
+
+prediccion_piloto_original: "",
+prediccion_motor_original: "",
+
+prediccion_piloto_modificada: false,
+prediccion_motor_modificada: false,
+
+bonus_temporada: 0,
+bonus_temporada_aplicado: false,
+        },
+      ]);
+
+  if (errorEquipo) {
+    console.error(errorEquipo);
+  }
+
+}
 
   const { error: errorEquipo } =
     await supabase
