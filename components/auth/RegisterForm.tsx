@@ -99,10 +99,6 @@ export default function RegisterForm() {
       "rayongrid_session",
       JSON.stringify({
         id: nuevoUsuario.id,
-        usuario: nuevoUsuario.usuario,
-        email: nuevoUsuario.email,
-        avatar: nuevoUsuario.avatar,
-        super_admin: nuevoUsuario.super_admin,
       })
     );
 

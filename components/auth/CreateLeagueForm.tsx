@@ -9,147 +9,197 @@ export default function CreateLeagueForm() {
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [avatar, setAvatar] = useState("avatar1.png");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
+
   const [nombreLiga, setNombreLiga] = useState("");
+  const [codigoLiga, setCodigoLiga] = useState("");
 
-  const crearLiga = async () => {
+  const [avatar, setAvatar] =
+    useState("avatar1.png");
 
-  if (
-    !usuario ||
-    !email ||
-    !password ||
-    !nombreLiga
-  ) {
-    alert("Completa todos los campos.");
-    return;
-  }
+  const [loading, setLoading] =
+    useState(false);
 
-  // Comprobar email
+  const [error, setError] =
+    useState("");
 
-  const { data: emailExiste } =
-    await supabase
+  async function crearLiga() {
+
+    setError("");
+
+    if (
+      !usuario ||
+      !email ||
+      !password ||
+      !confirmarPassword ||
+      !nombreLiga ||
+      !codigoLiga
+    ) {
+      setError("Completa todos los campos.");
+      return;
+    }
+
+    if (password !== confirmarPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    setLoading(true);
+
+    // Usuario existente
+
+    const { data: usuarioExiste } =
+      await supabase
+        .from("usuarios")
+        .select("id")
+        .eq("usuario", usuario)
+        .maybeSingle();
+
+    if (usuarioExiste) {
+      setError("Ese usuario ya existe.");
+      setLoading(false);
+      return;
+    }
+
+    // Email existente
+
+    const { data: emailExiste } =
+      await supabase
+        .from("usuarios")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
+
+    if (emailExiste) {
+      setError("Ese correo ya está registrado.");
+      setLoading(false);
+      return;
+    }
+
+    // Código repetido
+
+    const { data: ligaExiste } =
+      await supabase
+        .from("ligas")
+        .select("id")
+        .eq("codigo", codigoLiga)
+        .maybeSingle();
+
+    if (ligaExiste) {
+      setError("Ese código ya existe.");
+      setLoading(false);
+      return;
+    }
+
+    // Crear usuario
+
+    const {
+      data: nuevoUsuario,
+      error: errorUsuario,
+    } = await supabase
       .from("usuarios")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
+      .insert([
+        {
+          usuario,
+          email,
+          password,
+          avatar,
+          activo: true,
+          
+          super_admin: false,
+        },
+      ])
+      .select()
+      .single();
 
-  if (emailExiste) {
-    alert("Ya existe una cuenta con ese correo.");
-    return;
-  }
+    if (errorUsuario) {
 
-  // Comprobar usuario
+      console.error(errorUsuario);
 
-  const { data: usuarioExiste } =
-    await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("usuario", usuario)
-      .maybeSingle();
+      setError("Error creando usuario.");
 
-  if (usuarioExiste) {
-    alert("Ese nombre de usuario ya existe.");
-    return;
-  }
+      setLoading(false);
 
-  // Comprobar liga
+      return;
 
-  const { data: ligaExiste } =
-    await supabase
+    }
+
+    // Crear liga
+
+    const {
+      data: nuevaLiga,
+      error: errorLiga,
+    } = await supabase
       .from("ligas")
-      .select("id")
-      .eq("nombre", nombreLiga)
-      .maybeSingle();
+      .insert([
+        {
+          nombre: nombreLiga,
+          codigo: codigoLiga.toUpperCase(),
+          activa: true,
+          creador_id: nuevoUsuario.id,
+        },
+      ])
+      .select()
+      .single();
 
-  if (ligaExiste) {
-    alert("Ese nombre de liga ya existe.");
-    return;
+    if (errorLiga) {
+
+      console.error(errorLiga);
+
+      setError("Error creando liga.");
+
+      setLoading(false);
+
+      return;
+
+    }
+
+    // Actualizar usuario
+
+    await supabase
+      .from("usuarios")
+      .update({
+        liga_id: nuevaLiga.id,
+      })
+      .eq("id", nuevoUsuario.id);
+
+    // Relación usuario-liga
+
+    await supabase
+      .from("usuarios_ligas")
+      .insert([
+        {
+          usuario_id: nuevoUsuario.id,
+          liga_id: nuevaLiga.id,
+          admin_liga: true,
+          codigo: codigoLiga.toUpperCase(),
+        },
+      ]);
+
+    // Guardar sesión
+
+    localStorage.setItem(
+      "rayongrid_session",
+      JSON.stringify({
+        id: nuevoUsuario.id,
+        usuario: nuevoUsuario.usuario,
+      })
+    );
+
+    window.location.href = "/dashboard";
   }
-
-  // Crear usuario
-
-  const {
-    data: nuevoUsuario,
-    error: errorUsuario,
-  } = await supabase
-    .from("usuarios")
-    .insert({
-      usuario,
-      email,
-      password,
-      avatar,
-      activo: true,
-      super_admin: false,
-    })
-    .select()
-    .single();
-
-  if (errorUsuario || !nuevoUsuario) {
-    console.error(errorUsuario);
-    alert("Error creando usuario.");
-    return;
-  }
-
-  // Crear liga
-
-  const {
-    data: nuevaLiga,
-    error: errorLiga,
-  } = await supabase
-    .from("ligas")
-    .insert({
-      nombre: nombreLiga,
-    })
-    .select()
-    .single();
-
-  if (errorLiga || !nuevaLiga) {
-    console.error(errorLiga);
-    alert("Error creando la liga.");
-    return;
-  }
-// Relacionar usuario con la liga
-
-const { error: errorRelacion } = await supabase
-  .from("usuarios_ligas")
-  .insert({
-    usuario_id: nuevoUsuario.id,
-    liga_id: nuevaLiga.id,
-    admin_liga: true,
-  });
-
-if (errorRelacion) {
-  console.error(errorRelacion);
-  alert("Error asociando el usuario a la liga.");
-  return;
-}
-// Crear equipo
-
-const { error: errorEquipo } = await supabase
-  .from("equipos")
-  .insert({
-    usuario_id: nuevoUsuario.id,
-    liga_id: nuevaLiga.id,
-  });
-
-if (errorEquipo) {
-  console.error(errorEquipo);
-  alert("Error creando el equipo.");
-  return;
-}
-};
 
   return (
 
     <div className="space-y-4">
 
-      <h2 className="text-2xl font-bold text-center">
-        Crear una liga
-      </h2>
-
       <input
-        type="text"
-        placeholder="Nombre de usuario"
+        placeholder="Usuario"
         value={usuario}
         onChange={(e)=>setUsuario(e.target.value)}
         className="w-full p-3 rounded-xl bg-zinc-800"
@@ -157,7 +207,7 @@ if (errorEquipo) {
 
       <input
         type="email"
-        placeholder="Correo electrónico"
+        placeholder="Correo"
         value={email}
         onChange={(e)=>setEmail(e.target.value)}
         className="w-full p-3 rounded-xl bg-zinc-800"
@@ -172,19 +222,44 @@ if (errorEquipo) {
       />
 
       <input
-        type="text"
+        type="password"
+        placeholder="Repetir contraseña"
+        value={confirmarPassword}
+        onChange={(e)=>setConfirmarPassword(e.target.value)}
+        className="w-full p-3 rounded-xl bg-zinc-800"
+      />
+
+      <input
         placeholder="Nombre de la liga"
         value={nombreLiga}
         onChange={(e)=>setNombreLiga(e.target.value)}
         className="w-full p-3 rounded-xl bg-zinc-800"
       />
 
+      <input
+        placeholder="Código de la liga"
+        value={codigoLiga}
+        onChange={(e)=>setCodigoLiga(e.target.value.toUpperCase())}
+        className="w-full p-3 rounded-xl bg-zinc-800"
+      />
+
       <AvatarPicker
-  value={avatar}
-  onChange={setAvatar}
-/>
+        value={avatar}
+        onChange={setAvatar}
+      />
+
+      {error && (
+
+        <div className="text-red-500">
+
+          {error}
+
+        </div>
+
+      )}
 
       <button
+        disabled={loading}
         onClick={crearLiga}
         className="
           w-full
@@ -192,11 +267,13 @@ if (errorEquipo) {
           hover:bg-yellow-400
           text-black
           font-bold
-          py-3
           rounded-xl
+          py-4
         "
       >
-        Crear Liga
+        {loading
+          ? "Creando..."
+          : "Crear Liga"}
       </button>
 
     </div>
