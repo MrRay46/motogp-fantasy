@@ -5,20 +5,26 @@ import { supabase } from "@/lib/supabase";
 import AvatarPicker from "./AvatarPicker";
 
 export default function RegisterForm() {
+
   const [usuario, setUsuario] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmarPassword, setConfirmarPassword] = useState("");
-
   const [avatar, setAvatar] = useState("avatar1.png");
 
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function registrarUsuario() {
+
     setError("");
 
-    if (!usuario || !email || !password || !confirmarPassword) {
+    if (
+      !usuario.trim() ||
+      !email.trim() ||
+      !password ||
+      !confirmarPassword
+    ) {
       setError("Debes completar todos los campos.");
       return;
     }
@@ -35,39 +41,49 @@ export default function RegisterForm() {
 
     setLoading(true);
 
-    // Comprobar usuario
+    // Usuario existente
 
-    const { data: usuarioExistente } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("usuario", usuario)
-      .maybeSingle();
+    const { data: usuarioExistente } =
+      await supabase
+        .from("usuarios")
+        .select("id")
+        .eq("usuario", usuario)
+        .maybeSingle();
 
     if (usuarioExistente) {
-      setError("Ese nombre de usuario ya existe.");
+
       setLoading(false);
+
+      setError("Ese usuario ya existe.");
+
       return;
+
     }
 
-    // Comprobar email
+    // Email existente
 
-    const { data: emailExistente } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
+    const { data: emailExistente } =
+      await supabase
+        .from("usuarios")
+        .select("id")
+        .eq("email", email)
+        .maybeSingle();
 
     if (emailExistente) {
-      setError("Ese correo electrónico ya está registrado.");
+
       setLoading(false);
+
+      setError("Ese correo ya está registrado.");
+
       return;
+
     }
 
     // Crear usuario
 
     const {
       data: nuevoUsuario,
-      error: errorInsert,
+      error: errorUsuario,
     } = await supabase
       .from("usuarios")
       .insert([
@@ -78,41 +94,47 @@ export default function RegisterForm() {
           avatar,
           activo: true,
           super_admin: false,
+          liga_actual_id: null,
         },
       ])
       .select()
       .single();
 
-    if (errorInsert || !nuevoUsuario) {
-      console.error(errorInsert);
+    if (errorUsuario || !nuevoUsuario) {
 
-      setError("Ha ocurrido un error creando la cuenta.");
+      console.error(errorUsuario);
 
       setLoading(false);
 
+      setError("No se pudo crear la cuenta.");
+
       return;
+
     }
 
-    // Crear sesión
+    // Guardar sesión COMPLETA
 
-   localStorage.setItem(
-  "rayongrid_session",
-  JSON.stringify(nuevoUsuario)
-);
+    localStorage.setItem(
+      "rayongrid_session",
+      JSON.stringify(nuevoUsuario)
+    );
 
     setLoading(false);
 
-    window.location.href = "/bienvenida";
+    window.location.href =
+      "/bienvenida";
+
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
 
-      <h1 className="text-4xl font-black text-center mb-2">
+    <div className="space-y-5">
+
+      <h1 className="text-4xl font-black text-center">
         RayonGrid
       </h1>
 
-      <p className="text-zinc-400 text-center mb-8">
+      <p className="text-center text-zinc-400">
         Crea tu cuenta
       </p>
 
@@ -120,72 +142,32 @@ export default function RegisterForm() {
         type="text"
         placeholder="Usuario"
         value={usuario}
-        onChange={(e) => setUsuario(e.target.value)}
-        className="
-          w-full
-          mb-4
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-          focus:border-orange-500
-          outline-none
-        "
+        onChange={(e)=>setUsuario(e.target.value)}
+        className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
       />
 
       <input
         type="email"
         placeholder="Correo electrónico"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="
-          w-full
-          mb-4
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-          focus:border-orange-500
-          outline-none
-        "
+        onChange={(e)=>setEmail(e.target.value)}
+        className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
       />
 
       <input
         type="password"
         placeholder="Contraseña"
         value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="
-          w-full
-          mb-4
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-          focus:border-orange-500
-          outline-none
-        "
+        onChange={(e)=>setPassword(e.target.value)}
+        className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
       />
 
       <input
         type="password"
         placeholder="Repetir contraseña"
         value={confirmarPassword}
-        onChange={(e) => setConfirmarPassword(e.target.value)}
-        className="
-          w-full
-          mb-8
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-          focus:border-orange-500
-          outline-none
-        "
+        onChange={(e)=>setConfirmarPassword(e.target.value)}
+        className="w-full p-4 rounded-2xl bg-zinc-900 border border-zinc-700"
       />
 
       <AvatarPicker
@@ -194,40 +176,29 @@ export default function RegisterForm() {
       />
 
       {error && (
-        <div
-          className="
-            mt-6
-            rounded-xl
-            bg-red-500/10
-            border
-            border-red-500/30
-            p-4
-            text-red-400
-            text-sm
-          "
-        >
+
+        <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 text-red-400">
+
           {error}
+
         </div>
+
       )}
 
       <button
         onClick={registrarUsuario}
         disabled={loading}
-        className="
-          w-full
-          mt-8
-          bg-orange-500
-          hover:bg-orange-400
-          rounded-2xl
-          py-4
-          font-bold
-          transition-colors
-          disabled:opacity-50
-        "
+        className="w-full bg-orange-500 hover:bg-orange-400 rounded-2xl py-4 font-bold disabled:opacity-50"
       >
-        {loading ? "Creando cuenta..." : "Crear cuenta"}
+
+        {loading
+          ? "Creando cuenta..."
+          : "Crear cuenta"}
+
       </button>
 
     </div>
+
   );
+
 }
