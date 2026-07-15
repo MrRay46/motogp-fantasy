@@ -2,34 +2,21 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import AvatarPicker from "./AvatarPicker";
 
 export default function CreateLeagueForm() {
 
-  const [usuario, setUsuario] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmarPassword, setConfirmarPassword] = useState("");
-
   const [nombreLiga, setNombreLiga] = useState("");
-
-  const [avatar, setAvatar] =
-    useState("avatar1.png");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   function generarCodigoLiga() {
 
     const caracteres =
       "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-    let codigo = "";
+    let codigo = "RG-";
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 6; i++) {
 
       codigo += caracteres.charAt(
         Math.floor(
@@ -48,134 +35,65 @@ export default function CreateLeagueForm() {
 
     setError("");
 
-    if (
-      !usuario ||
-      !email ||
-      !password ||
-      !confirmarPassword ||
-      !nombreLiga
-    ) {
+    if (!nombreLiga.trim()) {
 
       setError(
-        "Debes completar todos los campos."
+        "Introduce un nombre para la liga."
       );
 
       return;
 
     }
 
-    if (
-      password !== confirmarPassword
-    ) {
+    const sesion =
+      localStorage.getItem(
+        "rayongrid_session"
+      );
+
+    if (!sesion) {
 
       setError(
-        "Las contraseñas no coinciden."
+        "No hay sesión iniciada."
       );
 
       return;
 
     }
 
-    if (password.length < 6) {
-
-      setError(
-        "La contraseña debe tener al menos 6 caracteres."
-      );
-
-      return;
-
-    }
+    const usuario =
+      JSON.parse(sesion);
 
     setLoading(true);
 
-    // Comprobar usuario
+    // Obtener usuario actualizado
 
     const {
-      data: usuarioExistente,
-    } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("usuario", usuario)
-      .maybeSingle();
-
-    if (usuarioExistente) {
-
-      setLoading(false);
-
-      setError(
-        "Ese nombre de usuario ya existe."
-      );
-
-      return;
-
-    }
-
-    // Comprobar email
-
-    const {
-      data: emailExistente,
-    } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (emailExistente) {
-
-      setLoading(false);
-
-      setError(
-        "Ese correo electrónico ya está registrado."
-      );
-
-      return;
-
-    }
-
-        // =====================================
-    // Crear usuario
-    // =====================================
-
-    const {
-      data: nuevoUsuario,
+      data: usuarioDB,
       error: errorUsuario,
     } = await supabase
       .from("usuarios")
-      .insert([
-        {
-          usuario,
-          email,
-          password,
-          avatar,
-          activo: true,
-          super_admin: false,
-        },
-      ])
-      .select()
+      .select("*")
+      .eq("id", usuario.id)
       .single();
 
-    if (errorUsuario || !nuevoUsuario) {
+    if (errorUsuario || !usuarioDB) {
 
       setLoading(false);
 
       setError(
-        "No se pudo crear el usuario."
+        "No se pudo cargar el usuario."
       );
 
       return;
 
     }
 
-    // =====================================
-    // Generar código de liga
-    // =====================================
+    // Crear código
 
-    const codigoLiga =
+    const codigo =
       generarCodigoLiga();
 
-    // =====================================
     // Crear liga
-    // =====================================
 
     const {
       data: nuevaLiga,
@@ -185,15 +103,17 @@ export default function CreateLeagueForm() {
       .insert([
         {
           nombre: nombreLiga,
-          codigo: codigoLiga,
+          codigo: codigo,
           activa: true,
-          creador_id: nuevoUsuario.id,
+          creador_id: usuarioDB.id,
         },
       ])
       .select()
       .single();
 
     if (errorLiga || !nuevaLiga) {
+
+      console.error(errorLiga);
 
       setLoading(false);
 
@@ -205,9 +125,7 @@ export default function CreateLeagueForm() {
 
     }
 
-    // =====================================
-    // Relacionar usuario con liga
-    // =====================================
+    // Relación usuario-liga
 
     const {
       error: errorRelacion,
@@ -215,53 +133,37 @@ export default function CreateLeagueForm() {
       .from("usuarios_ligas")
       .insert([
         {
-          usuario_id: nuevoUsuario.id,
+          usuario_id: usuarioDB.id,
           liga_id: nuevaLiga.id,
           admin_liga: true,
-          codigo: codigoLiga,
+          codigo: codigo,
         },
       ]);
 
     if (errorRelacion) {
 
+      console.error(errorRelacion);
+
       setLoading(false);
 
       setError(
-        "No se pudo vincular el usuario con la liga."
+        "No se pudo crear la relación."
       );
 
       return;
 
     }
 
-    // =====================================
     // Actualizar liga actual
-    // =====================================
 
-    const {
-      error: errorLigaActual,
-    } = await supabase
+    await supabase
       .from("usuarios")
       .update({
         liga_actual_id: nuevaLiga.id,
       })
-      .eq("id", nuevoUsuario.id);
+      .eq("id", usuarioDB.id);
 
-    if (errorLigaActual) {
-
-      setLoading(false);
-
-      setError(
-        "No se pudo actualizar la liga actual."
-      );
-
-      return;
-
-    }
-
-    // =====================================
     // Crear equipo
-    // =====================================
 
     const {
       error: errorEquipo,
@@ -269,49 +171,44 @@ export default function CreateLeagueForm() {
       .from("equipos")
       .insert([
         {
-          usuario_id: nuevoUsuario.id,
+          usuario_id: usuarioDB.id,
           liga_id: nuevaLiga.id,
-          usuario: usuario,
-          avatar: avatar,
+
+          usuario: usuarioDB.usuario,
+          avatar: usuarioDB.avatar,
+
           puntos: 0,
+
+          posicion_anterior: 0,
+
+          diferencia_lider_anterior: 0,
+
+          admin: true,
         },
       ]);
 
     if (errorEquipo) {
 
-      setLoading(false);
-
-      setError(
-        "No se pudo crear el equipo."
-      );
-
-      return;
+      console.error(errorEquipo);
 
     }
 
-    // =====================================
-    // Guardar sesión
-    // =====================================
+    // Actualizar sesión
+
+    usuario.liga_actual_id =
+      nuevaLiga.id;
 
     localStorage.setItem(
       "rayongrid_session",
-      JSON.stringify({
-        id: nuevoUsuario.id,
-        usuario: nuevoUsuario.usuario,
-        email: nuevoUsuario.email,
-        avatar: nuevoUsuario.avatar,
-        super_admin:
-          nuevoUsuario.super_admin,
-        liga_actual_id:
-          nuevaLiga.id,
-      })
+      JSON.stringify(usuario)
     );
 
     setLoading(false);
 
     window.location.href =
       "/dashboard";
-        }
+
+  }
 
   return (
 
@@ -322,66 +219,15 @@ export default function CreateLeagueForm() {
       </h2>
 
       <p className="text-zinc-400 text-center">
-        Crea tu usuario y conviértete en el administrador de una nueva liga.
+        Dale un nombre a tu nueva liga.
       </p>
 
       <input
         type="text"
-        placeholder="Usuario"
-        value={usuario}
+        placeholder="Nombre de la liga"
+        value={nombreLiga}
         onChange={(e) =>
-          setUsuario(e.target.value)
-        }
-        className="
-          w-full
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-        "
-      />
-
-      <input
-        type="email"
-        placeholder="Correo electrónico"
-        value={email}
-        onChange={(e) =>
-          setEmail(e.target.value)
-        }
-        className="
-          w-full
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-        "
-      />
-
-      <input
-        type="password"
-        placeholder="Contraseña"
-        value={password}
-        onChange={(e) =>
-          setPassword(e.target.value)
-        }
-        className="
-          w-full
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-        "
-      />
-
-      <input
-        type="password"
-        placeholder="Repetir contraseña"
-        value={confirmarPassword}
-        onChange={(e) =>
-          setConfirmarPassword(
+          setNombreLiga(
             e.target.value
           )
         }
@@ -392,29 +238,9 @@ export default function CreateLeagueForm() {
           bg-zinc-900
           border
           border-zinc-700
+          outline-none
+          focus:border-orange-500
         "
-      />
-
-      <input
-        type="text"
-        placeholder="Nombre de la liga"
-        value={nombreLiga}
-        onChange={(e) =>
-          setNombreLiga(e.target.value)
-        }
-        className="
-          w-full
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-        "
-      />
-
-      <AvatarPicker
-        value={avatar}
-        onChange={setAvatar}
       />
 
       {error && (
@@ -429,7 +255,9 @@ export default function CreateLeagueForm() {
             text-red-400
           "
         >
+
           {error}
+
         </div>
 
       )}
@@ -441,17 +269,17 @@ export default function CreateLeagueForm() {
           w-full
           bg-yellow-500
           hover:bg-yellow-400
-          disabled:opacity-50
           text-black
           font-bold
           py-4
           rounded-2xl
           transition
+          disabled:opacity-50
         "
       >
 
         {loading
-          ? "Creando liga..."
+          ? "Creando..."
           : "Crear Liga"}
 
       </button>

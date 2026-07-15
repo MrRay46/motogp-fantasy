@@ -95,12 +95,10 @@ export default function RegisterForm() {
 
     // Crear sesión
 
-    localStorage.setItem(
-      "rayongrid_session",
-      JSON.stringify({
-        id: nuevoUsuario.id,
-      })
-    );
+   localStorage.setItem(
+  "rayongrid_session",
+  JSON.stringify(nuevoUsuario)
+);
 
     setLoading(false);
 
