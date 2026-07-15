@@ -156,12 +156,7 @@ export default function CreateLeagueForm() {
 
     // Actualizar liga actual
 
-    await supabase
-      .from("usuarios")
-      .update({
-        liga_actual_id: nuevaLiga.id,
-      })
-      .eq("id", usuarioDB.id);
+    
 
     // Crear equipo
 
