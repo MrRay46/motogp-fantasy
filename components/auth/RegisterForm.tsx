@@ -83,7 +83,7 @@ export default function RegisterForm() {
 
     const {
       data: nuevoUsuario,
-      error: errorUsuario,
+      error: errorInsert,
     } = await supabase
       .from("usuarios")
       .insert([
@@ -100,17 +100,21 @@ export default function RegisterForm() {
       .select()
       .single();
 
-    if (errorUsuario || !nuevoUsuario) {
+   if (errorInsert || !nuevoUsuario) {
 
-      console.error(errorUsuario);
+  console.error(errorInsert);
 
-      setLoading(false);
+  if (errorInsert) {
+    setError(errorInsert.message);
+  } else {
+    setError("No se pudo crear la cuenta.");
+  }
 
-      setError("No se pudo crear la cuenta.");
+  setLoading(false);
 
-      return;
+  return;
 
-    }
+}
 
     // Guardar sesión COMPLETA
 
