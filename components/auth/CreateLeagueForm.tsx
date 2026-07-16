@@ -1,29 +1,55 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function CreateLeagueForm() {
+interface Usuario {
+  id: number;
+  usuario: string;
+  email: string;
+  avatar: string;
+  liga_actual_id: number | null;
+}
+
+interface Props {
+  usuario: Usuario;
+}
+
+export default function CreateLeagueForm({
+  usuario,
+}: Props) {
+
+  const router = useRouter();
 
   const [nombreLiga, setNombreLiga] = useState("");
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
 
   function generarCodigoLiga() {
 
-    const caracteres =
-      "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const numeros = "23456789";
 
     let codigo = "RG-";
 
     for (let i = 0; i < 6; i++) {
 
-      codigo += caracteres.charAt(
-        Math.floor(
-          Math.random() *
-          caracteres.length
-        )
-      );
+      if (Math.random() > 0.5) {
+
+        codigo += letras[
+          Math.floor(Math.random() * letras.length)
+        ];
+
+      } else {
+
+        codigo += numeros[
+          Math.floor(Math.random() * numeros.length)
+        ];
+
+      }
 
     }
 
@@ -35,65 +61,23 @@ export default function CreateLeagueForm() {
 
     setError("");
 
+    if (loading) return;
+
     if (!nombreLiga.trim()) {
 
-      setError(
-        "Introduce un nombre para la liga."
-      );
+      setError("Introduce un nombre para la liga.");
 
       return;
 
     }
-
-    const sesion =
-      localStorage.getItem(
-        "rayongrid_session"
-      );
-
-    if (!sesion) {
-
-      setError(
-        "No hay sesión iniciada."
-      );
-
-      return;
-
-    }
-
-    const usuario =
-      JSON.parse(sesion);
 
     setLoading(true);
 
-    // Obtener usuario actualizado
+    const codigo = generarCodigoLiga();
 
-    const {
-      data: usuarioDB,
-      error: errorUsuario,
-    } = await supabase
-      .from("usuarios")
-      .select("*")
-      .eq("id", usuario.id)
-      .single();
-
-    if (errorUsuario || !usuarioDB) {
-
-      setLoading(false);
-
-      setError(
-        "No se pudo cargar el usuario."
-      );
-
-      return;
-
-    }
-
-    // Crear código
-
-    const codigo =
-      generarCodigoLiga();
-
-    // Crear liga
+    //----------------------------------------
+    // CREAR LIGA
+    //----------------------------------------
 
     const {
       data: nuevaLiga,
@@ -103,9 +87,9 @@ export default function CreateLeagueForm() {
       .insert([
         {
           nombre: nombreLiga,
-          codigo: codigo,
+          codigo,
           activa: true,
-          creador_id: usuarioDB.id,
+          creador_id: usuario.id,
         },
       ])
       .select()
@@ -118,14 +102,17 @@ export default function CreateLeagueForm() {
       setLoading(false);
 
       setError(
-        "No se pudo crear la liga."
+        errorLiga?.message ??
+          "No se pudo crear la liga."
       );
 
       return;
 
     }
 
-    // Relación usuario-liga
+    //----------------------------------------
+    // CREAR RELACIÓN USUARIO-LIGA
+    //----------------------------------------
 
     const {
       error: errorRelacion,
@@ -133,131 +120,120 @@ export default function CreateLeagueForm() {
       .from("usuarios_ligas")
       .insert([
         {
-          usuario_id: usuarioDB.id,
+          usuario_id: usuario.id,
           liga_id: nuevaLiga.id,
           admin_liga: true,
-          codigo: codigo,
+          codigo,
         },
       ]);
 
     if (errorRelacion) {
 
       console.error(errorRelacion);
-console.log("ERROR RELACION:", errorRelacion);
+
       setLoading(false);
 
       setError(
-        "No se pudo crear la relación."
+        errorRelacion.message ??
+          "No se pudo crear la relación."
       );
 
       return;
 
     }
 
-    // Actualizar liga actual
+    //----------------------------------------
+    // ACTUALIZAR LIGA ACTUAL
+    //----------------------------------------
 
-    await supabase
+    const {
+      error: errorUpdate,
+    } = await supabase
       .from("usuarios")
       .update({
         liga_actual_id: nuevaLiga.id,
       })
+      .eq("id", usuario.id);
 
+    if (errorUpdate) {
 
-    // Crear equipo
+      console.error(errorUpdate);
 
-    const {
-      error: errorEquipo,
-    } = await supabase
-      .from("equipos")
-      .insert([
-        {
-          usuario_id: usuarioDB.id,
-          liga_id: nuevaLiga.id,
+      setLoading(false);
 
-          usuario: usuarioDB.usuario,
-          avatar: usuarioDB.avatar,
+      setError(
+        errorUpdate.message ??
+          "No se pudo actualizar el usuario."
+      );
 
-          puntos: 0,
-
-          posicion_anterior: 0,
-
-          diferencia_lider_anterior: 0,
-
-          admin: true,
-        },
-      ]);
-
-    if (errorEquipo) {
-
-      console.error(errorEquipo);
+      return;
 
     }
 
-    // Actualizar sesión
+      //----------------------------------------
+    // ACTUALIZAR LOCALSTORAGE
+    //----------------------------------------
 
-    usuario.liga_actual_id =
-      nuevaLiga.id;
+    const usuarioActualizado = {
+      ...usuario,
+      liga_actual_id: nuevaLiga.id,
+    };
 
     localStorage.setItem(
-      "rayongrid_session",
-      JSON.stringify(usuario)
+      "usuario",
+      JSON.stringify(usuarioActualizado)
     );
 
     setLoading(false);
 
-    window.location.href =
-      "/dashboard";
+    router.push("/dashboard");
 
   }
 
   return (
-
     <div className="space-y-6">
 
-      <h2 className="text-3xl font-bold text-center">
-        Crear una liga
-      </h2>
+      <div>
 
-      <p className="text-zinc-400 text-center">
-        Dale un nombre a tu nueva liga.
-      </p>
+        <label className="block text-sm text-zinc-400 mb-2">
+          Nombre de la liga
+        </label>
 
-      <input
-        type="text"
-        placeholder="Nombre de la liga"
-        value={nombreLiga}
-        onChange={(e) =>
-          setNombreLiga(
-            e.target.value
-          )
-        }
-        className="
-          w-full
-          p-4
-          rounded-2xl
-          bg-zinc-900
-          border
-          border-zinc-700
-          outline-none
-          focus:border-orange-500
-        "
-      />
+        <input
+          type="text"
+          placeholder="Ej. Los Ruda Pinchada"
+          value={nombreLiga}
+          onChange={(e) =>
+            setNombreLiga(e.target.value)
+          }
+          className="
+            w-full
+            rounded-xl
+            bg-zinc-900
+            border
+            border-zinc-700
+            px-4
+            py-3
+            outline-none
+            focus:border-orange-500
+          "
+        />
+
+      </div>
 
       {error && (
 
         <div
           className="
-            rounded-xl
-            bg-red-500/10
+            bg-red-900/30
             border
-            border-red-500/30
+            border-red-700
+            rounded-xl
             p-4
             text-red-400
           "
         >
-
           {error}
-
         </div>
 
       )}
@@ -267,25 +243,35 @@ console.log("ERROR RELACION:", errorRelacion);
         disabled={loading}
         className="
           w-full
-          bg-yellow-500
-          hover:bg-yellow-400
-          text-black
-          font-bold
-          py-4
-          rounded-2xl
+          bg-orange-500
+          hover:bg-orange-600
           transition
-          disabled:opacity-50
+          rounded-xl
+          py-4
+          font-bold
         "
       >
-
         {loading
-          ? "Creando..."
+          ? "Creando liga..."
           : "Crear Liga"}
+      </button>
 
+      <button
+        onClick={() => router.push("/registro")}
+        className="
+          w-full
+          bg-zinc-700
+          hover:bg-zinc-600
+          transition
+          rounded-xl
+          py-4
+          font-bold
+        "
+      >
+        ← Volver
       </button>
 
     </div>
-
   );
 
 }

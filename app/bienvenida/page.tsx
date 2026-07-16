@@ -1,127 +1,89 @@
 "use client";
 
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import CreateLeagueForm from "@/components/auth/CreateLeagueForm";
 import JoinLeagueForm from "@/components/auth/JoinLeagueForm";
 
 export default function BienvenidaPage() {
+  const router = useRouter();
 
-  const [modo, setModo] =
-    useState<"crear" | "unirse" | null>(null);
+  const [modo, setModo] = useState<"crear" | "unirse">("crear");
+  const [usuario, setUsuario] = useState<any>(null);
+
+  useEffect(() => {
+    const guardado = localStorage.getItem("usuario");
+
+    if (!guardado) {
+      router.replace("/registro");
+      return;
+    }
+
+    const datos = JSON.parse(guardado);
+
+    // Si ya pertenece a una liga, ir al dashboard
+    if (datos.liga_actual_id) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    setUsuario(datos);
+  }, [router]);
+
+  if (!usuario) return null;
 
   return (
+    <main className="min-h-screen bg-black flex items-center justify-center px-6">
 
-    <main className="min-h-screen bg-black text-white flex items-center justify-center p-8">
+      <div className="w-full max-w-lg">
 
-      <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8 w-full max-w-lg">
+        <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
 
-        {modo === null && (
+          <h1 className="text-4xl font-black text-center mb-2">
+            Bienvenido
+          </h1>
 
-          <>
+          <p className="text-center text-zinc-400 mb-8">
+            Hola <span className="font-bold">{usuario.usuario}</span>.
+            Ahora debes elegir cómo quieres comenzar.
+          </p>
 
-            <h1 className="text-4xl font-black text-center mb-4">
-              Bienvenido a RayonGrid
-            </h1>
-
-            <p className="text-zinc-400 text-center mb-10">
-              Tu cuenta ya está creada.
-              <br />
-              Ahora elige cómo quieres empezar.
-            </p>
-
-            <div className="space-y-6">
-
-              <button
-                onClick={() => setModo("crear")}
-                className="
-                  w-full
-                  bg-yellow-500
-                  hover:bg-yellow-400
-                  text-black
-                  font-bold
-                  py-5
-                  rounded-2xl
-                  text-xl
-                "
-              >
-                🏆 Crear una liga
-              </button>
-
-              <button
-                onClick={() => setModo("unirse")}
-                className="
-                  w-full
-                  bg-blue-600
-                  hover:bg-blue-500
-                  text-white
-                  font-bold
-                  py-5
-                  rounded-2xl
-                  text-xl
-                "
-              >
-                🤝 Unirme a una liga
-              </button>
-
-            </div>
-
-          </>
-
-        )}
-
-        {modo === "crear" && (
-
-          <>
-
-            <CreateLeagueForm />
+          <div className="grid grid-cols-2 gap-3 mb-8">
 
             <button
-              onClick={() => setModo(null)}
-              className="
-                w-full
-                mt-6
-                bg-zinc-700
-                hover:bg-zinc-600
-                rounded-xl
-                py-3
-              "
+              onClick={() => setModo("crear")}
+              className={`rounded-xl py-3 font-bold transition ${
+                modo === "crear"
+                  ? "bg-orange-500 text-white"
+                  : "bg-zinc-800 hover:bg-zinc-700"
+              }`}
             >
-              ← Volver
+              Crear liga
             </button>
-
-          </>
-
-        )}
-
-        {modo === "unirse" && (
-
-          <>
-
-            <JoinLeagueForm />
 
             <button
-              onClick={() => setModo(null)}
-              className="
-                w-full
-                mt-6
-                bg-zinc-700
-                hover:bg-zinc-600
-                rounded-xl
-                py-3
-              "
+              onClick={() => setModo("unirse")}
+              className={`rounded-xl py-3 font-bold transition ${
+                modo === "unirse"
+                  ? "bg-orange-500 text-white"
+                  : "bg-zinc-800 hover:bg-zinc-700"
+              }`}
             >
-              ← Volver
+              Unirme
             </button>
 
-          </>
+          </div>
 
-        )}
+          {modo === "crear" ? (
+            <CreateLeagueForm usuario={usuario} />
+          ) : (
+            <JoinLeagueForm usuario={usuario} />
+          )}
+
+        </div>
 
       </div>
 
     </main>
-
   );
-
 }

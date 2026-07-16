@@ -1,74 +1,130 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function JoinLeagueForm() {
+interface Usuario {
+  id: number;
+  usuario: string;
+  email: string;
+  avatar: string;
+  liga_actual_id: number | null;
+}
+
+interface Props {
+  usuario: Usuario;
+}
+
+export default function JoinLeagueForm({
+  usuario,
+}: Props) {
+
+  const router = useRouter();
+
   const [codigo, setCodigo] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-async function unirseLiga() {
+  const [loading, setLoading] =
+    useState(false);
 
-  setError("");
+  const [error, setError] =
+    useState("");
 
-  if (!codigo.trim()) {
-    setError("Introduce un código de liga.");
-    return;
-  }
+  async function unirseLiga() {
 
-  setLoading(true);
+    setError("");
 
-  // Leer sesión
+    if (loading) return;
 
-  const sesion = localStorage.getItem("rayongrid_session");
+    if (!codigo.trim()) {
 
-  if (!sesion) {
-    setError("No hay sesión iniciada.");
-    setLoading(false);
-    return;
-  }
+      setError(
+        "Introduce un código de liga."
+      );
 
-  const usuario = JSON.parse(sesion);
+      return;
 
-  // Buscar la liga
+    }
 
-  const {
-    data: liga,
-    error: errorLiga,
-  } = await supabase
-    .from("ligas")
-    .select("*")
-    .eq("codigo", codigo.toUpperCase())
-    .single();
+    setLoading(true);
 
-  if (errorLiga || !liga) {
-    setError("Ese código no existe.");
-    setLoading(false);
-    return;
-  }
+    //----------------------------------------
+    // BUSCAR LIGA
+    //----------------------------------------
 
-  // Comprobar que no esté ya dentro
+    const {
+      data: liga,
+      error: errorLiga,
+    } = await supabase
+      .from("ligas")
+      .select("*")
+      .eq(
+        "codigo",
+        codigo.toUpperCase()
+      )
+      .single();
 
-  const {
-    data: existente,
-  } = await supabase
-    .from("usuarios_ligas")
-    .select("id")
-    .eq("usuario_id", usuario.id)
-    .eq("liga_id", liga.id)
-    .maybeSingle();
+    if (errorLiga || !liga) {
 
-  if (existente) {
-    setError("Ya perteneces a esa liga.");
-    setLoading(false);
-    return;
-  }
+      console.error(errorLiga);
 
-  // Añadir a usuarios_ligas
+      setLoading(false);
 
-  const { error: errorUnion } =
-    await supabase
+      setError(
+        "Ese código no existe."
+      );
+
+      return;
+
+    }
+
+    //----------------------------------------
+    // ¿YA PERTENECE?
+    //----------------------------------------
+
+    const {
+      data: existente,
+      error: errorExistente,
+    } = await supabase
+      .from("usuarios_ligas")
+      .select("id")
+      .eq("usuario_id", usuario.id)
+      .eq("liga_id", liga.id)
+      .maybeSingle();
+
+    if (errorExistente) {
+
+      console.error(errorExistente);
+
+      setLoading(false);
+
+      setError(
+        "No se pudo comprobar la liga."
+      );
+
+      return;
+
+    }
+
+    if (existente) {
+
+      setLoading(false);
+
+      setError(
+        "Ya perteneces a esta liga."
+      );
+
+      return;
+
+    }
+
+    //----------------------------------------
+    // INSERTAR RELACIÓN
+    //----------------------------------------
+
+    const {
+      error: errorRelacion,
+    } = await supabase
       .from("usuarios_ligas")
       .insert([
         {
@@ -79,197 +135,155 @@ async function unirseLiga() {
         },
       ]);
 
-  if (errorUnion) {
-    console.error(errorUnion);
-    setError("No se pudo unir a la liga.");
+    if (errorRelacion) {
+
+      console.error(errorRelacion);
+
+      setLoading(false);
+
+      setError(
+        errorRelacion.message
+      );
+
+      return;
+
+    }
+
+    //----------------------------------------
+    // ACTUALIZAR USUARIO
+    //----------------------------------------
+
+    const {
+      error: errorUpdate,
+    } = await supabase
+      .from("usuarios")
+      .update({
+        liga_actual_id: liga.id,
+      })
+      .eq("id", usuario.id);
+
+    if (errorUpdate) {
+
+      console.error(errorUpdate);
+
+      setLoading(false);
+
+      setError(
+        errorUpdate.message
+      );
+
+      return;
+
+    }
+
+       //----------------------------------------
+    // ACTUALIZAR LOCALSTORAGE
+    //----------------------------------------
+
+    const usuarioActualizado = {
+      ...usuario,
+      liga_actual_id: liga.id,
+    };
+
+    localStorage.setItem(
+      "usuario",
+      JSON.stringify(usuarioActualizado)
+    );
+
     setLoading(false);
-    return;
+
+    router.push("/dashboard");
+
   }
 
-  // Actualizar usuario
-
-  await supabase
-    .from("usuarios")
-    .update({
-      liga_id: liga.id,
-    })
-    .eq("id", usuario.id);
-
-const { data: equipoExistente } = await supabase
-  .from("equipos")
-  .select("id")
-  .eq("usuario_id", usuario.id)
-  .eq("liga_id", liga.id)
-  .maybeSingle();
-
- if (!equipoExistente) {
-
-  const { error: errorEquipo } =
-    await supabase
-      .from("equipos")
-      .insert([
-        {
-        usuario_id: usuario.id,
-liga_id: liga.id,
-
-usuario: usuario.usuario,
-avatar: usuario.avatar,
-
-puntos: 0,
-posicion_anterior: 0,
-diferencia_lider_anterior: 0,
-
-admin: false,
-
-fichados: [],
-reserva: "",
-motor: "",
-
-prediccion_piloto: "",
-prediccion_motor: "",
-
-prediccion_piloto_original: "",
-prediccion_motor_original: "",
-
-prediccion_piloto_modificada: false,
-prediccion_motor_modificada: false,
-
-bonus_temporada: 0,
-bonus_temporada_aplicado: false,
-        },
-      ]);
-
-  if (errorEquipo) {
-    console.error(errorEquipo);
-  }
-
-}
-
-  const { error: errorEquipo } =
-    await supabase
-      .from("equipos")
-      .insert([
-        {
-          usuario_id: usuario.id,
-          liga_id: liga.id,
-
-          usuario: usuario.usuario,
-          avatar: usuario.avatar,
-
-          puntos: 0,
-          posicion_anterior: 0,
-          diferencia_lider_anterior: 0,
-
-          admin: false,
-
-          fichados: [],
-          reserva: "",
-          motor: "",
-
-          prediccion_piloto: "",
-          prediccion_motor: "",
-
-          prediccion_piloto_original: "",
-          prediccion_motor_original: "",
-
-          prediccion_piloto_modificada: false,
-          prediccion_motor_modificada: false,
-
-          bonus_temporada: 0,
-          bonus_temporada_aplicado: false,
-        },
-      ]);
-
-  if (errorEquipo) {
-    console.error(errorEquipo);
-  }
-
-  // Actualizar sesión
-
-  usuario.liga_id = liga.id;
-
-  localStorage.setItem(
-    "rayongrid_session",
-    JSON.stringify(usuario)
-  );
-setLoading(false);
-  window.location.href = "/dashboard";
-}
   return (
-  <div>
 
-    <h2 className="text-2xl font-bold text-center mb-6">
-      Unirme a una liga
-    </h2>
+    <div className="space-y-6">
 
-    <input
-      type="text"
-      placeholder="Código de invitación"
-      value={codigo}
-      onChange={(e) =>
-        setCodigo(e.target.value.toUpperCase())
-      }
-      className="
-        w-full
-        p-4
-        rounded-xl
-        bg-zinc-800
-        border
-        border-zinc-700
-        mb-6
-        outline-none
-        focus:border-orange-500
-      "
-    />
+      <div>
 
-    {error && (
-      <div
+        <label className="block text-sm text-zinc-400 mb-2">
+          Código de invitación
+        </label>
+
+        <input
+          type="text"
+          placeholder="RG-XXXXXX"
+          value={codigo}
+          onChange={(e) =>
+            setCodigo(
+              e.target.value.toUpperCase()
+            )
+          }
+          className="
+            w-full
+            rounded-xl
+            bg-zinc-900
+            border
+            border-zinc-700
+            px-4
+            py-3
+            uppercase
+            outline-none
+            focus:border-orange-500
+          "
+        />
+
+      </div>
+
+      {error && (
+
+        <div
+          className="
+            bg-red-900/30
+            border
+            border-red-700
+            rounded-xl
+            p-4
+            text-red-400
+          "
+        >
+          {error}
+        </div>
+
+      )}
+
+      <button
+        onClick={unirseLiga}
+        disabled={loading}
         className="
-          mb-6
+          w-full
+          bg-blue-600
+          hover:bg-blue-500
+          transition
           rounded-xl
-          bg-red-500/10
-          border
-          border-red-500/30
-          p-4
-          text-red-400
+          py-4
+          font-bold
+          disabled:opacity-50
         "
       >
-        {error}
-      </div>
-    )}
+        {loading
+          ? "Uniéndome..."
+          : "Entrar en la liga"}
+      </button>
 
-    <button
-      onClick={unirseLiga}
-      disabled={loading}
-      className="
-        w-full
-        bg-blue-600
-        hover:bg-blue-500
-        rounded-xl
-        py-4
-        font-bold
-        transition-colors
-      "
-    >
-      {loading
-        ? "Uniéndome..."
-        : "Entrar en la liga"}
-    </button>
+      <button
+        onClick={() => router.push("/bienvenida")}
+        className="
+          w-full
+          bg-zinc-700
+          hover:bg-zinc-600
+          transition
+          rounded-xl
+          py-4
+          font-bold
+        "
+      >
+        ← Volver
+      </button>
 
-    <button
-      onClick={() => window.location.reload()}
-      className="
-        w-full
-        mt-4
-        rounded-xl
-        py-4
-        bg-zinc-700
-        hover:bg-zinc-600
-      "
-    >
-      ← Volver
-    </button>
+    </div>
 
-  </div>
-);
+  );
+
 }
