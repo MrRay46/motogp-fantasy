@@ -94,7 +94,7 @@ export default function RegisterForm() {
           avatar,
           activo: true,
           super_admin: false,
-          liga_actual_id: null,
+          
         },
       ])
       .select()

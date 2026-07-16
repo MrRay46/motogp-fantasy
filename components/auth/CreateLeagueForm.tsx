@@ -143,7 +143,7 @@ export default function CreateLeagueForm() {
     if (errorRelacion) {
 
       console.error(errorRelacion);
-
+console.log("ERROR RELACION:", errorRelacion);
       setLoading(false);
 
       setError(
@@ -156,7 +156,12 @@ export default function CreateLeagueForm() {
 
     // Actualizar liga actual
 
-    
+    await supabase
+      .from("usuarios")
+      .update({
+        liga_actual_id: nuevaLiga.id,
+      })
+
 
     // Crear equipo
 
