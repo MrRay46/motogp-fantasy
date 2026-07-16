@@ -169,7 +169,7 @@ export default function RegisterForm() {
           onChange={(e) =>
             setUsuario(e.target.value)
           }
-          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3"
+          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
         <input
@@ -179,7 +179,7 @@ export default function RegisterForm() {
           onChange={(e) =>
             setEmail(e.target.value)
           }
-          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3"
+          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
         <input
@@ -189,7 +189,7 @@ export default function RegisterForm() {
           onChange={(e) =>
             setPassword(e.target.value)
           }
-          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3"
+          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
         <input
@@ -199,7 +199,7 @@ export default function RegisterForm() {
           onChange={(e) =>
             setPassword2(e.target.value)
           }
-          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3"
+          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
        <AvatarPicker
