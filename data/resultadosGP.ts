@@ -1,5 +1,5 @@
 export const resultadosGP = {
-  sachsenring: {
+  Sachsenring: {
 
     pilotoGanador:
       "Marc Marquez",
