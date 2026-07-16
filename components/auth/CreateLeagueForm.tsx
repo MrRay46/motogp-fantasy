@@ -201,22 +201,12 @@ export default function CreateLeagueForm({
 
         <input
           type="text"
-          placeholder="Ej. Los Ruda Pinchada"
+          placeholder="Ej. Los Rueda Pinchada"
           value={nombreLiga}
           onChange={(e) =>
             setNombreLiga(e.target.value)
           }
-          className="
-            w-full
-            rounded-xl
-            bg-zinc-900
-            border
-            border-zinc-700
-            px-4
-            py-3
-            outline-none
-            focus:border-orange-500
-          "
+          className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
       </div>
