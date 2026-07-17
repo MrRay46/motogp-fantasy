@@ -52,22 +52,34 @@ export default function BienvenidaPage() {
 
             <button
               onClick={() => setModo("crear")}
-              className={`rounded-xl py-3 font-bold transition ${
-                modo === "crear"
-                  ? "bg-orange-500 text-white"
-                  : "bg-zinc-800 hover:bg-zinc-700"
-              }`}
+              className={`
+                rounded-xl
+                py-3
+                font-bold
+                transition
+                ${
+                  modo === "crear"
+                    ? "bg-orange-500 text-white"
+                    : "bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
+                }
+              `}
             >
               Crear liga
             </button>
 
             <button
               onClick={() => setModo("unirse")}
-              className={`rounded-xl py-3 font-bold transition ${
-                modo === "unirse"
-                  ? "bg-orange-500 text-white"
-                  : "bg-zinc-800 hover:bg-zinc-700"
-              }`}
+              className={`
+                rounded-xl
+                py-3
+                font-bold
+                transition
+                ${
+                  modo === "unirse"
+                    ? "bg-orange-500 text-white"
+                    : "bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
+                }
+              `}
             >
               Unirme
             </button>
