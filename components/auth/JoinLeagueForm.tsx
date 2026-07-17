@@ -207,27 +207,28 @@ export default function JoinLeagueForm({
         </label>
 
         <input
-          type="text"
-          placeholder="RG-XXXXXX"
-          value={codigo}
-          onChange={(e) =>
-            setCodigo(
-              e.target.value.toUpperCase()
-            )
-          }
-          className="
-            w-full
-            rounded-xl
-            bg-zinc-900
-            border
-            border-zinc-700
-            px-4
-            py-3
-            uppercase
-            outline-none
-            focus:border-orange-500
-          "
-        />
+  type="text"
+  placeholder="RG-XXXXXX"
+  value={codigo}
+  onChange={(e) =>
+    setCodigo(e.target.value.toUpperCase())
+  }
+  className="
+    w-full
+    rounded-xl
+    border
+    border-orange-500
+    bg-zinc-900
+    px-4
+    py-3
+    text-white
+    caret-orange-500
+    placeholder:text-zinc-500
+    focus:outline-none
+    focus:ring-2
+    focus:ring-orange-500
+  "
+/>
 
       </div>
 
@@ -249,41 +250,40 @@ export default function JoinLeagueForm({
       )}
 
       <button
-        onClick={unirseLiga}
-        disabled={loading}
-        className="
-          w-full
-          bg-blue-600
-          hover:bg-blue-500
-          transition
-          rounded-xl
-          py-4
-          font-bold
-          disabled:opacity-50
-        "
-      >
-        {loading
-          ? "Uniéndome..."
-          : "Entrar en la liga"}
-      </button>
+  onClick={unirseLiga}
+  disabled={loading}
+  className="
+    w-full
+    bg-blue-600
+    hover:bg-blue-500
+    transition
+    rounded-xl
+    py-4
+    font-bold
+    text-white
+    disabled:opacity-50
+  "
+>
+  {loading
+    ? "Uniéndome..."
+    : "Entrar en la liga"}
+</button>
 
-      <button
-        onClick={() => router.push("/bienvenida")}
-        className="
-          w-full
-          bg-zinc-700
-          hover:bg-zinc-600
-          transition
-          rounded-xl
-          py-4
-          font-bold
-        "
-      >
-        ← Volver
-      </button>
-
-    </div>
-
-  );
-
+<button
+  onClick={() => router.push("/bienvenida")}
+  className="
+    w-full
+    rounded-xl
+    bg-zinc-700
+    py-3
+    font-semibold
+    text-zinc-100
+    hover:bg-zinc-600
+    transition
+  "
+>
+  ← Volver
+</button>
+</div> 
+); 
 }
