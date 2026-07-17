@@ -277,7 +277,7 @@ export default function JoinLeagueForm({
     bg-zinc-700
     py-3
     font-semibold
-    text-zinc-100
+    text-white
     hover:bg-zinc-600
     transition
   "

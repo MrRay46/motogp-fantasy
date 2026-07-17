@@ -251,6 +251,7 @@ export default function CreateLeagueForm({
         className="
           w-full
           bg-zinc-700
+          text-white
           hover:bg-zinc-600
           transition
           rounded-xl
