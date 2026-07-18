@@ -20,10 +20,11 @@ export default function PerformanceCard() {
   }, []);
 
   async function cargarDatos() {
-    const usuario =
-      localStorage.getItem("usuarioLogueado");
+    const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-    if (!usuario) return;
+if (!sesion.usuario) return;
 
     const { data } = await supabase
       .from("equipos")
@@ -34,9 +35,9 @@ export default function PerformanceCard() {
 
     if (!data) return;
 
-    const indice = data.findIndex(
-      (e) => e.usuario === usuario
-    );
+   const indice = data.findIndex(
+  (e) => e.usuario === sesion.usuario
+);
 
     if (indice === -1) return;
 
