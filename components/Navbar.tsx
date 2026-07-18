@@ -83,12 +83,12 @@ export default function Navbar() {
         Mercado
       </a>
 
-      <a
-        href="/clasificacion"
-        className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-      >
-        Clasificaciones
-      </a>
+     <a
+  href="/liga"
+  className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+>
+  Liga
+</a>
 
       <a
         href="/reglas"
