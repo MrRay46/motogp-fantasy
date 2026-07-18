@@ -33,9 +33,14 @@ export default function LoginPage() {
     }
 
     localStorage.setItem(
-      "usuarioLogueado",
-      data.usuario
-    );
+  "usuario",
+  JSON.stringify({
+    id: data.id,
+    usuario: data.usuario,
+    avatar: data.avatar,
+    liga_actual_id: data.liga_actual_id,
+  })
+);
 
     window.location.href = "/dashboard";
 
