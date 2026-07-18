@@ -7,6 +7,7 @@ export const pilotos = [
     equipo: "Lenovo Team",
     marca: "Ducati",
     foto: "/pilotos/marc marquez.webp",
+    miniatura:"pilotos miniaturas/marc marquez.png",
     logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
@@ -17,6 +18,7 @@ export const pilotos = [
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
     foto: "/pilotos/pedro acosta.webp",
+    miniatura:"pilotos miniaturas/pedro acosta.png",
     logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
@@ -27,6 +29,7 @@ export const pilotos = [
     equipo: "Red Bull Tech3",
     marca: "KTM",
     foto: "/pilotos/maverick viñales.webp",
+    miniatura:"pilotos miniaturas/maverick viñales.png",
     logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
@@ -37,6 +40,7 @@ export const pilotos = [
     equipo: "Monster Energy",
     marca: "Yamaha",
     foto: "/pilotos/alex rins.webp",
+    miniatura:"pilotos miniaturas/alex rins.png",
     logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
@@ -47,6 +51,7 @@ export const pilotos = [
     equipo: "Prima Pramac",
     marca: "Yamaha",
     foto: "/pilotos/toprak razgatlioglu.webp",
+    miniatura:"pilotos miniaturas/toprak razgatlioglu.png",
     logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
@@ -57,6 +62,7 @@ export const pilotos = [
     equipo: "Monster Energy",
     marca: "Yamaha",
     foto: "/pilotos/fabio quartararo.webp",
+    miniatura:"pilotos miniaturas/fabio quartararo.png",
     logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
@@ -67,6 +73,7 @@ export const pilotos = [
     equipo: "Trackhouse Team",
     marca: "Aprilia",
     foto: "/pilotos/ai ogura.webp",
+    miniatura:"pilotos miniaturas/ai ogura.png",
     logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
@@ -77,6 +84,7 @@ export const pilotos = [
     equipo: "LCR",
     marca: "Honda",
     foto: "/pilotos/diogo moreira.webp",
+    miniatura:"pilotos miniaturas/diogo moreira.png",
     logoEquipo: "/equipos/CASTROL Honda LCR.png",
   },
   {
@@ -87,6 +95,7 @@ export const pilotos = [
     equipo: "VR46 Racing",
     marca: "Ducati",
     foto: "/pilotos/franco morbidelli.webp",
+    miniatura:"pilotos miniaturas/franco morbidelli.png",
     logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
@@ -97,6 +106,7 @@ export const pilotos = [
     equipo: "HRC Castrol",
     marca: "Honda",
     foto: "/pilotos/joan mir.webp",
+    miniatura:"pilotos miniaturas/joan mir.png",
     logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
@@ -107,6 +117,7 @@ export const pilotos = [
     equipo: "Prima Pramac",
     marca: "Yamaha",
     foto: "/pilotos/jack miller.webp",
+    miniatura:"pilotos miniaturas/jack miller.png",
     logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
@@ -117,6 +128,7 @@ export const pilotos = [
     equipo: "Aprilia Racing",
     marca: "Aprilia",
     foto: "/pilotos/jorge martin.webp",
+    miniatura:"pilotos miniaturas/jorge martin.png",
     logoEquipo: "/equipos/Aprilia racing.png",
   },
   {
@@ -127,6 +139,7 @@ export const pilotos = [
     equipo: "BK8 Gresini Racing",
     marca: "Ducati",
     foto: "/pilotos/alex marquez.webp", 
+    miniatura:"pilotos miniaturas/alex marquez.png",
     logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
@@ -137,6 +150,7 @@ export const pilotos = [
     equipo: "BK8 Gresini Racing",
     marca: "Ducati",
     foto: "/pilotos/fermin aldeguer.webp",
+    miniatura:"pilotos miniaturas/fermin aldeguer.png",
     logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
@@ -147,6 +161,7 @@ export const pilotos = [
     equipo: "HRC Castrol",
     marca: "Honda",
     foto: "/pilotos/luca marini.webp",
+    miniatura:"pilotos miniaturas/luca marini.png",
     logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
@@ -157,6 +172,7 @@ export const pilotos = [
     equipo: "Trackhouse Team",
     marca: "Aprilia",
     foto: "/pilotos/raul fernandez.webp",
+    miniatura:"pilotos miniaturas/raul fernandez.png",
     logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
@@ -167,6 +183,7 @@ export const pilotos = [
     equipo: "VR46 Racing",
     marca: "Ducati",
     foto: "/pilotos/fabio digiannantonio.webp",
+    miniatura:"pilotos miniaturas/fabio digiannantonio.png",
     logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
@@ -177,6 +194,7 @@ export const pilotos = [
     equipo: "Red Bull Factory Racing",
     marca: "KTM",
     foto: "/pilotos/brad binder.webp",
+    miniatura:"pilotos miniaturas/brad binder.png",
     logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
@@ -187,6 +205,7 @@ export const pilotos = [
     equipo: "Aprilia Racing",
     marca: "Aprilia",
     foto: "/pilotos/marco bezzecchi.webp",
+    miniatura:"pilotos miniaturas/marco bezzecchi.png",
     logoEquipo: "/equipos/Aprilia racing.png",  
   },
   {
@@ -197,6 +216,7 @@ export const pilotos = [
     equipo: "Red Bull Tech3",
     marca: "KTM",
     foto: "/pilotos/enea bastianini.webp",
+    miniatura:"pilotos miniaturas/enea bastianini.png",
     logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
@@ -207,6 +227,7 @@ export const pilotos = [
     equipo: "Lenovo Team",
     marca: "Ducati",
     foto: "/pilotos/francesco bagnaia.webp",
+    miniatura:"pilotos miniaturas/francesco bagnaia.png",
     logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
@@ -217,6 +238,7 @@ export const pilotos = [
     equipo: "LCR",
     marca: "Honda",
     foto: "/pilotos/johann zarco.webp",
+    miniatura:"pilotos miniaturas/johann zarco.png",
     logoEquipo: "/equipos/CASTROL Honda LCR.png",
   },
 ];
