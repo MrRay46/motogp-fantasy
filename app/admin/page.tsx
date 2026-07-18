@@ -22,28 +22,19 @@ export default function AdminPage() {
   async function cargarDatos() {
     setLoading(true);
 
-    const usuario = localStorage.getItem("usuarioLogueado");
+    const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-    if (!usuario) {
-      window.location.href = "/login";
-      return;
-    }
+if (!sesion.id) {
+  window.location.href = "/login";
+  return;
+}
 
-    // Buscar usuario
-    const {
-      data: usuarioDB,
-      error: errorUsuario,
-    } = await supabase
-      .from("usuarios")
-      .select("id, liga_actual_id")
-      .eq("usuario", usuario)
-      .single();
-
-    if (errorUsuario || !usuarioDB) {
-      console.error(errorUsuario);
-      setLoading(false);
-      return;
-    }
+if (!sesion.liga_actual_id) {
+  setLoading(false);
+  return;
+}
 
     // Buscar liga
     const {
@@ -52,7 +43,7 @@ export default function AdminPage() {
     } = await supabase
       .from("ligas")
       .select("id,codigo")
-      .eq("id", usuarioDB.liga_actual_id)
+      .eq("id", sesion.liga_actual_id)
       .single();
 
     if (errorLiga || !liga) {

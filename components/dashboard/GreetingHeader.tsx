@@ -9,10 +9,11 @@ export default function GreetingHeader() {
 
   useEffect(() => {
 
-    const nombre =
-      localStorage.getItem("usuarioLogueado") || "";
+    const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-    setUsuario(nombre);
+setUsuario(sesion.usuario || "");
 
     const hora = new Date().getHours();
 

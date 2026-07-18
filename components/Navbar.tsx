@@ -8,29 +8,16 @@ export default function Navbar() {
 
   useEffect(() => {
     async function comprobarAdmin() {
-      const usuario = localStorage.getItem("usuarioLogueado");
+      const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-      if (!usuario) return;
+if (!sesion.id) return;
 
-      // Buscar el usuario
-      const {
-        data: usuarioDB,
-        error: errorUsuario,
-      } = await supabase
-        .from("usuarios")
-        .select("id, liga_actual_id")
-        .eq("usuario", usuario)
-        .single();
-
-      if (errorUsuario || !usuarioDB) {
-        console.error(errorUsuario);
-        return;
-      }
-
-      if (!usuarioDB.liga_actual_id) {
-        setEsAdmin(false);
-        return;
-      }
+if (!sesion.liga_actual_id) {
+  setEsAdmin(false);
+  return;
+}
 
       // Buscar la relación usuario-liga
       const {
@@ -39,8 +26,8 @@ export default function Navbar() {
       } = await supabase
         .from("usuarios_ligas")
         .select("admin_liga")
-        .eq("usuario_id", usuarioDB.id)
-        .eq("liga_id", usuarioDB.liga_actual_id)
+        .eq("usuario_id", sesion.id)
+.eq("liga_id", sesion.liga_actual_id)
         .single();
 
       if (errorRelacion) {
@@ -55,7 +42,7 @@ export default function Navbar() {
   }, []);
 
   function cerrarSesion() {
-    localStorage.removeItem("usuarioLogueado");
+    localStorage.removeItem("usuario");
     window.location.href = "/";
   }
 

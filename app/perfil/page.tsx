@@ -34,25 +34,17 @@ export default function PerfilPage() {
 
   useEffect(() => {
 
-    const usuario =
-      localStorage.getItem(
-        "usuarioLogueado"
-      );
+  const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-    if (usuario) {
-      setJugadorActual(usuario);
-    }
+if (sesion.usuario) {
+  setJugadorActual(sesion.usuario);
+}
 
-    const avatarGuardado =
-      localStorage.getItem(
-        "avatarSeleccionado"
-      );
-
-    if (avatarGuardado) {
-      setAvatarSeleccionado(
-        avatarGuardado
-      );
-    }
+    if (sesion.avatar) {
+  setAvatarSeleccionado(sesion.avatar);
+}
 
   }, []);
 
@@ -69,6 +61,17 @@ export default function PerfilPage() {
         "avatarSeleccionado",
         avatar
       );
+
+const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
+
+sesion.avatar = avatar;
+
+localStorage.setItem(
+  "usuario",
+  JSON.stringify(sesion)
+);
 
       if (!jugadorActual)
         return;

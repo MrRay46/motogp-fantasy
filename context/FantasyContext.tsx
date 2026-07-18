@@ -54,9 +54,9 @@ export function FantasyProvider({
 }) {
 
   const [
-    jugadorActual,
-    setJugadorActual,
-  ] = useState("De la Raya Jr");
+  jugadorActual,
+  setJugadorActual,
+] = useState("");
 
   const [
     equipos,
@@ -130,18 +130,13 @@ prediccionMotorModificada:
   };
   useEffect(() => {
 
-    const jugadorGuardado =
-      localStorage.getItem(
-        "usuarioLogueado"
-      );
+    const sesion = JSON.parse(
+  localStorage.getItem("usuario") || "{}"
+);
 
-    if (jugadorGuardado) {
-
-      setJugadorActual(
-        jugadorGuardado
-      );
-
-    }
+if (sesion.usuario) {
+  setJugadorActual(sesion.usuario);
+}
 
   }, []);
 
