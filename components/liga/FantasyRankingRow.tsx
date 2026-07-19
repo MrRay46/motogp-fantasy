@@ -46,13 +46,13 @@ export default function FantasyRankingRow({
 
       <div className="mx-3">
         <Image
-          src={jugador.avatar}
-          alt={jugador.usuario}
-          width={40}
-          height={40}
-          className="rounded-full"
-          priority={jugador.posicion <= 3}
-        />
+  src={`/avatars/${jugador.avatar}`}
+  alt={jugador.usuario}
+  width={40}
+  height={40}
+  className="rounded-full"
+  priority={jugador.posicion <= 3}
+/>
       </div>
 
       {/* Usuario */}
