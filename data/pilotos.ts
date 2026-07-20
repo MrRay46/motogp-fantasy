@@ -1,5 +1,6 @@
 export const pilotos = [
   {
+    id: 1,
     nombre: "Marc Marquez",
     precio: 50,
     puntos: 190,
@@ -11,6 +12,7 @@ export const pilotos = [
     logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
+    id: 2,
     nombre: "Pedro Acosta",
     precio: 34,
     puntos: 148,
@@ -22,6 +24,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
+    id: 3,
     nombre: "Maverick Viñales",
     precio: 16,
     puntos: 10,
@@ -33,6 +36,7 @@ export const pilotos = [
     logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
+    id: 4,
     nombre: "Alex Rins",
     precio: 15.8,
     puntos: 21,
@@ -44,6 +48,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
+    id: 5,
     nombre: "Toprak Razgatlioglu",
     precio: 14.6,
     puntos: 12,
@@ -55,6 +60,7 @@ export const pilotos = [
     logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
+    id: 6,
     nombre: "Fabio Quartararo",
     precio: 22.1,
     puntos: 55,
@@ -66,6 +72,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Monster Energy Yamaha.png",
   },
   {
+    id: 7,
     nombre: "Ai Ogura",
     precio: 22.9,
     puntos: 194,
@@ -77,6 +84,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
+    id: 8,
     nombre: "Diogo Moreira",
     precio: 14.1,
     puntos: 48,
@@ -88,6 +96,7 @@ export const pilotos = [
     logoEquipo: "/equipos/CASTROL Honda LCR.png",
   },
   {
+    id: 9,
     nombre: "Franco Morbidelli",
     precio: 27.9,
     puntos: 46,
@@ -99,6 +108,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
+    id: 10,
     nombre: "Joan Mir",
     precio: 20,
     puntos: 26,
@@ -110,6 +120,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
+    id: 11,
     nombre: "Jack Miller",
     precio: 13.7,
     puntos: 19,
@@ -121,6 +132,7 @@ export const pilotos = [
     logoEquipo: "/equipos/prima pramac yamaha.webp",
   },
   {
+    id: 12,
     nombre: "Jorge Martin",
     precio: 31.6,
     puntos: 208,
@@ -132,6 +144,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Aprilia racing.png",
   },
   {
+    id: 13,
     nombre: "Alex Marquez",
     precio: 36.4,
     puntos: 87,
@@ -143,6 +156,7 @@ export const pilotos = [
     logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
+    id: 14,
     nombre: "Fermin Aldeguer",
     precio: 28.2,
     puntos: 76,
@@ -154,6 +168,7 @@ export const pilotos = [
     logoEquipo: "/equipos/BK8 Gresini Racing MotoGP.png",
   },
   {
+    id: 15,
     nombre: "Luca Marini",
     precio: 20.3,
     puntos: 79,
@@ -165,6 +180,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Honda HRC Castrol.png",
   },
   {
+    id: 16,
     nombre: "Raul Fernandez",
     precio: 24.1,
     puntos: 159,
@@ -176,6 +192,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Trackhouse MotoGP Team.png",
   },
   {
+    id: 17,
     nombre: "Fabio DiGiannantonio",
     precio: 25.5,
     puntos: 184,
@@ -187,6 +204,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Pertamina Enduro VR46 Racing Team.png",
   },
   {
+    id: 18,
     nombre: "Brad Binder",
     precio: 23,
     puntos: 64,
@@ -198,6 +216,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Red Bull KTM Factory Racing.png",
   },
   {
+    id: 19,
     nombre: "Marco Bezzecchi",
     precio: 37.8,
     puntos: 186,
@@ -209,6 +228,7 @@ export const pilotos = [
     logoEquipo: "/equipos/Aprilia racing.png",  
   },
   {
+    id: 20,
     nombre: "Enea Bastianini",
     precio: 18.2,
     puntos: 76,
@@ -220,6 +240,7 @@ export const pilotos = [
     logoEquipo: "/equipos/red bull ktm tech3.png",
   },
   {
+    id: 21,
     nombre: "Francesco Bagnaia",
     precio: 37.7,
     puntos: 143,
@@ -231,6 +252,7 @@ export const pilotos = [
     logoEquipo: "/equipos/ducati lenovo.webp",
   },
   {
+    id: 22,
     nombre: "Johann Zarco",
     precio: 17.9,
     puntos: 34,
