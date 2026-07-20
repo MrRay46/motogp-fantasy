@@ -7,9 +7,9 @@ export interface UsuarioSesion {
   liga_actual_id: number | null;
 }
 
-/**
- * Modelos de base de datos
- */
+/* -------------------------------------------------------------------------- */
+/*                           MODELOS DE BASE DE DATOS                         */
+/* -------------------------------------------------------------------------- */
 
 export interface UsuarioLigaDB {
   id: number;
@@ -23,30 +23,50 @@ export interface EquipoLigaDB {
   posicion_anterior: number;
 }
 
-/**
- * Modelos de negocio
- */
+export interface PilotoDB {
+  id: number;
+  nombre: string;
+  slug: string;
+  dorsal: number;
+  precio: number;
+  puntos_gp: number;
+  puntos_totales: number;
+  equipo: string;
+  constructor: string;
+  foto: string;
+  miniatura: string;
+  logo_equipo: string;
+  activo: boolean;
+  orden: number;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                             MODELOS DE NEGOCIO                             */
+/* -------------------------------------------------------------------------- */
 
 export interface RankingJugador {
   id: number;
-
   usuario: string;
-
   avatar: string;
-
   puntos: number;
-
   posicion: number;
-
   posicionAnterior: number;
-
   movimiento: MovimientoRanking;
 }
 
-export interface GPHighlight {
-  titulo: string;
-  nombre: string;
-  imagen: string;
+export interface DestacadosGP {
+  granPremio: {
+    nombre: string;
+    pais: string;
+    imagen: string;
+    fechaInicio: string;
+    fechaFin: string;
+  };
+
+  sprintWinner: PilotoDB | null;
+  raceWinner: PilotoDB | null;
+  riderInForm: PilotoDB | null;
+  championshipLeader: PilotoDB | null;
 }
 
 export interface PilotoRanking {

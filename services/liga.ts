@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
-
 import {
+  DestacadosGP,
   EquipoLigaDB,
   MovimientoRanking,
   RankingJugador,
@@ -30,8 +30,77 @@ export async function obtenerRankingFantasy(
   }
 }
 
-export async function obtenerDestacadosGP() {
-  return [];
+export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
+  try {
+    const hoy = new Date().toISOString().split("T")[0];
+
+    // Último GP disputado
+    const { data: gp, error: gpError } = await supabase
+      .from("grandes_premios")
+      .select("*")
+      .lt("fecha_fin", hoy)
+      .order("fecha_fin", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (gpError) throw gpError;
+
+    if (!gp) return null;
+
+    // Pilotos destacados
+    const ids = [
+      gp.piloto_ganador_sprint_id,
+      gp.piloto_ganador_id,
+      gp.piloto_forma_id,
+    ].filter(Boolean);
+
+    const { data: pilotos, error: pilotosError } = await supabase
+      .from("pilotos")
+      .select("*")
+      .in("id", ids);
+
+    if (pilotosError) throw pilotosError;
+
+    // Líder del Mundial
+    const { data: lider, error: liderError } = await supabase
+      .from("pilotos")
+      .select("*")
+      .order("puntos_totales", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (liderError) throw liderError;
+
+    return {
+      granPremio: {
+        nombre: gp.nombre,
+        pais: gp.pais,
+        imagen: gp.imagen,
+        fechaInicio: gp.fecha_inicio,
+        fechaFin: gp.fecha_fin,
+      },
+
+      sprintWinner:
+        pilotos?.find(
+          (p) => p.id === gp.piloto_ganador_sprint_id
+        ) ?? null,
+
+      raceWinner:
+        pilotos?.find(
+          (p) => p.id === gp.piloto_ganador_id
+        ) ?? null,
+
+      riderInForm:
+        pilotos?.find(
+          (p) => p.id === gp.piloto_forma_id
+        ) ?? null,
+
+      championshipLeader: lider,
+    };
+  } catch (error) {
+    console.error("Error obteniendo destacados GP:", error);
+    throw error;
+  }
 }
 
 export async function obtenerRankingPilotos() {
@@ -91,10 +160,7 @@ function crearMapaEquipos(
   equipos: EquipoLigaDB[]
 ): Map<string, EquipoLigaDB> {
   return new Map(
-    equipos.map((equipo) => [
-      equipo.usuario,
-      equipo,
-    ])
+    equipos.map((equipo) => [equipo.usuario, equipo])
   );
 }
 
@@ -120,9 +186,7 @@ function construirRanking(
 function ordenarRanking(
   ranking: Omit<RankingJugador, "posicion" | "movimiento">[]
 ): Omit<RankingJugador, "posicion" | "movimiento">[] {
-  return [...ranking].sort(
-    (a, b) => b.puntos - a.puntos
-  );
+  return [...ranking].sort((a, b) => b.puntos - a.puntos);
 }
 
 function calcularPosiciones(
