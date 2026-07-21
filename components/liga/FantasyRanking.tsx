@@ -1,22 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { getUsuarioActual } from "@/lib/session";
+import { obtenerRankingFantasy } from "@/services/liga";
 
 import { RankingJugador } from "@/types/liga";
 
 import FantasyRankingRow from "./FantasyRankingRow";
 
-interface FantasyRankingProps {
-  ranking: RankingJugador[];
-}
+export default function FantasyRanking() {
+  const [ranking, setRanking] = useState<RankingJugador[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-export default function FantasyRanking({
-  ranking,
-}: FantasyRankingProps) {
   const usuario = getUsuarioActual();
+  const ligaId = usuario?.liga_actual_id ?? null;
   const usuarioId = usuario?.id ?? null;
+
+  useEffect(() => {
+    async function cargarRanking() {
+      if (ligaId === null) {
+        setError("No hay una liga seleccionada.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const datos = await obtenerRankingFantasy(ligaId);
+        setRanking(datos);
+      } catch (err) {
+        console.error(err);
+        setError("No se pudo cargar la clasificación.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarRanking();
+  }, [ligaId]);
 
   return (
     <section className="rounded-2xl bg-zinc-900 p-5 shadow-lg">
@@ -24,11 +47,25 @@ export default function FantasyRanking({
         🏆 Clasificación Fantasy
       </h2>
 
-      {ranking.length === 0 ? (
+      {loading && (
+        <div className="py-8 text-center text-zinc-400">
+          Cargando clasificación...
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center text-red-300">
+          {error}
+        </div>
+      )}
+
+      {!loading && !error && ranking.length === 0 && (
         <div className="py-8 text-center text-zinc-400">
           Todavía no hay jugadores en esta liga.
         </div>
-      ) : (
+      )}
+
+      {!loading && !error && ranking.length > 0 && (
         <>
           <div className="space-y-3">
             {ranking.slice(0, 7).map((jugador) => (
