@@ -8,16 +8,11 @@ import ConstructorsRanking from "@/components/liga/ConstructorsRanking";
 
 export default function LigaPage() {
 return (
-  <AppLayout>
-    <div className="flex flex-col gap-6">
-      <FantasyRanking />
-
-      <GPHighlights />
-
-      <RidersRanking />
-
-      <ConstructorsRanking />
-    </div>
+  
+   <AppLayout>
+  <h1 className="text-5xl text-red-500">
+    PRUEBA
+  </h1>
   </AppLayout>
 );
 }

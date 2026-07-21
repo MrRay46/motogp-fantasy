@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/layout/AppLayout";
 import { supabase } from "@/lib/supabase";
 
 const avatars = [
@@ -97,9 +97,7 @@ localStorage.setItem(
 
   return (
 
-    <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
-
-      <Navbar />
+    <AppLayout>
 
       <h1 className="text-5xl font-bold text-red-500 mb-4">
         Mi Perfil
@@ -146,7 +144,7 @@ localStorage.setItem(
 
       </div>
 
-    </main>
+    </AppLayout>
 
   );
 
