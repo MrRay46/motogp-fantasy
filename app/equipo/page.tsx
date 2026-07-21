@@ -166,23 +166,20 @@ const puntosMotor =
 }
   return (
     
-  <AppLayout>
-    <div className="relative overflow-hidden">
-  <img
-  src="/trofeo.png"
-  alt="Trofeo MotoGP"
-  className="
-w-full
-h-full
-object-center
-object-cover
-scale-[1.2]
-md:scale-100
-md:object-cover
-"
-/>
+<AppLayout>
+  <div className="relative">
 
-</div>
+    {/* Fondo */}
+    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+      <img
+        src="/trofeo.png"
+        alt="Trofeo MotoGP"
+        className="w-full h-full object-cover scale-[1.2] md:scale-100"
+      />
+    </div>
+
+{/* Contenido */}
+    <div className="relative z-10">
       
 
       <h1 className="text-5xl font-bold text-red-500 mb-8">
@@ -472,11 +469,15 @@ md:object-cover
 
     )}
 
-  </div>
+  
+  </div> {/* Tarjeta Motor */}
 
-</div>
+</div> {/* Grid */}
 
-     
-  </AppLayout>
+</div> {/* Contenido */}
+
+</div> {/* Contenedor relative */}
+
+</AppLayout>
 );
 }
