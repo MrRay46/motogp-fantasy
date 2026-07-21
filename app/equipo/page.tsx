@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/layout/AppLayout";
 
 import { pilotos } from "@/data/pilotos";
 import { motores } from "@/data/motores";
@@ -165,8 +165,9 @@ const puntosMotor =
   return null;
 }
   return (
-    <main className="relative overflow-hidden min-h-screen bg-gradient-to-br from-black via-zinc-950 to-red-950 text-white p-8">
-      <div className="absolute top-32 left-0 w-full h-full opacity-30 pointer-events-none overflow-hidden">
+    
+  <AppLayout>
+    <div className="relative overflow-hidden">
   <img
   src="/trofeo.png"
   alt="Trofeo MotoGP"
@@ -182,7 +183,7 @@ md:object-cover
 />
 
 </div>
-      <Navbar />
+      
 
       <h1 className="text-5xl font-bold text-red-500 mb-8">
         Mi Equipo
@@ -475,6 +476,7 @@ md:object-cover
 
 </div>
 
-    </main>
-  );
+     
+  </AppLayout>
+);
 }
