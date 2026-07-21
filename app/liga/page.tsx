@@ -15,7 +15,7 @@ return (
 
       <RidersRanking />
 
-      
+      <GPHighlights />
 
       <ConstructorsRanking />
     </div>

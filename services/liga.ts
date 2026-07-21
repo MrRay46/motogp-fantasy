@@ -36,16 +36,20 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
 
     // Último GP disputado
     const { data: gp, error: gpError } = await supabase
-      .from("grandes_premios")
-      .select("*")
-      .lt("fecha_fin", hoy)
-      .order("fecha_fin", { ascending: false })
-      .limit(1)
-      .single();
+  .from("grandes_premios")
+  .select("*")
+  .lt("fecha_fin", hoy)
+  .order("fecha_fin", { ascending: false })
+  .limit(1)
+  .maybeSingle();
 
-    if (gpError) throw gpError;
+if (gpError) {
+  throw gpError;
+}
 
-    if (!gp) return null;
+if (!gp) {
+  return null;
+}
 
     // Pilotos destacados
     const ids = [
