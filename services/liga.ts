@@ -38,7 +38,7 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
     const { data: gp, error: gpError } = await supabase
   .from("grandes_premios")
   .select("*")
-  .lt("fecha_fin", hoy)
+  .eq("estado", "finalizado")
   .order("fecha_fin", { ascending: false })
   .limit(1)
   .maybeSingle();
