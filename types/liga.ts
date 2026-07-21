@@ -66,8 +66,9 @@ export interface DestacadosGP {
   sprintWinner: PilotoDB | null;
   raceWinner: PilotoDB | null;
   riderInForm: PilotoDB | null;
-  championshipLeader: PilotoDB | null;
 }
+
+
 
 export interface PilotoRanking {
   posicion: number;

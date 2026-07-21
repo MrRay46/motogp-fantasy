@@ -35,73 +35,88 @@ export default function GPHighlights() {
     cargarDestacados();
   }, []);
 
+  if (loading) {
+    return (
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+        <h2 className="mb-6 text-3xl font-black">
+          🏍 Últimos destacados
+        </h2>
+
+        <p className="text-zinc-400">
+          Cargando destacados...
+        </p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+        <h2 className="mb-6 text-3xl font-black">
+          🏍 Últimos destacados
+        </h2>
+
+        <p className="text-red-400">
+          {error}
+        </p>
+      </section>
+    );
+  }
+
+  if (!destacados) {
+    return (
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+        <h2 className="mb-6 text-3xl font-black">
+          🏍 Últimos destacados
+        </h2>
+
+        <p className="text-zinc-400">
+          No hay ningún Gran Premio finalizado.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
       <h2 className="mb-6 text-3xl font-black">
         🏍 Últimos destacados
       </h2>
 
-      {loading && (
-        <p className="text-zinc-400">
-          Cargando destacados...
-        </p>
-      )}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-2xl bg-zinc-800 p-5">
+          <p className="text-sm text-zinc-400">
+            Sprint Winner
+          </p>
 
-      {!loading && error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300">
-          {error}
+          <p className="mt-2 text-xl font-bold">
+            {destacados.sprintWinner?.nombre ??
+              "-"}
+          </p>
         </div>
-      )}
 
-      {!loading && !error && !destacados && (
-        <p className="text-zinc-400">
-          Todavía no hay Grandes Premios finalizados.
-        </p>
-      )}
+        <div className="rounded-2xl bg-zinc-800 p-5">
+          <p className="text-sm text-zinc-400">
+            Race Winner
+          </p>
 
-      {!loading && !error && destacados && (
-        <div className="space-y-5">
-          <div>
-            <p className="text-sm text-zinc-500">
-              Sprint Winner
-            </p>
-
-            <p className="text-lg font-bold">
-              {destacados.sprintWinner?.nombre ?? "-"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-zinc-500">
-              Race Winner
-            </p>
-
-            <p className="text-lg font-bold">
-              {destacados.raceWinner?.nombre ?? "-"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-zinc-500">
-              Rider in Form
-            </p>
-
-            <p className="text-lg font-bold">
-              {destacados.riderInForm?.nombre ?? "-"}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-sm text-zinc-500">
-              Championship Leader
-            </p>
-
-            <p className="text-lg font-bold">
-              {destacados.championshipLeader?.nombre ?? "-"}
-            </p>
-          </div>
+          <p className="mt-2 text-xl font-bold">
+            {destacados.raceWinner?.nombre ??
+              "-"}
+          </p>
         </div>
-      )}
+
+        <div className="rounded-2xl bg-zinc-800 p-5">
+          <p className="text-sm text-zinc-400">
+            Rider in Form
+          </p>
+
+          <p className="mt-2 text-xl font-bold">
+            {destacados.riderInForm?.nombre ??
+              "-"}
+          </p>
+        </div>
+      </div>
     </section>
   );
 }

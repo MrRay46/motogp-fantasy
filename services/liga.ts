@@ -32,26 +32,22 @@ export async function obtenerRankingFantasy(
 
 export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
   try {
-    const hoy = new Date().toISOString().split("T")[0];
-
-    // Último GP disputado
     const { data: gp, error: gpError } = await supabase
-  .from("grandes_premios")
-  .select("*")
-  .eq("estado", "finalizado")
-  .order("fecha_fin", { ascending: false })
-  .limit(1)
-  .maybeSingle();
+      .from("grandes_premios")
+      .select("*")
+      .eq("estado", "finalizado")
+      .order("fecha_fin", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-if (gpError) {
-  throw gpError;
-}
+    if (gpError) {
+      throw gpError;
+    }
 
-if (!gp) {
-  return null;
-}
+    if (!gp) {
+      return null;
+    }
 
-    // Pilotos destacados
     const ids = [
       gp.piloto_ganador_sprint_id,
       gp.piloto_ganador_id,
@@ -63,17 +59,9 @@ if (!gp) {
       .select("*")
       .in("id", ids);
 
-    if (pilotosError) throw pilotosError;
-
-    // Líder del Mundial
-    const { data: lider, error: liderError } = await supabase
-      .from("pilotos")
-      .select("*")
-      .order("puntos_totales", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (liderError) throw liderError;
+    if (pilotosError) {
+      throw pilotosError;
+    }
 
     return {
       granPremio: {
@@ -86,23 +74,27 @@ if (!gp) {
 
       sprintWinner:
         pilotos?.find(
-          (p) => p.id === gp.piloto_ganador_sprint_id
+          (piloto) =>
+            piloto.id === gp.piloto_ganador_sprint_id
         ) ?? null,
 
       raceWinner:
         pilotos?.find(
-          (p) => p.id === gp.piloto_ganador_id
+          (piloto) =>
+            piloto.id === gp.piloto_ganador_id
         ) ?? null,
 
       riderInForm:
         pilotos?.find(
-          (p) => p.id === gp.piloto_forma_id
+          (piloto) =>
+            piloto.id === gp.piloto_forma_id
         ) ?? null,
-
-      championshipLeader: lider,
     };
   } catch (error) {
-    console.error("Error obteniendo destacados GP:", error);
+    console.error(
+      "Error obteniendo destacados GP:",
+      error
+    );
     throw error;
   }
 }
