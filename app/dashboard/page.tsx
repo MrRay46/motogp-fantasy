@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/layout/AppLayout";
 import GreetingHeader from "@/components/dashboard/GreetingHeader";
 import NextGPCard from "@/components/dashboard/NextGPCard";
 import PaddockFeed from "@/components/dashboard/PaddockFeed";
@@ -9,9 +9,7 @@ import PerformanceCard from "@/components/dashboard/PerformanceCard";
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-black text-white">
-
-      <Navbar />
+  <AppLayout>
 
       <section className="max-w-6xl mx-auto px-6 py-14">
 
@@ -40,6 +38,6 @@ export default function DashboardPage() {
 
       </section>
 
-    </main>
+    </AppLayout>
   );
 }

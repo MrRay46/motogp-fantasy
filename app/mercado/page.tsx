@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/components/Navbar";
+import AppLayout from "@/components/layout/AppLayout";
 
 import { motores } from "@/data/motores";
 import { pilotos } from "@/data/pilotos";
@@ -192,9 +192,8 @@ const presupuestoRestante =
     );
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-black to-zinc-900 text-white p-8">
-
-      <Navbar />
+    
+  <AppLayout>
 
       <h1 className="text-5xl font-bold text-red-500 mb-4">
         Mercado
@@ -525,6 +524,6 @@ const presupuestoRestante =
 
       </div>
 
-    </main>
+    </AppLayout>
   );
 }
