@@ -26,17 +26,23 @@ export default function FantasyRanking() {
         setLoading(false);
         return;
       }
+async function cargarRanking() {
+  if (ligaId === null) {
+    setError("No hay una liga seleccionada.");
+    setLoading(false);
+    return;
+  }
 
-      try {
-        const datos = await obtenerRankingFantasy(ligaId);
-        setRanking(datos);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar la clasificación.");
-      } finally {
-        setLoading(false);
-      }
-    }
+  try {
+    const datos = await obtenerRankingFantasy(ligaId);
+    setRanking(datos);
+  } catch (err) {
+    console.error(err);
+    setError("No se pudo cargar la clasificación.");
+  } finally {
+    setLoading(false);
+  }
+}
 
     cargarRanking();
   }, [ligaId]);
