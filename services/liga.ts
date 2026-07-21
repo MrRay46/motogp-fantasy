@@ -71,7 +71,7 @@ if (!gp) {
       .select("*")
       .order("puntos_totales", { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (liderError) throw liderError;
 
