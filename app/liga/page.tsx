@@ -10,9 +10,15 @@ export default function LigaPage() {
 return (
   
    <AppLayout>
-  <h1 className="text-5xl text-red-500">
-    PRUEBA
-  </h1>
+  <div className="flex flex-col gap-6">
+      <FantasyRanking />
+
+      <GPHighlights />
+
+      
+
+      <ConstructorsRanking />
+    </div>
   </AppLayout>
 );
 }
