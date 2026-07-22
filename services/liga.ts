@@ -32,15 +32,7 @@ export async function obtenerRankingFantasy(
 
 export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
   try {
-    
-    const { data: prueba, error: pruebaError } = await supabase
-      .from("pilotos")
-      .select("id,nombre")
-      .limit(5);
-
-    console.log("PRUEBA PILOTOS:", prueba);
-    console.log("ERROR PILOTOS:", pruebaError);
-
+   
     const { data: gp, error: gpError } = await supabase
       .from("grandes_premios")
       .select("*")
