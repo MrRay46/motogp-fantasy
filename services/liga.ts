@@ -32,6 +32,15 @@ export async function obtenerRankingFantasy(
 
 export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
   try {
+    
+    const { data: prueba, error: pruebaError } = await supabase
+      .from("pilotos")
+      .select("id,nombre")
+      .limit(5);
+
+    console.log("PRUEBA PILOTOS:", prueba);
+    console.log("ERROR PILOTOS:", pruebaError);
+
     const { data: gp, error: gpError } = await supabase
       .from("grandes_premios")
       .select("*")
@@ -62,13 +71,7 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
     if (pilotosError) {
       throw pilotosError;
     }
-console.log("IDs buscados:", ids);
-console.log("Pilotos encontrados:", pilotos);
-console.log("GP:", {
-  sprint: gp.piloto_ganador_sprint_id,
-  race: gp.piloto_ganador_id,
-  form: gp.piloto_forma_id,
-});
+
     return {
       granPremio: {
         nombre: gp.nombre,
