@@ -91,10 +91,18 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
   }
 }
 
-export async function obtenerRankingPilotos() {
-  return [];
-}
 
+export async function obtenerRankingPilotos(): Promise<PilotoDB[]> {
+  const { data, error } = await supabase
+    .from("pilotos")
+    .select("*")
+    .eq("activo", true)
+    .order("puntos_totales", { ascending: false });
+
+  if (error) throw error;
+
+  return data ?? [];
+}
 export async function obtenerRankingConstructores() {
   return [];
 }
