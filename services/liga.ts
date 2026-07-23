@@ -7,6 +7,7 @@ import {
   RankingJugador,
   UsuarioLigaDB,
 } from "@/types/liga";
+import type { ConstructorDB } from "@/types/liga";
 
 /* -------------------------------------------------------------------------- */
 /*                               API PÚBLICA                                  */
@@ -104,10 +105,18 @@ export async function obtenerRankingPilotos(): Promise<PilotoDB[]> {
 
   return data ?? [];
 }
-export async function obtenerRankingConstructores() {
-  return [];
-}
 
+export async function obtenerRankingConstructores(): Promise<ConstructorDB[]> {
+  const { data, error } = await supabase
+    .from("constructores")
+    .select("*")
+    .eq("activo", true)
+    .order("puntos", { ascending: false });
+
+  if (error) throw error;
+
+  return data ?? [];
+}
 /* -------------------------------------------------------------------------- */
 /*                              FUNCIONES PRIVADAS                            */
 /* -------------------------------------------------------------------------- */

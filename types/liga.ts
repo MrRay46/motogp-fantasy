@@ -43,6 +43,17 @@ export interface PilotoDB {
   logo_constructor?: string;
 }
 
+export interface ConstructorDB {
+  id: number;
+  nombre: string;
+  slug: string;
+  logo: string;
+  logo_blanco?: string;
+  color: string;
+  puntos: number;
+  activo: boolean;
+  orden: number;
+}
 /* -------------------------------------------------------------------------- */
 /*                             MODELOS DE NEGOCIO                             */
 /* -------------------------------------------------------------------------- */
@@ -80,9 +91,9 @@ export interface PilotoRanking {
   foto: string;
 }
 
-export interface ConstructorRanking {
-  posicion: number;
-  nombre: string;
-  puntos: number;
-  logo: string;
+export interface ConstructorRanking { 
+  posicion: number; 
+  nombre: string; 
+  puntos: number; 
+  logo: string; 
 }
