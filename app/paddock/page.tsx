@@ -17,7 +17,7 @@ export default function PaddockPage() {
           🏍 PADDOCK
         </h1>
 
-        <PaddockFeed />
+        <PaddockFeed limit={false} />
 
       </section>
 

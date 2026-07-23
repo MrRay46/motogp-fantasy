@@ -12,7 +12,13 @@ interface Noticia {
   fecha: string;
 }
 
-export default function PaddockFeed() {
+export default function PaddockFeed({
+  limit = true,
+  showButton = true,
+}: {
+  limit?: boolean;
+  showButton?: boolean;
+}) {
 
   const [noticias, setNoticias] = useState<Noticia[]>([]);
 
@@ -22,12 +28,17 @@ export default function PaddockFeed() {
 
   async function cargarNoticias() {
 
-    const { data, error } = await supabase
-      .from("noticias")
-      .select("*")
-      .eq("visible", true)
-      .order("fecha", { ascending: false })
-.limit(5);
+    let query = supabase
+  .from("noticias")
+  .select("*")
+  .eq("visible", true)
+  .order("fecha", { ascending: false });
+
+if (limit) {
+  query = query.limit(5);
+}
+
+const { data, error } = await query;
 
     if (error) {
       console.error(error);
@@ -84,21 +95,21 @@ export default function PaddockFeed() {
       </div>
 
    
-<div className="flex justify-center mt-8">
-
-  <button
-    onClick={() => window.location.href = "/paddock"}
-    className="
-      text-orange-400
-      hover:text-orange-300
-      font-semibold
-      transition-colors
-    "
-  >
-    Ver todas las noticias →
-  </button>
-
-</div>
+{showButton && (
+  <div className="flex justify-center mt-8">
+    <button
+      onClick={() => (window.location.href = "/paddock")}
+      className="
+        text-orange-400
+        hover:text-orange-300
+        font-semibold
+        transition-colors
+      "
+    >
+      Ver todas las noticias →
+    </button>
+  </div>
+)}
 
 </div>
 
