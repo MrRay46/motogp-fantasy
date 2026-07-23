@@ -80,13 +80,13 @@ function HighlightCard({
           </div>
 
           <div className="relative h-24 w-24 shrink-0 drop-shadow-xl">
-            <Image
-              src={pilot.miniatura}
-              alt={pilot.nombre}
-              fill
-              className="object-contain"
-              sizes="96px"
-            />
+           <Image
+  src={pilot.miniatura}
+  alt={pilot.nombre}
+  fill
+  unoptimized
+  className="object-contain"
+/>
           </div>
         </div>
       )}
