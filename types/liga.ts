@@ -38,6 +38,9 @@ export interface PilotoDB {
   logo_equipo: string;
   activo: boolean;
   orden: number;
+
+  // Opcional para futuras consultas
+  logo_constructor?: string;
 }
 
 /* -------------------------------------------------------------------------- */

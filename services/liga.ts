@@ -32,7 +32,7 @@ export async function obtenerRankingFantasy(
 
 export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
   try {
-   
+    // Último GP finalizado
     const { data: gp, error: gpError } = await supabase
       .from("grandes_premios")
       .select("*")
@@ -41,28 +41,37 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
       .limit(1)
       .maybeSingle();
 
-    if (gpError) {
-      throw gpError;
-    }
+    if (gpError) throw gpError;
 
-    if (!gp) {
-      return null;
-    }
+    if (!gp) return null;
 
-    const ids = [
-      gp.piloto_ganador_sprint_id,
-      gp.piloto_ganador_id,
-      gp.piloto_forma_id,
-    ].filter(Boolean);
-
-    const { data: pilotos, error: pilotosError } = await supabase
+    // Ganador Sprint
+    const { data: sprintWinner, error: sprintError } = await supabase
       .from("pilotos")
       .select("*")
-      .in("id", ids);
+      .eq("id", gp.piloto_ganador_sprint_id)
+      .maybeSingle();
 
-    if (pilotosError) {
-      throw pilotosError;
-    }
+    if (sprintError) throw sprintError;
+
+    // Ganador Carrera
+    const { data: raceWinner, error: raceError } = await supabase
+      .from("pilotos")
+      .select("*")
+      .eq("id", gp.piloto_ganador_id)
+      .maybeSingle();
+
+    if (raceError) throw raceError;
+
+    // Líder del Mundial
+    const { data: riderInForm, error: leaderError } = await supabase
+      .from("pilotos")
+      .select("*")
+      .order("puntos_totales", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (leaderError) throw leaderError;
 
     return {
       granPremio: {
@@ -72,30 +81,12 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
         fechaInicio: gp.fecha_inicio,
         fechaFin: gp.fecha_fin,
       },
-
-      sprintWinner:
-        pilotos?.find(
-          (piloto) =>
-            piloto.id === gp.piloto_ganador_sprint_id
-        ) ?? null,
-
-      raceWinner:
-        pilotos?.find(
-          (piloto) =>
-            piloto.id === gp.piloto_ganador_id
-        ) ?? null,
-
-      riderInForm:
-        pilotos?.find(
-          (piloto) =>
-            piloto.id === gp.piloto_forma_id
-        ) ?? null,
+      sprintWinner: sprintWinner ?? null,
+      raceWinner: raceWinner ?? null,
+      riderInForm: riderInForm ?? null,
     };
   } catch (error) {
-    console.error(
-      "Error obteniendo destacados GP:",
-      error
-    );
+    console.error("Error obteniendo destacados GP:", error);
     throw error;
   }
 }
