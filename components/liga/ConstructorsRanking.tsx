@@ -51,15 +51,15 @@ function ConstructorRow({
           {posicionLabel}
         </div>
 
-        <div className="relative h-14 w-14 overflow-hidden rounded-full border border-zinc-700 bg-zinc-800">
-          <Image
-            src={constructor.logo}
-            alt={constructor.nombre}
-            fill
-            className="object-contain p-2"
-            sizes="56px"
-          />
-        </div>
+        <div className="relative flex h-14 w-20 items-center justify-center">
+  <Image
+    src={constructor.logo}
+    alt={constructor.nombre}
+    fill
+    className="object-contain"
+    sizes="80px"
+  />
+</div>
 
         <span className={`text-lg font-semibold ${textColor}`}>
           {constructor.nombre}
