@@ -79,7 +79,7 @@ function HighlightCard({
             </p>
           </div>
 
-          <div className="relative h-24 w-24 shrink-0 drop-shadow-xl">
+          <div className="relative -translate-y-3 h-28 w-28 shrink-0 drop-shadow-xl transition-transform">
            <img
             src={pilot.miniatura}
             alt={pilot.nombre}
