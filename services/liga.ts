@@ -3,6 +3,7 @@ import {
   DestacadosGP,
   EquipoLigaDB,
   MovimientoRanking,
+  PilotoDB,
   RankingJugador,
   UsuarioLigaDB,
 } from "@/types/liga";
