@@ -38,7 +38,7 @@ function HighlightCard({
       title: "text-yellow-300",
     },
   };
-console.log(pilot?.miniatura);
+
   const style = colors[accent];
 
   return (
