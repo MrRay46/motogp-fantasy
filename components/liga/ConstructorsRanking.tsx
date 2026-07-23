@@ -53,12 +53,18 @@ function ConstructorRow({
 
         <div className="relative flex h-14 w-20 items-center justify-center">
   <Image
-    src={constructor.logo}
-    alt={constructor.nombre}
-    fill
-    className="object-contain"
-    sizes="80px"
-  />
+  src={constructor.logo}
+  alt={constructor.nombre}
+  fill
+  className={`object-contain ${
+    constructor.slug === "aprilia"
+      ? "scale-125"
+      : constructor.slug === "ktm"
+      ? "scale-110"
+      : "scale-100"
+  }`}
+  sizes="80px"
+/>
 </div>
 
         <span className={`text-lg font-semibold ${textColor}`}>
