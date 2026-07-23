@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+
 
 import { getUsuarioActual } from "@/lib/session";
 import { obtenerRankingFantasy } from "@/services/liga";
@@ -68,7 +68,7 @@ export default function FantasyRanking() {
       {!loading && !error && ranking.length > 0 && (
         <>
           <div className="space-y-3">
-            {ranking.slice(0, 7).map((jugador) => (
+            {ranking.map((jugador) => (
               <FantasyRankingRow
                 key={jugador.id}
                 jugador={jugador}
@@ -77,12 +77,7 @@ export default function FantasyRanking() {
             ))}
           </div>
 
-          <Link
-            href="/clasificacion"
-            className="mt-5 flex justify-center rounded-xl bg-zinc-800 py-3 font-medium text-white transition hover:bg-zinc-700"
-          >
-            Ver clasificación completa →
-          </Link>
+         
         </>
       )}
     </section>
