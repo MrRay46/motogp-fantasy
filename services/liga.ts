@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import {
   DestacadosGP,
+  EquipoFantasy, 
   EquipoLigaDB,
   MovimientoRanking,
   PilotoDB,
@@ -116,6 +117,41 @@ export async function obtenerRankingConstructores(): Promise<ConstructorDB[]> {
   if (error) throw error;
 
   return data ?? [];
+}
+export async function obtenerEquipoFantasy(
+  usuarioId: number
+): Promise<EquipoFantasy> {
+  const { data, error } = await supabase
+    .from("equipos")
+    .select(`
+      fichados,
+      reserva,
+      motor,
+      prediccion_piloto,
+      prediccion_motor,
+      prediccion_piloto_modificada,
+      prediccion_motor_modificada
+    `)
+    .eq("usuario_id", usuarioId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    titulares: (data.fichados ?? []).filter(
+      (piloto: string) => piloto !== data.reserva
+    ),
+    reserva: data.reserva,
+    motor: data.motor,
+
+    prediccionPiloto: data.prediccion_piloto,
+    prediccionMotor: data.prediccion_motor,
+
+    pilotoModificada: data.prediccion_piloto_modificada,
+    motorModificada: data.prediccion_motor_modificada,
+  };
 }
 /* -------------------------------------------------------------------------- */
 /*                              FUNCIONES PRIVADAS                            */

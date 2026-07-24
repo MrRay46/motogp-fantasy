@@ -97,3 +97,15 @@ export interface ConstructorRanking {
   puntos: number; 
   logo: string; 
 }
+
+export interface EquipoFantasy {
+  titulares: string[];
+  reserva: string;
+  motor: string;
+
+  prediccionPiloto: string;
+  prediccionMotor: string;
+
+  pilotoModificada: boolean;
+  motorModificada: boolean;
+}
