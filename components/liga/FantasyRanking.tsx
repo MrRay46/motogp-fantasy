@@ -14,7 +14,7 @@ export default function FantasyRanking() {
   const [ranking, setRanking] = useState<RankingJugador[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
   const usuario = getUsuarioActual();
   const ligaId = usuario?.liga_actual_id ?? null;
   const usuarioId = usuario?.id ?? null;
@@ -67,15 +67,21 @@ export default function FantasyRanking() {
 
       {!loading && !error && ranking.length > 0 && (
         <>
-          <div className="space-y-3">
-            {ranking.map((jugador) => (
-              <FantasyRankingRow
-                key={jugador.id}
-                jugador={jugador}
-                esUsuarioActual={jugador.id === usuarioId}
-              />
-            ))}
-          </div>
+         <div className="space-y-3">
+  {ranking.map((jugador) => (
+    <FantasyRankingRow
+      key={jugador.id}
+      jugador={jugador}
+      esUsuarioActual={jugador.id === usuarioId}
+      expanded={expandedPlayer === jugador.id}
+      onToggle={() =>
+        setExpandedPlayer((prev) =>
+          prev === jugador.id ? null : jugador.id
+        )
+      }
+    />
+  ))}
+</div>
 
          
         </>

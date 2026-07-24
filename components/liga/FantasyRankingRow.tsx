@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 
+import FantasyTeamCard from "./FantasyTeamCard";
+
 import {
   MovimientoRanking,
   RankingJugador,
@@ -10,85 +12,99 @@ import {
 interface FantasyRankingRowProps {
   jugador: RankingJugador;
   esUsuarioActual: boolean;
+  expanded: boolean;
+  onToggle: () => void;
 }
 
 export default function FantasyRankingRow({
   jugador,
   esUsuarioActual,
+  expanded,
+  onToggle,
 }: FantasyRankingRowProps) {
   return (
-    <div
-      className={`
-        flex items-center
-        rounded-xl
-        border
-        px-4
-        py-3
-        transition-all
-        duration-200
-
-        ${
-          esUsuarioActual
-            ? "border-red-500 bg-red-600/20"
-            : "border-zinc-800 bg-zinc-800 hover:bg-zinc-700"
-        }
-
-        ${obtenerBordeTop3(jugador.posicion)}
-      `}
-    >
-      {/* Posición */}
-
-      <div className="w-10 text-center text-xl font-bold">
-        {obtenerPosicion(jugador.posicion)}
-      </div>
-
-      {/* Avatar */}
-
-      <div className="mx-3">
-        <Image
-  src={`/avatars/${jugador.avatar}`}
-  alt={jugador.usuario}
-  width={40}
-  height={40}
-  className="rounded-full"
-  priority={jugador.posicion <= 3}
-/>
-      </div>
-
-      {/* Usuario */}
-
-      <div className="flex-1">
-
-        <p className="font-semibold text-white">
-          {jugador.usuario}
-        </p>
-
-      </div>
-
-      {/* Puntos */}
-
-      <div className="mr-5 text-right">
-
-        <p className="font-bold text-white">
-          {jugador.puntos}
-        </p>
-
-        <p className="text-xs text-zinc-400">
-          pts
-        </p>
-
-      </div>
-
-      {/* Movimiento */}
-
+    <>
       <div
-        className={`w-6 text-center text-lg font-bold ${obtenerColorMovimiento(
-          jugador.movimiento
-        )}`}
+        onClick={onToggle}
+        className={`
+          flex items-center
+          rounded-xl
+          border
+          px-4
+          py-3
+          cursor-pointer
+          transition-all
+          duration-200
+
+          ${
+            esUsuarioActual
+              ? "border-red-500 bg-red-600/20"
+              : "border-zinc-800 bg-zinc-800 hover:bg-zinc-700"
+          }
+
+          ${obtenerBordeTop3(jugador.posicion)}
+        `}
       >
-        {obtenerMovimiento(jugador.movimiento)}
+        {/* Posición */}
+
+        <div className="w-10 text-center text-xl font-bold">
+          {obtenerPosicion(jugador.posicion)}
+        </div>
+
+        {/* Avatar */}
+
+        <div className="mx-3">
+          <Image
+            src={`/avatars/${jugador.avatar}`}
+            alt={jugador.usuario}
+            width={40}
+            height={40}
+            className="rounded-full"
+            priority={jugador.posicion <= 3}
+          />
+        </div>
+
+        {/* Usuario */}
+
+        <div className="flex-1">
+          <p className="font-semibold text-white">
+            {jugador.usuario}
+          </p>
+        </div>
+
+        {/* Puntos */}
+
+        <div className="mr-5 text-right">
+          <p className="font-bold text-white">
+            {jugador.puntos}
+          </p>
+
+          <p className="text-xs text-zinc-400">
+            pts
+          </p>
+        </div>
+
+        {/* Movimiento */}
+
+        <div
+          className={`mr-4 w-6 text-center text-lg font-bold ${obtenerColorMovimiento(
+            jugador.movimiento
+          )}`}
+        >
+          {obtenerMovimiento(jugador.movimiento)}
+        </div>
+
+        {/* Expandir */}
+
+        <div className="w-5 text-center text-zinc-500">
+          {expanded ? "▲" : "▼"}
+        </div>
       </div>
-    </div>
+
+      {expanded && (
+        <FantasyTeamCard jugadorId={jugador.id} />
+      )}
+    </>
   );
 }
 
