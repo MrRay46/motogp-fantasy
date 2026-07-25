@@ -24,7 +24,7 @@ export default function GridSlot({
       {/* Cajón */}
       <div
   className={`
-    w-28
+    w-24
     md:w-36
     h-7
     md:h-8
@@ -43,7 +43,7 @@ export default function GridSlot({
   className="
     -mt-4
     md:-mt-5
-    h-20
+    h-16
     md:h-28
     object-contain
     select-none
