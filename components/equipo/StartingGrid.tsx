@@ -1,57 +1,49 @@
+import GridSlot from "./GridSlot";
+
 type PilotoGrid = {
   nombre: string;
   foto: string;
 };
 
-type GridSlotProps = {
-  piloto: PilotoGrid;
-  tipo: "titular" | "reserva";
+type StartingGridProps = {
+  titulares: PilotoGrid[];
+  reserva: PilotoGrid | null;
 };
 
-export default function GridSlot({
-  piloto,
-  tipo,
-}: GridSlotProps) {
-  const borderColor =
-    tipo === "reserva"
-      ? "border-orange-500"
-      : "border-white";
-
+export default function StartingGrid({
+  titulares,
+  reserva,
+}: StartingGridProps) {
   return (
-    <div className="flex flex-col items-center">
+    <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-8">
+      <h2 className="mb-10 text-center text-3xl font-bold text-white">
+        🏁 Mi Parrilla
+      </h2>
 
-      {/* Cajón de salida */}
-      <div
-        className={`
-          w-32
-          h-8
-          border-t-4
-          border-l-4
-          border-r-4
-          rounded-t-md
-          ${borderColor}
-        `}
-      />
+      <div className="grid grid-cols-3 gap-x-8 gap-y-12 justify-items-center">
+        {titulares.slice(0, 3).map((piloto) => (
+          <GridSlot
+            key={piloto.nombre}
+            piloto={piloto}
+            tipo="titular"
+          />
+        ))}
 
-      {/* Piloto */}
-      <img
-        src={piloto.foto}
-        alt={piloto.nombre}
-        className="
-          -mt-5
-          h-24
-          object-contain
-          select-none
-          pointer-events-none
-        "
-        draggable={false}
-      />
+        {titulares.slice(3, 5).map((piloto) => (
+          <GridSlot
+            key={piloto.nombre}
+            piloto={piloto}
+            tipo="titular"
+          />
+        ))}
 
-      {/* Nombre */}
-      <p className="mt-2 text-center text-sm font-semibold text-white leading-tight">
-        {piloto.nombre}
-      </p>
-
-    </div>
+        {reserva && (
+          <GridSlot
+            piloto={reserva}
+            tipo="reserva"
+          />
+        )}
+      </div>
+    </section>
   );
 }
