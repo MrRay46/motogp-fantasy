@@ -216,13 +216,15 @@ puntosMotor;
             titulares={titulares}
             reserva={pilotoReserva ?? null}
           />
-                    <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-6 mt-8 items-start">
+                    <div className="mt-8">
 
             <MotorCard
               motor={motorSeleccionado ?? null}
               puntos={puntosMotor}
             />
+<div className="mt-6">
 
+</div>
            <PredictionsCard
     piloto={prediccionPiloto}
     motor={prediccionMotor}
