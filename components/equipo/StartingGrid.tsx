@@ -16,7 +16,7 @@ export default function StartingGrid({
   reserva,
 }: StartingGridProps) {
   return (
-    <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 md:p-8">
+    <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 px-3 py-6 md:p-8">
 
       <h2 className="mb-8 text-center text-3xl font-bold text-white">
         
