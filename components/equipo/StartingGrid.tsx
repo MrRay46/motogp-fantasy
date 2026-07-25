@@ -19,7 +19,7 @@ export default function StartingGrid({
     <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 md:p-8">
 
       <h2 className="mb-8 text-center text-3xl font-bold text-white">
-        🏁 Mi Parrilla
+        
       </h2>
 
       <div className="grid grid-cols-3 gap-x-10 gap-y-8 justify-items-center">

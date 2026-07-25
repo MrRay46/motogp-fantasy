@@ -181,7 +181,7 @@ puntosMotor;
         <div className="relative z-10">
 
           <h1 className="text-4xl md:text-5xl font-bold text-red-500 mb-8">
-  🏁 Mi Parrilla
+  
 </h1>
 
           <div className="flex flex-wrap gap-6 mb-10">
