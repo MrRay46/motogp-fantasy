@@ -23,35 +23,49 @@ export default function GridSlot({
 
       {/* Cajón */}
       <div
-        className={`
-          w-36
-          h-8
-          border-t-4
-          border-l-4
-          border-r-4
-          rounded-t-md
-          ${borderColor}
-        `}
-      />
+  className={`
+    w-28
+    md:w-36
+    h-7
+    md:h-8
+    border-t-4
+    border-l-4
+    border-r-4
+    rounded-t-md
+    ${borderColor}
+  `}
+/>
 
       {/* Piloto */}
       <img
-        src={piloto.miniatura}
-        alt={piloto.nombre}
-        className="
-          -mt-4
-          h-28
-          object-contain
-          select-none
-          pointer-events-none
-        "
-        draggable={false}
-      />
+  src={piloto.miniatura}
+  alt={piloto.nombre}
+  className="
+    -mt-4
+    md:-mt-5
+    h-20
+    md:h-28
+    object-contain
+    select-none
+    pointer-events-none
+  "
+  draggable={false}
+/>
 
       {/* Nombre */}
-      <p className="mt-1 text-center text-base font-semibold text-white">
-        {piloto.nombre}
-      </p>
+      <p
+  className="
+    mt-1
+    text-center
+    text-sm
+    md:text-base
+    font-semibold
+    text-white
+    leading-tight
+  "
+>
+  {piloto.nombre}
+</p>
 
     </div>
   );

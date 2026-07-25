@@ -19,15 +19,15 @@ export default function MotorCard({
       </h2>
 
       {motor ? (
-        <div className="flex items-center justify-center gap-5">
+        <div className="flex items-center justify-center gap-7">
 
           <img
             src={motor.logo}
             alt={motor.nombre}
-            className="h-16 w-16 object-contain"
+            className="h-20 w-20 md:h-24 md:w-24 object-contain"
           />
 
-          <span className="text-2xl font-bold text-white">
+          <span className="text-2xl md:text-3xl font-bold text-white">
             {motor.nombre}
           </span>
 

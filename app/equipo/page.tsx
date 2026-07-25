@@ -216,7 +216,7 @@ puntosMotor;
             titulares={titulares}
             reserva={pilotoReserva ?? null}
           />
-                    <div className="grid lg:grid-cols-2 gap-6 mt-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-6 mt-8 items-start">
 
             <MotorCard
               motor={motorSeleccionado ?? null}

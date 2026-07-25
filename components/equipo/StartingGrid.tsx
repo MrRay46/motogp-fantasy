@@ -22,7 +22,11 @@ export default function StartingGrid({
         
       </h2>
 
-      <div className="grid grid-cols-3 gap-x-10 gap-y-8 justify-items-center">
+      <div className="grid grid-cols-3
+gap-x-3
+md:gap-x-10
+gap-y-6
+md:gap-y-8 justify-items-center">
 
         {titulares.slice(0, 3).map((piloto) => (
           <GridSlot

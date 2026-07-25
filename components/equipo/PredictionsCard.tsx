@@ -52,17 +52,15 @@ export default function PredictionsCard({
           </p>
 
           {pilotoPredicho ? (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center justify-center py-4">
 
               <img
                 src={pilotoPredicho.foto}
                 alt={pilotoPredicho.nombre}
-                className="h-16 w-16 object-contain"
+                className="h-36 md:h-44 lg:h-52 w-auto object-contain mx-auto"
               />
 
-              <p className="text-lg font-bold text-white">
-                {pilotoPredicho.nombre}
-              </p>
+              
 
             </div>
           ) : (
@@ -93,17 +91,15 @@ export default function PredictionsCard({
           </p>
 
           {motorPredicho ? (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center justify-center py-4">
 
               <img
                 src={motorPredicho.logo}
                 alt={motorPredicho.nombre}
-                className="h-16 w-16 object-contain"
+                className="h-36 md:h-44 lg:h-52 w-auto object-contain mx-auto"
               />
 
-              <p className="text-lg font-bold text-white">
-                {motorPredicho.nombre}
-              </p>
+             
 
             </div>
           ) : (
