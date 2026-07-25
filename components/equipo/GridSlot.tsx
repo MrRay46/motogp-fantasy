@@ -1,9 +1,10 @@
-type GridSlotProps = {
-  piloto: {
-    nombre: string;
-    foto: string;
-  };
+type PilotoGrid = {
+  nombre: string;
+  foto: string;
+};
 
+type GridSlotProps = {
+  piloto: PilotoGrid;
   tipo: "titular" | "reserva";
 };
 
@@ -11,7 +12,7 @@ export default function GridSlot({
   piloto,
   tipo,
 }: GridSlotProps) {
-  const colorLinea =
+  const borderColor =
     tipo === "reserva"
       ? "border-orange-500"
       : "border-white";
@@ -19,7 +20,7 @@ export default function GridSlot({
   return (
     <div className="flex flex-col items-center">
 
-      {/* Línea de parrilla */}
+      {/* Cajón de salida */}
       <div
         className={`
           w-32
@@ -28,26 +29,26 @@ export default function GridSlot({
           border-l-4
           border-r-4
           rounded-t-md
-          ${colorLinea}
+          ${borderColor}
         `}
       />
 
-      {/* Miniatura */}
-      <div className="-mt-4">
-        <img
-          src={piloto.foto}
-          alt={piloto.nombre}
-          className="
-            h-20
-            object-contain
-            drop-shadow-xl
-            select-none
-          "
-        />
-      </div>
+      {/* Piloto */}
+      <img
+        src={piloto.foto}
+        alt={piloto.nombre}
+        className="
+          -mt-5
+          h-24
+          object-contain
+          select-none
+          pointer-events-none
+        "
+        draggable={false}
+      />
 
       {/* Nombre */}
-      <p className="mt-2 text-center text-sm font-semibold text-white">
+      <p className="mt-2 text-center text-sm font-semibold text-white leading-tight">
         {piloto.nombre}
       </p>
 
