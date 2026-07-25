@@ -1,6 +1,7 @@
 type PilotoGrid = {
   nombre: string;
   foto: string;
+  miniatura: string;
 };
 
 type GridSlotProps = {
@@ -20,10 +21,10 @@ export default function GridSlot({
   return (
     <div className="flex flex-col items-center">
 
-      {/* Cajón de salida */}
+      {/* Cajón */}
       <div
         className={`
-          w-32
+          w-36
           h-8
           border-t-4
           border-l-4
@@ -35,11 +36,11 @@ export default function GridSlot({
 
       {/* Piloto */}
       <img
-        src={piloto.foto}
+        src={piloto.miniatura}
         alt={piloto.nombre}
         className="
-          -mt-5
-          h-24
+          -mt-4
+          h-28
           object-contain
           select-none
           pointer-events-none
@@ -48,7 +49,7 @@ export default function GridSlot({
       />
 
       {/* Nombre */}
-      <p className="mt-2 text-center text-sm font-semibold text-white leading-tight">
+      <p className="mt-1 text-center text-base font-semibold text-white">
         {piloto.nombre}
       </p>
 

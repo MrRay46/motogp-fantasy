@@ -46,6 +46,11 @@ export default function EquipoPage() {
 
   const prediccionMotor =
     equipoActual.prediccionMotor;
+const prediccionPilotoModificada =
+  equipoActual.prediccionPilotoModificada ?? false;
+
+const prediccionMotorModificada =
+  equipoActual.prediccionMotorModificada ?? false;
 
   const equipo = pilotos.filter((piloto) =>
     fichados.includes(piloto.nombre)
@@ -161,56 +166,51 @@ export default function EquipoPage() {
     puntosTitulares +
     puntosReserva +
     puntosMotor;
+const puntosTotales = titulares.reduce(
+  (total, piloto) => total + piloto.puntos,
+  0
+) +
+(pilotoReserva?.puntos ?? 0) +
+puntosMotor;
 
   return (
     <AppLayout>
       <div className="relative">
 
-        {/* Fondo */}
-
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
-
-          <img
-            src="/trofeo.png"
-            alt="Trofeo MotoGP"
-            className="w-full h-full object-cover scale-[1.2] md:scale-100"
-          />
-
-        </div>
 
         <div className="relative z-10">
 
-          <h1 className="text-5xl font-bold text-red-500 mb-8">
-            Mi Equipo
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-red-500 mb-8">
+  🏁 Mi Parrilla
+</h1>
 
-          <div className="flex flex-wrap gap-8 mb-10 text-lg">
+          <div className="flex flex-wrap gap-6 mb-10">
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3">
+  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
 
-              💰 Presupuesto
+    <div className="text-sm text-zinc-400">
+      🏆 Puntos GP
+    </div>
 
-              <div className="mt-1 text-2xl font-bold">
+    <div className="mt-1 text-3xl font-bold text-white">
+      {puntosEquipo}
+    </div>
 
-                {presupuestoUsado.toFixed(1)} / 172 M
+  </div>
 
-              </div>
+  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
 
-            </div>
+    <div className="text-sm text-zinc-400">
+      ⭐ Puntos Totales
+    </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3">
+    <div className="mt-1 text-3xl font-bold text-white">
+      {puntosTotales}
+    </div>
 
-              🏆 Puntos GP
+  </div>
 
-              <div className="mt-1 text-2xl font-bold">
-
-                {puntosEquipo}
-
-              </div>
-
-            </div>
-
-          </div>
+</div>
 
           <StartingGrid
             titulares={titulares}
@@ -223,10 +223,12 @@ export default function EquipoPage() {
               puntos={puntosMotor}
             />
 
-            <PredictionsCard
-              piloto={prediccionPiloto}
-              motor={prediccionMotor}
-            />
+           <PredictionsCard
+    piloto={prediccionPiloto}
+    motor={prediccionMotor}
+    pilotoModificado={prediccionPilotoModificada}
+    motorModificado={prediccionMotorModificada}
+/>
 
           </div>
 

@@ -4,11 +4,16 @@ import { pilotos } from "@/data/pilotos";
 type PredictionsCardProps = {
   piloto: string | null;
   motor: string | null;
+
+  pilotoModificado: boolean;
+  motorModificado: boolean;
 };
 
 export default function PredictionsCard({
   piloto,
   motor,
+  pilotoModificado,
+  motorModificado,
 }: PredictionsCardProps) {
   const pilotoPredicho = pilotos.find(
     (p) => p.nombre === piloto
@@ -29,7 +34,18 @@ export default function PredictionsCard({
 
         {/* Campeón */}
 
-        <div className="rounded-2xl border border-zinc-700 bg-zinc-800/50 p-4">
+        <div
+  className={`
+    rounded-2xl
+    p-4
+    transition-colors
+    ${
+      pilotoModificado
+        ? "border border-yellow-500/40 bg-yellow-900/10"
+        : "border border-green-500/40 bg-green-900/10"
+    }
+  `}
+>
 
           <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
             Campeón del Mundo
@@ -59,7 +75,18 @@ export default function PredictionsCard({
 
         {/* Constructor */}
 
-        <div className="rounded-2xl border border-zinc-700 bg-zinc-800/50 p-4">
+        <div
+  className={`
+    rounded-2xl
+    p-4
+    transition-colors
+    ${
+      motorModificado
+        ? "border border-yellow-500/40 bg-yellow-900/10"
+        : "border border-green-500/40 bg-green-900/10"
+    }
+  `}
+>
 
           <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
             Constructor Campeón
