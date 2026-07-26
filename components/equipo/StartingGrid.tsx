@@ -17,7 +17,7 @@ export default function StartingGrid({
 }: StartingGridProps) {
   return (
     <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 px-3 py-6 md:p-8">
-      <div className="flex justify-center items-start gap-2 md:gap-8">
+      <div className="flex justify-center items-start gap-2 md:gap-10">
         {/* Columna izquierda */}
         <div className="flex flex-col gap-6 md:gap-8">
           <GridSlot piloto={titulares[0]} tipo="titular" />
@@ -25,13 +25,13 @@ export default function StartingGrid({
         </div>
 
         {/* Columna central */}
-        <div className="mt-3 md:mt-5 flex flex-col gap-6 md:gap-8">
+        <div className="mt-4 md:mt-6 flex flex-col gap-6 md:gap-8">
           <GridSlot piloto={titulares[1]} tipo="titular" />
           <GridSlot piloto={titulares[4]} tipo="titular" />
         </div>
 
         {/* Columna derecha */}
-        <div className="mt-6 md:mt-10 flex flex-col gap-6 md:gap-8">
+        <div className="mt-8 md:mt-12 flex flex-col gap-6 md:gap-8">
           <GridSlot piloto={titulares[2]} tipo="titular" />
 
           {reserva && (
