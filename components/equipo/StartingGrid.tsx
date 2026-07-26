@@ -47,11 +47,11 @@ export default function StartingGrid({
           const columna = index % 3;
 
           const offset =
-            columna === 0
-              ? ""
-              : columna === 1
-              ? "translate-x-1 translate-y-1 md:translate-x-2 md:translate-y-1"
-              : "translate-x-2 translate-y-2 md:translate-x-4 md:translate-y-2";
+  columna === 0
+    ? ""
+    : columna === 1
+    ? "translate-x-3 translate-y-1 md:translate-x-5 md:translate-y-1"
+    : "translate-x-6 translate-y-2 md:translate-x-10 md:translate-y-2";
 
           return (
             <div key={piloto.nombre} className={offset}>
