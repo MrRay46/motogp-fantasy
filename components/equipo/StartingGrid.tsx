@@ -15,50 +15,29 @@ export default function StartingGrid({
   titulares,
   reserva,
 }: StartingGridProps) {
-  const parrilla = [
-    ...titulares.slice(0, 5).map((piloto) => ({
-      piloto,
-      tipo: "titular" as const,
-    })),
-    ...(reserva
-      ? [
-          {
-            piloto: reserva,
-            tipo: "reserva" as const,
-          },
-        ]
-      : []),
-  ];
-
   return (
     <section className="rounded-3xl border border-zinc-800 bg-zinc-900/40 px-3 py-6 md:p-8">
-      <div
-        className="
-          grid
-          grid-cols-3
-          gap-x-3
-          md:gap-x-10
-          gap-y-6
-          md:gap-y-8
-          justify-items-center
-        "
-      >
-        {parrilla.map(({ piloto, tipo }, index) => {
-          const columna = index % 3;
+      <div className="flex justify-center items-start gap-2 md:gap-8">
+        {/* Columna izquierda */}
+        <div className="flex flex-col gap-6 md:gap-8">
+          <GridSlot piloto={titulares[0]} tipo="titular" />
+          <GridSlot piloto={titulares[3]} tipo="titular" />
+        </div>
 
-          const offset =
-  columna === 0
-    ? ""
-    : columna === 1
-    ? "translate-x-3 translate-y-1 md:translate-x-5 md:translate-y-1"
-    : "translate-x-6 translate-y-2 md:translate-x-10 md:translate-y-2";
+        {/* Columna central */}
+        <div className="mt-3 md:mt-5 flex flex-col gap-6 md:gap-8">
+          <GridSlot piloto={titulares[1]} tipo="titular" />
+          <GridSlot piloto={titulares[4]} tipo="titular" />
+        </div>
 
-          return (
-            <div key={piloto.nombre} className={offset}>
-              <GridSlot piloto={piloto} tipo={tipo} />
-            </div>
-          );
-        })}
+        {/* Columna derecha */}
+        <div className="mt-6 md:mt-10 flex flex-col gap-6 md:gap-8">
+          <GridSlot piloto={titulares[2]} tipo="titular" />
+
+          {reserva && (
+            <GridSlot piloto={reserva} tipo="reserva" />
+          )}
+        </div>
       </div>
     </section>
   );
