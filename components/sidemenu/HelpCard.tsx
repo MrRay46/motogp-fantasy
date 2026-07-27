@@ -19,9 +19,10 @@ export default function HelpCard() {
       />
 
       <MenuItem
-        icon={<BookOpen size={18} />}
-        title="Reglamento"
-      />
+    icon={<BookOpen size={18} />}
+    title="Reglamento"
+    href="/reglas"
+/>
 
       <MenuItem
         icon={<CircleHelp size={18} />}
