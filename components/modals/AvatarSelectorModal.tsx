@@ -109,8 +109,7 @@ export default function AvatarSelectorModal({
                 onClick={() => {
   if (!saving) onClose();
 }}
-disabled:opacity-50
-disabled:cursor-not-allowed
+
                 className="px-5 py-2 rounded-xl bg-zinc-700 hover:bg-zinc-600 transition"
               >
                 Cancelar
