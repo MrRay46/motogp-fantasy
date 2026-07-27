@@ -2,32 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { Menu } from "lucide-react";
+import SideMenu from "./SideMenu";
 
 export default function Navbar() {
   const [esAdmin, setEsAdmin] = useState(false);
+  const [menuAbierto, setMenuAbierto] = useState(false);
 
   useEffect(() => {
     async function comprobarAdmin() {
-      const sesion = JSON.parse(
-  localStorage.getItem("usuario") || "{}"
-);
+      const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
 
-if (!sesion.id) return;
+      if (!sesion.id) return;
 
-if (!sesion.liga_actual_id) {
-  setEsAdmin(false);
-  return;
-}
+      if (!sesion.liga_actual_id) {
+        setEsAdmin(false);
+        return;
+      }
 
-      // Buscar la relación usuario-liga
-      const {
-        data: relacion,
-        error: errorRelacion,
-      } = await supabase
+      const { data: relacion, error: errorRelacion } = await supabase
         .from("usuarios_ligas")
         .select("admin_liga")
         .eq("usuario_id", sesion.id)
-.eq("liga_id", sesion.liga_actual_id)
+        .eq("liga_id", sesion.liga_actual_id)
         .single();
 
       if (errorRelacion) {
@@ -47,66 +44,65 @@ if (!sesion.liga_actual_id) {
   }
 
   return (
-    <nav className="bg-zinc-900/80 backdrop-blur border border-zinc-700 rounded-2xl p-4 flex flex-wrap gap-4 justify-center items-center mb-10 text-base md:text-xl font-semibold">
+    <>
+      <nav className="bg-zinc-900/80 backdrop-blur border border-zinc-700 rounded-2xl p-4 flex flex-wrap gap-4 justify-center items-center mb-10 text-base md:text-xl font-semibold">
 
-      <a
-        href="/dashboard"
-        className="bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-400 transition"
-      >
-        Inicio
-      </a>
-
-      <a
-        href="/equipo"
-        className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-      >
-        Mi Equipo
-      </a>
-
-      <a
-        href="/mercado"
-        className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-      >
-        Mercado
-      </a>
-
-     <a
-  href="/liga"
-  className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
->
-  Liga
-</a>
-
-      <a
-        href="/reglas"
-        className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-      >
-        Reglas
-      </a>
-
-      <a
-        href="/perfil"
-        className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-      >
-        Perfil
-      </a>
-
-      {esAdmin && (
-        <a
-          href="/admin"
-          className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-xl transition"
+        <button
+          onClick={() => setMenuAbierto(true)}
+          className="bg-zinc-800 text-white p-3 rounded-xl hover:bg-zinc-700 transition"
         >
-          ⚙️ Admin
+          <Menu size={22} />
+        </button>
+
+        <a
+          href="/dashboard"
+          className="bg-orange-500 text-white px-4 py-2 rounded-xl hover:bg-orange-400 transition"
+        >
+          Inicio
         </a>
-      )}
 
-      <button
-        onClick={cerrarSesion}
-        className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl transition"
-      >
-        Salir
-      </button>
+        <a
+          href="/equipo"
+          className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+        >
+          Equipo
+        </a>
 
-    </nav>
+        <a
+          href="/mercado"
+          className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+        >
+          Mercado
+        </a>
+
+        <a
+          href="/liga"
+          className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+        >
+          Liga
+        </a>
+
+        {esAdmin && (
+          <a
+            href="/admin"
+            className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-xl transition"
+          >
+            Administración
+          </a>
+        )}
+
+        <button
+          onClick={cerrarSesion}
+          className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl transition"
+        >
+          Salir
+        </button>
+      </nav>
+
+      <SideMenu
+        abierto={menuAbierto}
+        onClose={() => setMenuAbierto(false)}
+      />
+    </>
   );
 }
