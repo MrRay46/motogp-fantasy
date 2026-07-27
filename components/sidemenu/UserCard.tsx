@@ -65,7 +65,7 @@ export default function UserCard() {
 
       <div className="flex justify-center mb-5">
         <img
-          src={usuario.avatar}
+          src={`/avatars/${usuario.avatar}`}
           alt={usuario.usuario}
           className="w-24 h-24 rounded-full object-cover border-4 border-orange-500"
         />
