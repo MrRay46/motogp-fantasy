@@ -13,10 +13,11 @@ export default function HelpCard() {
   return (
     <div className="bg-zinc-900 rounded-2xl p-3 shadow-lg">
 
-      <MenuItem
-        icon={<BookOpen size={18} />}
-        title="Cómo jugar"
-      />
+     <MenuItem
+  icon={<BookOpen size={18} />}
+  title="Cómo jugar"
+  href="/como-jugar"
+/>
 
       <MenuItem
     icon={<BookOpen size={18} />}
