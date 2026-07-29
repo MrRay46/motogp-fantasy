@@ -105,8 +105,122 @@ export default function ComoJugarPage() {
             </p>
           </div>
         </div>
+<h2 className="text-3xl font-bold mt-20 mb-4">
+  👥 Equipo
+</h2>
+
+<p className="text-zinc-300 leading-7 mb-8">
+  En la pantalla <strong>Equipo</strong> podrás consultar la composición de tu
+  plantilla, el motor seleccionado, las predicciones de temporada y toda la
+  información relacionada con tu equipo Fantasy.
+</p>
+
+<Image
+  src="/capturas/equipo-plantilla.png"
+  alt="Plantilla del equipo"
+  width={1400}
+  height={800}
+  className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+/>
+
+<div className="grid md:grid-cols-2 gap-6 mb-16">
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ① Puntos GP
+    </h3>
+
+    <p className="text-zinc-400">
+      Muestra los puntos obtenidos por tu equipo durante el último Gran Premio.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ② Puntos Totales
+    </h3>
+
+    <p className="text-zinc-400">
+      Indica los puntos acumulados a lo largo de toda la temporada.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ③ Equipo
+    </h3>
+
+    <p className="text-zinc-400">
+      Aquí se muestran los cinco pilotos titulares que forman tu equipo para cada
+      Gran Premio.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ④ Suplente
+    </h3>
+
+    <p className="text-zinc-400">
+      El piloto reserva aparece resaltado con un borde naranja para diferenciarlo
+      del resto de titulares.
+    </p>
+  </div>
+</div>
+
+<Image
+  src="/capturas/equipo-predicciones.png"
+  alt="Motor y predicciones"
+  width={1400}
+  height={800}
+  className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+/>
+
+<div className="grid md:grid-cols-2 gap-6">
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ① Motor
+    </h3>
+
+    <p className="text-zinc-400">
+      Muestra el constructor seleccionado para tu equipo Fantasy.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ② Constructor
+    </h3>
+
+    <p className="text-zinc-400">
+      Indica el fabricante elegido que sumará puntos durante la temporada según
+      el reglamento.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ③ Predicciones
+    </h3>
+
+    <p className="text-zinc-400">
+      Agrupa las predicciones de temporada realizadas antes del inicio del campeonato.
+    </p>
+  </div>
+
+  <div>
+    <h3 className="text-xl font-bold mb-2">
+      ④ Predicciones seleccionadas
+    </h3>
+
+    <p className="text-zinc-400">
+      Muestra el piloto campeón y el constructor campeón que has elegido como
+      predicción para la temporada.
+    </p>
+  </div>
+</div>
 
       </div>
     </main>
   );
 }
+
