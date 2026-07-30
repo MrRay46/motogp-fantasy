@@ -328,6 +328,196 @@ export default function ComoJugarPage() {
             </p>
           </div>
         </div>
+        {/* ===================================================== */}
+        {/* LIGA */}
+        {/* ===================================================== */}
+
+        <h2 className="text-3xl font-bold mb-4">
+          Liga
+        </h2>
+
+        <p className="text-zinc-300 leading-7 mb-8">
+          La pantalla <strong>Liga</strong> reúne las diferentes clasificaciones
+          de la competición y permite consultar el rendimiento de los
+          participantes, pilotos y constructores durante toda la temporada.
+        </p>
+
+        <Image
+          src="/capturas/liga-clasificacionfantasy.png"
+          alt="Clasificación Fantasy"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Clasificación Fantasy
+            </h3>
+
+            <p className="text-zinc-400">
+              Consulta la clasificación general de la liga y los puntos acumulados
+              por cada participante durante la temporada.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Ver equipo rival
+            </h3>
+
+            <p className="text-zinc-400">
+              Despliega la plantilla completa de cualquier participante para
+              consultar su equipo Fantasy.
+            </p>
+          </div>
+        </div>
+
+        <Image
+          src="/capturas/liga-clasificacionmotor.png"
+          alt="Clasificación de Constructores"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="mb-16">
+          <h3 className="text-xl font-bold mb-2">
+            ① Clasificación de Constructores
+          </h3>
+
+          <p className="text-zinc-400">
+            Muestra la clasificación oficial de constructores de MotoGP según los
+            puntos obtenidos por cada fabricante durante la temporada.
+          </p>
+        </div>
+
+        <Image
+          src="/capturas/liga-clasificacionpilotos.png"
+          alt="Clasificación de Pilotos"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="mb-16">
+          <h3 className="text-xl font-bold mb-2">
+            ① Clasificación de Pilotos
+          </h3>
+
+          <p className="text-zinc-400">
+            Permite consultar la clasificación oficial del Campeonato del Mundo de
+            MotoGP con los puntos acumulados por cada piloto.
+          </p>
+        </div>
+
+        <Image
+          src="/capturas/liga-ultimosdestacados.png"
+          alt="Últimos destacados"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="mb-20">
+          <h3 className="text-xl font-bold mb-2">
+            ① Últimos destacados
+          </h3>
+
+          <p className="text-zinc-400">
+            Resume los pilotos más destacados del último Gran Premio, incluyendo
+            el ganador de la Sprint, el vencedor de la carrera principal y el
+            líder actual del Campeonato del Mundo.
+          </p>
+        </div>
+        {/* ===================================================== */}
+        {/* ADMINISTRACIÓN */}
+        {/* ===================================================== */}
+
+        <h2 className="text-3xl font-bold mb-4">
+          Administración
+        </h2>
+
+        <p className="text-zinc-300 leading-7 mb-8">
+          La pantalla <strong>Administración</strong> está disponible únicamente
+          para los administradores de la liga y permite gestionar los
+          participantes y las invitaciones.
+        </p>
+
+        <Image
+          src="/capturas/admin-panel.png"
+          alt="Panel de administración"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Panel de Administración
+            </h3>
+
+            <p className="text-zinc-400">
+              Centraliza todas las herramientas necesarias para gestionar la liga
+              y sus participantes.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Añadir participante
+            </h3>
+
+            <p className="text-zinc-400">
+              Genera un código de invitación para que nuevos jugadores puedan
+              unirse a la liga.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ③ Gestionar participantes
+            </h3>
+
+            <p className="text-zinc-400">
+              Permite activar o desactivar la participación de cualquier jugador
+              de la liga cuando sea necesario.
+            </p>
+          </div>
+        </div>
+        {/* ===================================================== */}
+        {/* MENÚ LATERAL */}
+        {/* ===================================================== */}
+
+        <h2 className="text-3xl font-bold mb-4">
+          Menú lateral
+        </h2>
+
+        <p className="text-zinc-300 leading-7 mb-8">
+          El menú lateral reúne la información de tu perfil, la liga activa y el
+          acceso a las diferentes secciones de ayuda de la aplicación.
+        </p>
+
+        <Image
+          src="/capturas/menu-lateral.png"
+          alt="Menú lateral"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="mb-20">
+          <h3 className="text-xl font-bold mb-2">
+            ① Avatar
+          </h3>
+
+          <p className="text-zinc-400">
+            Pulsa sobre tu avatar para elegir una imagen diferente entre los
+            avatares disponibles.
+          </p>
+        </div>
 
       </div>
     </main>
