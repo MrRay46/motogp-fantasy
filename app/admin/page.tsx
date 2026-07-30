@@ -99,7 +99,7 @@ if (!sesion.liga_actual_id) {
     alert(`Código de la liga: ${codigoLiga}`);
   }
 async function generarBonificaciones() {
-
+let equiposProcesados = 0;
   const confirmar = window.confirm(
     "¿Aplicar las bonificaciones finales de la temporada?\n\nEsta acción solo debería ejecutarse una vez."
   );
@@ -152,12 +152,19 @@ if (errorUpdate) {
     errorUpdate
   );
 } else {
+  equiposProcesados++;
   console.log(
     `${equipo.usuario}: +${bonus} puntos`
   );
 }
 }
-alert("Bonificaciones aplicadas correctamente.");
+if (equiposProcesados === 0) {
+  alert("Las bonificaciones ya habían sido aplicadas.");
+} else {
+  alert(
+    `Bonificaciones aplicadas correctamente.\n\nEquipos procesados: ${equiposProcesados}`
+  );
+}
 }
   async function cambiarEstado(
     id: number,
