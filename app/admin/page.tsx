@@ -1,5 +1,5 @@
 "use client";
-
+import AppLayout from "@/components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -138,7 +138,8 @@ if (!sesion.liga_actual_id) {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white py-10">
+    
+  <AppLayout>
 
       <div className="max-w-5xl mx-auto space-y-8">
 
@@ -254,6 +255,8 @@ if (!sesion.liga_actual_id) {
 
       </div>
 
-    </main>
+        </AppLayout>
+  
+
   );
 }
