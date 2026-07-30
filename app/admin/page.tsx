@@ -98,7 +98,27 @@ if (!sesion.liga_actual_id) {
     async function generarInvitacion() {
     alert(`Código de la liga: ${codigoLiga}`);
   }
+async function generarBonificaciones() {
 
+  const confirmar = window.confirm(
+    "¿Aplicar las bonificaciones finales de la temporada?\n\nEsta acción solo debería ejecutarse una vez."
+  );
+
+  if (!confirmar) return;
+
+  const { data: equipos, error } = await supabase
+    .from("equipos")
+    .select("*");
+
+  if (error) {
+    console.error(error);
+    alert("No se pudieron leer los equipos.");
+    return;
+  }
+
+  console.log(equipos);
+
+}
   async function cambiarEstado(
     id: number,
     activo: boolean
@@ -252,7 +272,25 @@ if (!sesion.liga_actual_id) {
           </div>
 
         </div>
+<div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
 
+  <h2 className="text-3xl font-bold mb-6">
+    🎯 Bonificaciones de temporada
+  </h2>
+
+  <p className="text-zinc-400 mb-6">
+    Aplica automáticamente las bonificaciones de las predicciones
+    acertadas al finalizar el campeonato.
+  </p>
+
+  <button
+  onClick={generarBonificaciones}
+  className="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-bold transition"
+>
+    Generar bonificaciones
+  </button>
+
+</div>
       </div>
 
         </AppLayout>
