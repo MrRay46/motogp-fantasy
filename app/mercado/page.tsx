@@ -7,7 +7,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import { motores } from "@/data/motores";
 import { pilotos } from "@/data/pilotos";
 
-import { supabase } from "@/lib/supabase";
+import { obtenerEstadoMercado } from "@/lib/mercado";
 
 import { useFantasy } from "@/context/FantasyContext";
 
@@ -20,13 +20,18 @@ export default function MercadoPage() {
   } = useFantasy();
 
   const equipoActual =
-    equipos[jugadorActual] || {
-      fichados: [],
-      reserva: null,
-      motor: null,
-      prediccionPiloto: null,
-      prediccionMotor: null,
-    };
+  equipos[jugadorActual] || {
+    fichados: [],
+    reserva: null,
+    motor: null,
+
+    prediccionPiloto: null,
+    prediccionMotor: null,
+
+    constructorModificado: false,
+    reservaModificada: false,
+    cambiosPilotos: 0,
+  };
 
   const fichados =
     equipoActual.fichados;
@@ -49,69 +54,20 @@ export default function MercadoPage() {
   const [diasRestantes, setDiasRestantes] =
     useState<number | null>(null);
 
-  useEffect(() => {
+    const [estadoMercado, setEstadoMercado] = useState<any>(null);
+useEffect(() => {
+  async function cargarMercado() {
+    const estado = await obtenerEstadoMercado();
 
-    async function cargarMercado() {
+    if (!estado) return;
 
-      const { data } = await supabase
-        .from("ventanas_mercado")
-        .select("*")
-        .order("inicio");
+    setEstadoMercado(estado);
+    setMercadoAbierto(estado.mercadoAbierto);
+    setDiasRestantes(estado.diasRestantes);
+  }
 
-      if (!data) return;
-
-      const hoy = new Date();
-
-      const abierta = data.some((ventana) => {
-
-        const inicio = new Date(ventana.inicio);
-        const fin = new Date(ventana.fin);
-
-        return hoy >= inicio && hoy <= fin;
-
-      });
-
-      setMercadoAbierto(abierta);
-
-      if (abierta) {
-
-        setDiasRestantes(null);
-
-        return;
-
-      }
-
-      const siguiente = data
-        .filter(
-          (v) =>
-            new Date(v.inicio) > hoy
-        )
-        .sort(
-          (a, b) =>
-            new Date(a.inicio).getTime() -
-            new Date(b.inicio).getTime()
-        )[0];
-
-      if (!siguiente) return;
-
-      const dias = Math.ceil(
-
-        (
-          new Date(siguiente.inicio).getTime() -
-          hoy.getTime()
-        ) /
-
-        (1000 * 60 * 60 * 24)
-
-      );
-
-      setDiasRestantes(dias);
-
-    }
-
-    cargarMercado();
-
-  }, []);
+  cargarMercado();
+}, []);
 
   const setFichados = (
     nuevosFichados: string[]
@@ -365,58 +321,50 @@ export default function MercadoPage() {
             <div className="flex gap-3 flex-wrap">
 
               <button
-                disabled={
-                  !mercadoAbierto ||
-                  (
-                    !fichados.includes(piloto.nombre) &&
-                    (
-                      fichados.length >= 6 ||
-                      presupuestoUsado + piloto.precio > 172
-                    )
-                  )
-                }
-                onClick={() => {
+  disabled={
+    !mercadoAbierto ||
+    (
+      !fichados.includes(piloto.nombre) &&
+      (
+        fichados.length >= 6 ||
+        presupuestoUsado + piloto.precio > 172
+      )
+    )
+  }
+  onClick={() => {
+    if (!mercadoAbierto) return;
 
-                  if (!mercadoAbierto) return;
+    if (fichados.includes(piloto.nombre)) {
+      setFichados(
+        fichados.filter(
+          (nombre) => nombre !== piloto.nombre
+        )
+      );
+      return;
+    }
 
-                  if (fichados.includes(piloto.nombre)) {
+    if (
+      fichados.length >= 6 ||
+      presupuestoUsado + piloto.precio > 172
+    ) {
+      return;
+    }
 
-                    setFichados(
-                      fichados.filter(
-                        (nombre) =>
-                          nombre !== piloto.nombre
-                      )
-                    );
-
-                    return;
-
-                  }
-
-                  if (
-                    fichados.length >= 6 ||
-                    presupuestoUsado + piloto.precio > 172
-                  ) {
-                    return;
-                  }
-
-                  setFichados([
-                    ...fichados,
-                    piloto.nombre,
-                  ]);
-
-                }}
-                className={`px-4 py-2 rounded-xl font-bold transition ${
-                  fichados.includes(piloto.nombre)
-                    ? "bg-red-600"
-                    : "bg-red-500 hover:bg-red-400"
-                }`}
-              >
-
-                {fichados.includes(piloto.nombre)
-                  ? "Quitar ❌"
-                  : "Fichar"}
-
-              </button>
+    setFichados([
+      ...fichados,
+      piloto.nombre,
+    ]);
+  }}
+  className={`px-4 py-2 rounded-xl font-bold transition ${
+    fichados.includes(piloto.nombre)
+      ? "bg-red-600"
+      : "bg-red-500 hover:bg-red-400"
+  }`}
+>
+  {fichados.includes(piloto.nombre)
+    ? "Quitar ❌"
+    : "Fichar"}
+</button>
 
               {fichados.includes(piloto.nombre) && (
 
@@ -455,64 +403,71 @@ export default function MercadoPage() {
       ))}
 
     </div>
-        <h2 className="text-4xl font-bold mt-16 mb-6">
-      Motores
-    </h2>
+  <h2 className="text-4xl font-bold mt-16 mb-6">
+  Motores
+</h2>
 
-    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+<div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+  {motores.map((item) => (
+    <div
+      key={item.nombre}
+      className="bg-red-900/40 border border-red-500 p-6 rounded-3xl"
+    >
+      <div className="flex items-center gap-4 mb-4">
+        <img
+          src={item.logo}
+          alt={item.nombre}
+          className="w-16 h-16 object-contain"
+        />
 
-      {motores.map((item) => (
+        <h2 className="text-2xl font-bold">
+          {item.nombre}
+        </h2>
+      </div>
 
-        <div
-          key={item.nombre}
-          className="bg-red-900/40 border border-red-500 p-6 rounded-3xl"
-        >
+      <p className="text-lg">
+        💰 {item.precio} M
+      </p>
 
-          <div className="flex items-center gap-4 mb-4">
+      <button
+        disabled={
+          !mercadoAbierto ||
+          !estadoMercado?.cambiarConstructor ||
+          equipoActual?.constructorModificado
+        }
+        onClick={() => {
+          if (
+            !mercadoAbierto ||
+            !estadoMercado?.cambiarConstructor ||
+            equipoActual?.constructorModificado
+          ) {
+            return;
+          }
 
-            <img
-              src={item.logo}
-              alt={item.nombre}
-              className="w-16 h-16 object-contain"
-            />
-
-            <h2 className="text-2xl font-bold">
-              {item.nombre}
-            </h2>
-
-          </div>
-
-          <p className="text-lg">
-            💰 {item.precio} M
-          </p>
-
-          <button
-            disabled={!mercadoAbierto}
-            onClick={() => {
-
-              if (!mercadoAbierto) return;
-
-              setMotor(item.nombre);
-
-            }}
-            className={`mt-4 px-4 py-2 rounded-xl transition ${
-              mercadoAbierto
-                ? "bg-red-500 hover:bg-red-400"
-                : "bg-zinc-700 opacity-50 cursor-not-allowed"
-            }`}
-          >
-
-            {motor === item.nombre
-              ? "Seleccionado ✅"
-              : "Seleccionar"}
-
-          </button>
-
-        </div>
-
-      ))}
-
+          setEquipos((prev) => ({
+            ...prev,
+            [jugadorActual]: {
+              ...prev[jugadorActual],
+              motor: item.nombre,
+              constructorModificado: true,
+            },
+          }));
+        }}
+        className={`mt-4 px-4 py-2 rounded-xl transition ${
+          !mercadoAbierto ||
+          !estadoMercado?.cambiarConstructor ||
+          equipoActual?.constructorModificado
+            ? "bg-zinc-700 opacity-50 cursor-not-allowed"
+            : "bg-red-500 hover:bg-red-400"
+        }`}
+      >
+        {motor === item.nombre
+          ? "Seleccionado ✅"
+          : "Seleccionar"}
+      </button>
     </div>
+  ))}
+</div>
 
     <h2 className="text-4xl font-bold mt-16 mb-6">
       🎯 Predicciones Temporada

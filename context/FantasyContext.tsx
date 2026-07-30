@@ -20,6 +20,10 @@ type EquipoJugador = {
 
   prediccionPilotoModificada?: boolean;
   prediccionMotorModificada?: boolean;
+
+  constructorModificado?: boolean;
+  reservaModificada?: boolean;
+  cambiosPilotos?: number;
 };
 
 type FantasyContextType = {
@@ -117,6 +121,14 @@ prediccionMotorOriginal:
 
 prediccionMotorModificada:
   fila.prediccion_motor_modificada,
+  constructorModificado:
+  fila.constructor_modificado ?? false,
+
+reservaModificada:
+  fila.reserva_modificada ?? false,
+
+cambiosPilotos:
+  fila.cambios_pilotos ?? 0,
       };
 
     });
@@ -203,6 +215,14 @@ prediccion_motor_original:
 
 prediccion_motor_modificada:
   equipo.prediccionMotorModificada,
+  constructor_modificado:
+  equipo.constructorModificado,
+
+reserva_modificada:
+  equipo.reservaModificada,
+
+cambios_pilotos:
+  equipo.cambiosPilotos,
     },
     {
       onConflict: "usuario",
