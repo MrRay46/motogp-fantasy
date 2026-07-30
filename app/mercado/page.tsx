@@ -235,6 +235,15 @@ useEffect(() => {
 
   const presupuestoRestante =
     172 - presupuestoUsado;
+    const puedeCambiarConstructor = () => {
+  if (!mercadoAbierto) return false;
+
+  if (!estadoMercado?.cambiarConstructor) return false;
+
+  if (equipoActual.constructorModificado) return false;
+
+  return true;
+};
     return (
 
   <AppLayout>
@@ -430,33 +439,21 @@ useEffect(() => {
       </p>
 
       <button
-        disabled={
-          !mercadoAbierto ||
-          !estadoMercado?.cambiarConstructor ||
-          equipoActual?.constructorModificado
-        }
+        disabled={!puedeCambiarConstructor()}
         onClick={() => {
-          if (
-            !mercadoAbierto ||
-            !estadoMercado?.cambiarConstructor ||
-            equipoActual?.constructorModificado
-          ) {
-            return;
-          }
+  if (!puedeCambiarConstructor()) return;
 
-          setEquipos((prev) => ({
-            ...prev,
-            [jugadorActual]: {
-              ...prev[jugadorActual],
-              motor: item.nombre,
-              constructorModificado: true,
-            },
-          }));
-        }}
+  setEquipos((prev) => ({
+    ...prev,
+    [jugadorActual]: {
+      ...prev[jugadorActual],
+      motor: item.nombre,
+      constructorModificado: true,
+    },
+  }));
+}}
         className={`mt-4 px-4 py-2 rounded-xl transition ${
-          !mercadoAbierto ||
-          !estadoMercado?.cambiarConstructor ||
-          equipoActual?.constructorModificado
+         !puedeCambiarConstructor()
             ? "bg-zinc-700 opacity-50 cursor-not-allowed"
             : "bg-red-500 hover:bg-red-400"
         }`}
