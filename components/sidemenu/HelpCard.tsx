@@ -37,9 +37,10 @@ export default function HelpCard() {
 />
 
       <MenuItem
-        icon={<Info size={18} />}
-        title="Versión RayonGrid"
-      />
+  icon={<Info size={18} />}
+  title="Versión RayonGrid"
+  href="/version"
+/>
 
     </div>
   );
