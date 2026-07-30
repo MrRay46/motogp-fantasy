@@ -228,12 +228,8 @@ cambios_pilotos:
       onConflict: "usuario",
     }
   );
-   if (error) {
-  console.error("ERROR SUPABASE");
+  if (error) {
   console.error(error);
-  console.error(error.message);
-  console.error(error.details);
-  console.error(error.hint);
 }
   }
 };
