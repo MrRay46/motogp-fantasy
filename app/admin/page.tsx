@@ -2,7 +2,7 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-
+import { campeonTemporada } from "@/data/prediccionesTemporada";
 interface Participante {
   id: number;
   usuario: string;
@@ -116,8 +116,48 @@ async function generarBonificaciones() {
     return;
   }
 
-  console.log(equipos);
+  for (const equipo of equipos) {
+if (equipo.bonus_temporada_aplicado) {
+  continue;
+}
+  let bonus = 0;
 
+  if (
+    equipo.prediccion_piloto === campeonTemporada.piloto
+  ) {
+    bonus += equipo.prediccion_piloto_modificada
+      ? 18.5
+      : 37;
+  }
+
+  if (
+    equipo.prediccion_motor === campeonTemporada.constructor
+  ) {
+    bonus += equipo.prediccion_motor_modificada
+      ? 5
+      : 10;
+  }
+
+const { error: errorUpdate } = await supabase
+  .from("equipos")
+  .update({
+    bonus_temporada: bonus,
+    bonus_temporada_aplicado: true,
+  })
+  .eq("id", equipo.id);
+
+if (errorUpdate) {
+  console.error(
+    `Error actualizando ${equipo.usuario}`,
+    errorUpdate
+  );
+} else {
+  console.log(
+    `${equipo.usuario}: +${bonus} puntos`
+  );
+}
+}
+alert("Bonificaciones aplicadas correctamente.");
 }
   async function cambiarEstado(
     id: number,
