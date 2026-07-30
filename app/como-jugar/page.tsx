@@ -11,7 +11,7 @@ export default function ComoJugarPage() {
       <div className="max-w-5xl mx-auto px-6 py-10">
 
         <h1 className="text-5xl font-bold text-red-500 mb-4">
-          📖 Cómo jugar
+          Cómo jugar
         </h1>
 
         <p className="text-zinc-300 text-lg leading-8 mb-20">
@@ -19,8 +19,12 @@ export default function ComoJugarPage() {
           cada opción de la aplicación.
         </p>
 
+        {/* ===================================================== */}
+        {/* INICIO */}
+        {/* ===================================================== */}
+
         <h2 className="text-3xl font-bold mb-4">
-          🏠 Inicio
+          Inicio
         </h2>
 
         <p className="text-zinc-300 leading-7 mb-8">
@@ -81,7 +85,7 @@ export default function ComoJugarPage() {
           className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
         />
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
           <div>
             <h3 className="text-xl font-bold mb-2">
               ① Paddock
@@ -101,126 +105,231 @@ export default function ComoJugarPage() {
             <p className="text-zinc-400">
               Cada noticia muestra una categoría que permite identificar
               rápidamente su contenido, como <strong>MotoGP</strong>,
-              <strong> Mercado</strong> o <strong>Lesiones</strong>.
+              <strong> Mercado</strong> o <strong> Lesiones</strong>.
             </p>
           </div>
         </div>
-<h2 className="text-3xl font-bold mt-20 mb-4">
-  👥 Equipo
-</h2>
 
-<p className="text-zinc-300 leading-7 mb-8">
-  En la pantalla <strong>Equipo</strong> podrás consultar la composición de tu
-  plantilla, el motor seleccionado, las predicciones de temporada y toda la
-  información relacionada con tu equipo Fantasy.
-</p>
+        {/* ===================================================== */}
+        {/* EQUIPO */}
+        {/* ===================================================== */}
 
-<Image
-  src="/capturas/equipo-plantilla.png"
-  alt="Plantilla del equipo"
-  width={1400}
-  height={800}
-  className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
-/>
+        <h2 className="text-3xl font-bold mb-4">
+          Equipo
+        </h2>
 
-<div className="grid md:grid-cols-2 gap-6 mb-16">
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ① Puntos GP
-    </h3>
+        <p className="text-zinc-300 leading-7 mb-8">
+          En la pantalla <strong>Equipo</strong> podrás consultar la composición
+          de tu plantilla, el motor seleccionado, las predicciones de temporada y
+          toda la información relacionada con tu equipo Fantasy.
+        </p>
 
-    <p className="text-zinc-400">
-      Muestra los puntos obtenidos por tu equipo durante el último Gran Premio.
-    </p>
-  </div>
+        <Image
+          src="/capturas/equipo-plantilla.png"
+          alt="Plantilla del equipo"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ② Puntos Totales
-    </h3>
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Puntos GP
+            </h3>
 
-    <p className="text-zinc-400">
-      Indica los puntos acumulados a lo largo de toda la temporada.
-    </p>
-  </div>
+            <p className="text-zinc-400">
+              Muestra los puntos obtenidos por tu equipo durante el último Gran
+              Premio.
+            </p>
+          </div>
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ③ Equipo
-    </h3>
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Puntos Totales
+            </h3>
 
-    <p className="text-zinc-400">
-      Aquí se muestran los cinco pilotos titulares que forman tu equipo para cada
-      Gran Premio.
-    </p>
-  </div>
+            <p className="text-zinc-400">
+              Indica los puntos acumulados a lo largo de toda la temporada.
+            </p>
+          </div>
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ④ Suplente
-    </h3>
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ③ Equipo
+            </h3>
 
-    <p className="text-zinc-400">
-      El piloto reserva aparece resaltado con un borde naranja para diferenciarlo
-      del resto de titulares.
-    </p>
-  </div>
-</div>
+            <p className="text-zinc-400">
+              Aquí se muestran los cinco pilotos titulares que forman tu equipo
+              para cada Gran Premio.
+            </p>
+          </div>
 
-<Image
-  src="/capturas/equipo-predicciones.png"
-  alt="Motor y predicciones"
-  width={1400}
-  height={800}
-  className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
-/>
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ④ Suplente
+            </h3>
 
-<div className="grid md:grid-cols-2 gap-6">
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ① Motor
-    </h3>
+            <p className="text-zinc-400">
+              El piloto reserva aparece resaltado con un borde naranja para
+              diferenciarlo del resto de titulares.
+            </p>
+          </div>
+        </div>
 
-    <p className="text-zinc-400">
-      Muestra el constructor seleccionado para tu equipo Fantasy.
-    </p>
-  </div>
+        <Image
+          src="/capturas/equipo-predicciones.png"
+          alt="Motor y predicciones"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ② Constructor
-    </h3>
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Motor
+            </h3>
 
-    <p className="text-zinc-400">
-      Indica el fabricante elegido que sumará puntos durante la temporada según
-      el reglamento.
-    </p>
-  </div>
+            <p className="text-zinc-400">
+              Muestra el constructor seleccionado para tu equipo Fantasy.
+            </p>
+          </div>
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ③ Predicciones
-    </h3>
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Constructor
+            </h3>
 
-    <p className="text-zinc-400">
-      Agrupa las predicciones de temporada realizadas antes del inicio del campeonato.
-    </p>
-  </div>
+            <p className="text-zinc-400">
+              Indica el fabricante elegido que sumará puntos durante la temporada
+              según el reglamento.
+            </p>
+          </div>
 
-  <div>
-    <h3 className="text-xl font-bold mb-2">
-      ④ Predicciones seleccionadas
-    </h3>
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ③ Predicciones
+            </h3>
 
-    <p className="text-zinc-400">
-      Muestra el piloto campeón y el constructor campeón que has elegido como
-      predicción para la temporada.
-    </p>
-  </div>
-</div>
+            <p className="text-zinc-400">
+              Agrupa las predicciones de temporada realizadas antes del inicio del
+              campeonato.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ④ Predicciones seleccionadas
+            </h3>
+
+            <p className="text-zinc-400">
+              Muestra el piloto campeón y el constructor campeón elegidos para la
+              temporada.
+            </p>
+          </div>
+        </div>
+                {/* ===================================================== */}
+        {/* MERCADO */}
+        {/* ===================================================== */}
+
+        <h2 className="text-3xl font-bold mb-4">
+          Mercado
+        </h2>
+
+        <p className="text-zinc-300 leading-7 mb-8">
+          Desde la pantalla <strong>Mercado</strong> podrás gestionar tu equipo
+          durante las ventanas oficiales de fichajes. Aquí podrás incorporar o
+          eliminar pilotos, seleccionar el piloto reserva, elegir el constructor
+          y realizar tus predicciones para la temporada.
+        </p>
+
+        <Image
+          src="/capturas/mercado-listado.png"
+          alt="Mercado de pilotos"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="grid md:grid-cols-2 gap-6 mb-16">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Mercado
+            </h3>
+
+            <p className="text-zinc-400">
+              Muestra todos los pilotos disponibles para formar o modificar tu
+              equipo Fantasy.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Estado del mercado
+            </h3>
+
+            <p className="text-zinc-400">
+              Indica si el mercado se encuentra abierto o cerrado y, por tanto,
+              si es posible realizar cambios en el equipo.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ③ Presupuesto restante
+            </h3>
+
+            <p className="text-zinc-400">
+              Muestra el presupuesto disponible para realizar nuevos fichajes.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ④ Acciones
+            </h3>
+
+            <p className="text-zinc-400">
+              Permite fichar, quitar o convertir un piloto en suplente según la
+              situación de tu equipo.
+            </p>
+          </div>
+        </div>
+
+        <Image
+          src="/capturas/mercado-predicciones.png"
+          alt="Motores y predicciones"
+          width={1400}
+          height={800}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="grid md:grid-cols-2 gap-6 mb-20">
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ① Motores
+            </h3>
+
+            <p className="text-zinc-400">
+              Selecciona el constructor que formará parte de tu equipo Fantasy.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold mb-2">
+              ② Predicciones de temporada
+            </h3>
+
+            <p className="text-zinc-400">
+              Elige el piloto campeón del mundo y el constructor campeón antes del
+              inicio de la temporada o durante el periodo permitido por el
+              reglamento.
+            </p>
+          </div>
+        </div>
 
       </div>
     </main>
   );
 }
-
