@@ -30,10 +30,11 @@ export default function HelpCard() {
         title="FAQ"
       />
 
-      <MenuItem
-        icon={<Mail size={18} />}
-        title="Contacto"
-      />
+     <MenuItem
+  icon={<Mail size={18} />}
+  title="Contacto"
+  href="/contacto"
+/>
 
       <MenuItem
         icon={<Info size={18} />}
