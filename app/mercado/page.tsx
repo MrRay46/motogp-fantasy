@@ -244,6 +244,41 @@ useEffect(() => {
 
   return true;
 };
+const puedeCambiarReserva = () => {
+  if (!mercadoAbierto) return false;
+
+  if (!estadoMercado?.cambiarReserva) return false;
+
+  if (
+    equipoActual.reservaModificada &&
+    !estadoMercado?.reservaConsumible
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+const puedeCambiarPredicciones = () => {
+  if (!mercadoAbierto) return false;
+
+  if (!estadoMercado?.cambiarPredicciones) return false;
+
+  return true;
+};
+
+const puedeCambiarPilotos = () => {
+  if (!mercadoAbierto) return false;
+
+  if (
+    (equipoActual.cambiosPilotos ?? 0) >=
+    (estadoMercado?.cambiosPilotos ?? 0)
+  ) {
+    return false;
+  }
+
+  return true;
+};
     return (
 
   <AppLayout>
@@ -484,10 +519,10 @@ useEffect(() => {
 
             <button
               key={piloto.nombre}
-              disabled={!mercadoAbierto}
+              disabled={!puedeCambiarPredicciones()}
               onClick={() => {
 
-                if (!mercadoAbierto) return;
+                if (!puedeCambiarPredicciones()) return;
 
                 setPrediccionPiloto(
                   piloto.nombre
@@ -525,10 +560,10 @@ useEffect(() => {
 
             <button
               key={item.nombre}
-              disabled={!mercadoAbierto}
+              disabled={!puedeCambiarPredicciones()}
               onClick={() => {
 
-                if (!mercadoAbierto) return;
+                if (!puedeCambiarPredicciones()) return;
 
                 setPrediccionMotor(
                   item.nombre
