@@ -141,9 +141,10 @@ if (equipo.bonus_temporada_aplicado) {
 const { error: errorUpdate } = await supabase
   .from("equipos")
   .update({
-    bonus_temporada: bonus,
-    bonus_temporada_aplicado: true,
-  })
+  puntos: (equipo.puntos ?? 0) + bonus,
+  bonus_temporada: bonus,
+  bonus_temporada_aplicado: true,
+})
   .eq("id", equipo.id);
 
 if (errorUpdate) {
