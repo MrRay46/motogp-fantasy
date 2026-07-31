@@ -12,6 +12,8 @@ type EquipoJugador = {
   reserva: string | null;
   motor: string | null;
 
+  puntos: number;
+
   prediccionPiloto: string | null;
   prediccionMotor: string | null;
 
@@ -91,9 +93,7 @@ const cargarEquiposSupabase =
 
     data.forEach((fila) => {
 
-      equiposCargados[
-        fila.usuario
-      ] = {
+      equiposCargados[fila.usuario] = {
 
         fichados:
           fila.fichados || [],
@@ -103,6 +103,8 @@ const cargarEquiposSupabase =
 
         motor:
           fila.motor,
+          
+          puntos: fila.puntos ?? 0,
 
         prediccionPiloto:
           fila.prediccion_piloto,

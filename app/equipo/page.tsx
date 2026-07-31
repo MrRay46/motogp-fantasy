@@ -28,14 +28,15 @@ export default function EquipoPage() {
     );
   }
 
-  const equipoActual =
-    equipos[jugadorActual] || {
-      fichados: [],
-      reserva: null,
-      motor: null,
-      prediccionPiloto: null,
-      prediccionMotor: null,
-    };
+ const equipoActual =
+  equipos[jugadorActual] || {
+    fichados: [],
+    reserva: null,
+    motor: null,
+    prediccionPiloto: null,
+    prediccionMotor: null,
+    puntos: 0,
+  };
 
   const fichados = equipoActual.fichados;
   const reserva = equipoActual.reserva;
@@ -166,12 +167,8 @@ const prediccionMotorModificada =
     puntosTitulares +
     puntosReserva +
     puntosMotor;
-const puntosTotales = titulares.reduce(
-  (total, piloto) => total + piloto.puntos,
-  0
-) +
-(pilotoReserva?.puntos ?? 0) +
-puntosMotor;
+const puntosTotales =
+  equipoActual.puntos ?? 0;
 
   return (
     <AppLayout>
