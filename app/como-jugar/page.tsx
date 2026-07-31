@@ -435,14 +435,15 @@ export default function ComoJugarPage() {
         {/* ADMINISTRACIÓN */}
         {/* ===================================================== */}
 
-        <h2 className="text-3xl font-bold mb-4">
+               <h2 className="text-3xl font-bold mb-4">
           Administración
         </h2>
 
         <p className="text-zinc-300 leading-7 mb-8">
           La pantalla <strong>Administración</strong> está disponible únicamente
           para los administradores de la liga y permite gestionar los
-          participantes y las invitaciones.
+          participantes, las invitaciones y las bonificaciones de final de
+          temporada.
         </p>
 
         <Image
@@ -453,7 +454,8 @@ export default function ComoJugarPage() {
           className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
         />
 
-        <div className="grid md:grid-cols-2 gap-6 mb-20">
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+
           <div>
             <h3 className="text-xl font-bold mb-2">
               ① Panel de Administración
@@ -486,7 +488,33 @@ export default function ComoJugarPage() {
               de la liga cuando sea necesario.
             </p>
           </div>
+
         </div>
+
+        <Image
+          src="/capturas/admin-bonificaciones.png"
+          alt="Bonificaciones de temporada"
+          width={1400}
+          height={500}
+          className="w-full rounded-2xl border border-zinc-700/40 shadow-xl mb-8"
+        />
+
+        <div className="mb-20">
+
+          <h3 className="text-xl font-bold mb-2">
+            ① Generar bonificaciones
+          </h3>
+
+          <p className="text-zinc-400 leading-7">
+            Una vez finalizada la temporada, el administrador podrá pulsar este
+            botón para aplicar automáticamente las bonificaciones de las
+            predicciones acertadas de todos los jugadores.
+            Cada bonificación solo puede aplicarse una única vez, evitando que
+            los puntos puedan duplicarse por error.
+          </p>
+
+        </div>
+
         {/* ===================================================== */}
         {/* MENÚ LATERAL */}
         {/* ===================================================== */}
