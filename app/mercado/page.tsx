@@ -1,4 +1,8 @@
 "use client";
+import {
+  MarketStatus,
+  BudgetCard,
+} from "@/components/mercado";
 
 import { useEffect, useState } from "react";
 
@@ -287,35 +291,16 @@ const puedeCambiarPilotos = () => {
       Mercado
     </h1>
 
-    {mercadoAbierto ? (
+    <MarketStatus
+  mercadoAbierto={mercadoAbierto}
+  diasRestantes={diasRestantes}
+/>
 
-      <p className="text-xl mb-6 text-green-400 font-semibold">
-        🟢 Mercado abierto
-      </p>
+   
 
-    ) : (
-
-      <div className="mb-6 space-y-2">
-
-        <p className="text-xl text-yellow-400 font-semibold">
-          🔒 Mercado cerrado
-        </p>
-
-        {diasRestantes !== null && (
-          <p className="text-lg text-zinc-300">
-            ⏳ Abre en {diasRestantes}{" "}
-            {diasRestantes === 1 ? "día" : "días"}
-          </p>
-        )}
-
-      </div>
-
-    )}
-
-    <p className="text-xl mb-8">
-      💰 Presupuesto restante:{" "}
-      {presupuestoRestante.toFixed(1)} M
-    </p>
+    <BudgetCard
+  presupuestoRestante={presupuestoRestante}
+/>
 
     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
 
@@ -356,9 +341,9 @@ const puedeCambiarPilotos = () => {
 
             <div className="flex justify-between text-lg mb-5">
 
-              <p>🏆 {piloto.puntos} pts</p>
+              <p>ðŸ† {piloto.puntos} pts</p>
 
-              <p>💰 {piloto.precio} M</p>
+              <p>ðŸ’° {piloto.precio} M</p>
 
             </div>
 
@@ -406,7 +391,7 @@ const puedeCambiarPilotos = () => {
   }`}
 >
   {fichados.includes(piloto.nombre)
-    ? "Quitar ❌"
+    ? "Quitar âŒ"
     : "Fichar"}
 </button>
 
@@ -431,7 +416,7 @@ const puedeCambiarPilotos = () => {
                 >
 
                   {reserva === piloto.nombre
-                    ? "Reserva ✅"
+                    ? "Reserva âœ…"
                     : "Reserva"}
 
                 </button>
@@ -470,7 +455,7 @@ const puedeCambiarPilotos = () => {
       </div>
 
       <p className="text-lg">
-        💰 {item.precio} M
+        ðŸ’° {item.precio} M
       </p>
 
       <button
@@ -494,7 +479,7 @@ const puedeCambiarPilotos = () => {
         }`}
       >
         {motor === item.nombre
-          ? "Seleccionado ✅"
+          ? "Seleccionado âœ…"
           : "Seleccionar"}
       </button>
     </div>
@@ -502,7 +487,7 @@ const puedeCambiarPilotos = () => {
 </div>
 
     <h2 className="text-4xl font-bold mt-16 mb-6">
-      🎯 Predicciones Temporada
+      ðŸŽ¯ Predicciones Temporada
     </h2>
 
     <div className="grid md:grid-cols-2 gap-6">
@@ -510,7 +495,7 @@ const puedeCambiarPilotos = () => {
       <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
 
         <h3 className="text-2xl font-bold mb-4">
-          🏆 Piloto Campeón
+          ðŸ† Piloto CampeÃ³n
         </h3>
 
         <div className="flex flex-wrap gap-3">
@@ -551,7 +536,7 @@ const puedeCambiarPilotos = () => {
       <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
 
         <h3 className="text-2xl font-bold mb-4">
-          🏍️ Motor Campeón
+          ðŸï¸ Motor CampeÃ³n
         </h3>
 
         <div className="flex flex-wrap gap-3">

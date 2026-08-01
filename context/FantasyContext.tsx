@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 
-type EquipoJugador = {
+export type EquipoJugador = {
   fichados: string[];
   reserva: string | null;
   motor: string | null;
