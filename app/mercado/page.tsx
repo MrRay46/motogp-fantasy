@@ -209,6 +209,16 @@ export default function MercadoPage() {
   const presupuestoRestante =
     172 - presupuestoUsado;
 
+    const equipoInicialCompleto = () => {
+  return (
+    fichados.length === 6 &&
+    reserva !== null &&
+    motor !== null &&
+    prediccionPiloto !== null &&
+    prediccionMotor !== null
+  );
+};
+
   const puedeCambiarConstructor =
     () => {
       if (!mercadoAbierto)
@@ -262,6 +272,10 @@ export default function MercadoPage() {
 
   const puedeCambiarPilotos =
     () => {
+
+      if (!equipoInicialCompleto()) {
+  return true;
+}
       if (!mercadoAbierto)
         return false;
 
