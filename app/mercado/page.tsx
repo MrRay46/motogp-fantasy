@@ -1,7 +1,12 @@
 "use client";
+
 import {
+  MarketHeader,
   MarketStatus,
   BudgetCard,
+  PilotsMarket,
+  ConstructorsMarket,
+  SeasonPredictions,
 } from "@/components/mercado";
 
 import { useEffect, useState } from "react";
@@ -16,7 +21,6 @@ import { obtenerEstadoMercado } from "@/lib/mercado";
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function MercadoPage() {
-
   const {
     equipos,
     setEquipos,
@@ -24,27 +28,22 @@ export default function MercadoPage() {
   } = useFantasy();
 
   const equipoActual =
-  equipos[jugadorActual] || {
-    fichados: [],
-    reserva: null,
-    motor: null,
+    equipos[jugadorActual] || {
+      fichados: [],
+      reserva: null,
+      motor: null,
 
-    prediccionPiloto: null,
-    prediccionMotor: null,
+      prediccionPiloto: null,
+      prediccionMotor: null,
 
-    constructorModificado: false,
-    reservaModificada: false,
-    cambiosPilotos: 0,
-  };
+      constructorModificado: false,
+      reservaModificada: false,
+      cambiosPilotos: 0,
+    };
 
-  const fichados =
-    equipoActual.fichados;
-
-  const reserva =
-    equipoActual.reserva;
-
-  const motor =
-    equipoActual.motor;
+  const fichados = equipoActual.fichados;
+  const reserva = equipoActual.reserva;
+  const motor = equipoActual.motor;
 
   const prediccionPiloto =
     equipoActual.prediccionPiloto;
@@ -52,101 +51,88 @@ export default function MercadoPage() {
   const prediccionMotor =
     equipoActual.prediccionMotor;
 
-  const [mercadoAbierto, setMercadoAbierto] =
-    useState(false);
+  const [
+    mercadoAbierto,
+    setMercadoAbierto,
+  ] = useState(false);
 
-  const [diasRestantes, setDiasRestantes] =
-    useState<number | null>(null);
+  const [
+    diasRestantes,
+    setDiasRestantes,
+  ] = useState<number | null>(null);
 
-    const [estadoMercado, setEstadoMercado] = useState<any>(null);
-useEffect(() => {
-  async function cargarMercado() {
-    const estado = await obtenerEstadoMercado();
+  const [
+    estadoMercado,
+    setEstadoMercado,
+  ] = useState<any>(null);
 
-    if (!estado) return;
+  useEffect(() => {
+    async function cargarMercado() {
+      const estado =
+        await obtenerEstadoMercado();
 
-    setEstadoMercado(estado);
-    setMercadoAbierto(estado.mercadoAbierto);
-    setDiasRestantes(estado.diasRestantes);
-  }
+      if (!estado) return;
 
-  cargarMercado();
-}, []);
+      setEstadoMercado(estado);
+      setMercadoAbierto(
+        estado.mercadoAbierto
+      );
+      setDiasRestantes(
+        estado.diasRestantes
+      );
+    }
+
+    cargarMercado();
+  }, []);
 
   const setFichados = (
     nuevosFichados: string[]
   ) => {
-
     const nuevosEquipos = {
       ...equipos,
 
       [jugadorActual]: {
-
         ...equipos[jugadorActual],
-
-        fichados:
-          nuevosFichados,
-
+        fichados: nuevosFichados,
       },
-
     };
 
-    setEquipos(
-      nuevosEquipos
-    );
-
+    setEquipos(nuevosEquipos);
   };
 
   const setReserva = (
     nuevaReserva: string | null
   ) => {
-
     setEquipos((prev) => ({
-
       ...prev,
 
       [jugadorActual]: {
-
         ...prev[jugadorActual],
-
         reserva: nuevaReserva,
-
       },
-
     }));
-
   };
 
   const setMotor = (
     nuevoMotor: string | null
   ) => {
-
     setEquipos((prev) => ({
-
       ...prev,
 
       [jugadorActual]: {
-
         ...prev[jugadorActual],
-
         motor: nuevoMotor,
-
       },
-
     }));
-
   };
 
   const setPrediccionPiloto = (
     piloto: string
   ) => {
-
     setEquipos((prev) => ({
-
       ...prev,
 
       [jugadorActual]: {
-
         ...prev[jugadorActual],
 
         prediccionPiloto: piloto,
@@ -157,35 +143,26 @@ useEffect(() => {
           piloto,
 
         prediccionPilotoModificada:
-
           prev[jugadorActual]
             ?.prediccionPilotoOriginal &&
-
           prev[jugadorActual]
-            ?.prediccionPilotoOriginal !== piloto
-
+            ?.prediccionPilotoOriginal !==
+            piloto
             ? true
-
             : prev[jugadorActual]
                 ?.prediccionPilotoModificada ||
               false,
-
       },
-
     }));
-
   };
 
   const setPrediccionMotor = (
     marca: string
   ) => {
-
     setEquipos((prev) => ({
-
       ...prev,
 
       [jugadorActual]: {
-
         ...prev[jugadorActual],
 
         prediccionMotor: marca,
@@ -196,30 +173,22 @@ useEffect(() => {
           marca,
 
         prediccionMotorModificada:
-
           prev[jugadorActual]
             ?.prediccionMotorOriginal &&
-
           prev[jugadorActual]
-            ?.prediccionMotorOriginal !== marca
-
+            ?.prediccionMotorOriginal !==
+            marca
             ? true
-
             : prev[jugadorActual]
                 ?.prediccionMotorModificada ||
               false,
-
       },
-
     }));
-
   };
 
   const equipo = pilotos.filter(
     (piloto) =>
-      fichados.includes(
-        piloto.nombre
-      )
+      fichados.includes(piloto.nombre)
   );
 
   const motorSeleccionado =
@@ -239,345 +208,179 @@ useEffect(() => {
 
   const presupuestoRestante =
     172 - presupuestoUsado;
-    const puedeCambiarConstructor = () => {
-  if (!mercadoAbierto) return false;
 
-  if (!estadoMercado?.cambiarConstructor) return false;
+  const puedeCambiarConstructor =
+    () => {
+      if (!mercadoAbierto)
+        return false;
 
-  if (equipoActual.constructorModificado) return false;
-
-  return true;
-};
-const puedeCambiarReserva = () => {
-  if (!mercadoAbierto) return false;
-
-  if (!estadoMercado?.cambiarReserva) return false;
-
-  if (
-    equipoActual.reservaModificada &&
-    !estadoMercado?.reservaConsumible
-  ) {
-    return false;
-  }
-
-  return true;
-};
-
-const puedeCambiarPredicciones = () => {
-  if (!mercadoAbierto) return false;
-
-  if (!estadoMercado?.cambiarPredicciones) return false;
-
-  return true;
-};
-
-const puedeCambiarPilotos = () => {
-  if (!mercadoAbierto) return false;
-
-  if (
-    (equipoActual.cambiosPilotos ?? 0) >=
-    (estadoMercado?.cambiosPilotos ?? 0)
-  ) {
-    return false;
-  }
-
-  return true;
-};
-    return (
-
-  <AppLayout>
-
-    <h1 className="text-5xl font-bold text-red-500 mb-4">
-      Mercado
-    </h1>
-
-    <MarketStatus
-  mercadoAbierto={mercadoAbierto}
-  diasRestantes={diasRestantes}
-/>
-
-   
-
-    <BudgetCard
-  presupuestoRestante={presupuestoRestante}
-/>
-
-    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-
-      {pilotos.map((piloto) => (
-
-        <div
-          key={piloto.nombre}
-          className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl hover:scale-[1.03] hover:shadow-red-500/20 transition-all duration-300"
-        >
-
-          <div className="relative">
-
-            <img
-              src={piloto.foto}
-              alt={piloto.nombre}
-              className="w-full h-72 object-contain bg-gradient-to-b from-zinc-900 to-black p-4"
-            />
-
-            <div className="absolute top-4 left-4">
-
-              <img
-                src={piloto.logoEquipo}
-                alt={piloto.equipo}
-                className="w-14 h-14 object-contain"
-              />
-
-            </div>
-
-            <div className="absolute bottom-4 left-4">
-              <h2 className="text-3xl font-black">
-                {piloto.nombre}
-              </h2>
-            </div>
-
-          </div>
-
-          <div className="p-5">
-
-            <div className="flex justify-between text-lg mb-5">
-
-              <p>ðŸ† {piloto.puntos} pts</p>
-
-              <p>ðŸ’° {piloto.precio} M</p>
-
-            </div>
-
-            <div className="flex gap-3 flex-wrap">
-
-              <button
-  disabled={
-    !mercadoAbierto ||
-    (
-      !fichados.includes(piloto.nombre) &&
-      (
-        fichados.length >= 6 ||
-        presupuestoUsado + piloto.precio > 172
+      if (
+        !estadoMercado?.cambiarConstructor
       )
-    )
-  }
-  onClick={() => {
-    if (!mercadoAbierto) return;
+        return false;
 
-    if (fichados.includes(piloto.nombre)) {
-      setFichados(
-        fichados.filter(
-          (nombre) => nombre !== piloto.nombre
-        )
-      );
-      return;
-    }
+      if (
+        equipoActual.constructorModificado
+      )
+        return false;
 
-    if (
-      fichados.length >= 6 ||
-      presupuestoUsado + piloto.precio > 172
-    ) {
-      return;
-    }
+      return true;
+    };
 
-    setFichados([
-      ...fichados,
-      piloto.nombre,
-    ]);
-  }}
-  className={`px-4 py-2 rounded-xl font-bold transition ${
-    fichados.includes(piloto.nombre)
-      ? "bg-red-600"
-      : "bg-red-500 hover:bg-red-400"
-  }`}
->
-  {fichados.includes(piloto.nombre)
-    ? "Quitar âŒ"
-    : "Fichar"}
-</button>
+  const puedeCambiarReserva =
+    () => {
+      if (!mercadoAbierto)
+        return false;
 
-              {fichados.includes(piloto.nombre) && (
+      if (
+        !estadoMercado?.cambiarReserva
+      )
+        return false;
 
-                <button
-                  disabled={!mercadoAbierto}
-                  onClick={() => {
+      if (
+        equipoActual.reservaModificada &&
+        !estadoMercado?.reservaConsumible
+      ) {
+        return false;
+      }
 
-                    if (!mercadoAbierto) return;
+      return true;
+    };
 
-                    setReserva(
-                      piloto.nombre
-                    );
+  const puedeCambiarPredicciones =
+    () => {
+      if (!mercadoAbierto)
+        return false;
 
-                  }}
-                  className={`px-4 py-2 rounded-xl font-bold transition ${
-                    reserva === piloto.nombre
-                      ? "bg-blue-600"
-                      : "bg-blue-500 hover:bg-blue-400"
-                  }`}
-                >
+      if (
+        !estadoMercado?.cambiarPredicciones
+      )
+        return false;
 
-                  {reserva === piloto.nombre
-                    ? "Reserva âœ…"
-                    : "Reserva"}
+      return true;
+    };
 
-                </button>
+  const puedeCambiarPilotos =
+    () => {
+      if (!mercadoAbierto)
+        return false;
 
-              )}
+      if (
+        (equipoActual.cambiosPilotos ??
+          0) >=
+        (estadoMercado?.cambiosPilotos ??
+          0)
+      ) {
+        return false;
+      }
 
-            </div>
+      return true;
+    };
 
-          </div>
+  return (
+    <AppLayout>
+      <MarketHeader />
 
-        </div>
+      <MarketStatus
+        mercadoAbierto={
+          mercadoAbierto
+        }
+        diasRestantes={
+          diasRestantes
+        }
+      />
 
-      ))}
+      <BudgetCard
+        presupuestoRestante={
+          presupuestoRestante
+        }
+      />
+      <PilotsMarket
+        pilotos={pilotos}
+        fichados={fichados}
+        reserva={reserva}
+        mercadoAbierto={puedeCambiarPilotos()}
+        onFichar={(piloto) => {
+          const fichado =
+            fichados.includes(
+              piloto.nombre
+            );
 
-    </div>
-  <h2 className="text-4xl font-bold mt-16 mb-6">
-  Motores
-</h2>
+          if (fichado) {
+            setFichados(
+              fichados.filter(
+                (nombre) =>
+                  nombre !==
+                  piloto.nombre
+              )
+            );
 
-<div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-  {motores.map((item) => (
-    <div
-      key={item.nombre}
-      className="bg-red-900/40 border border-red-500 p-6 rounded-3xl"
-    >
-      <div className="flex items-center gap-4 mb-4">
-        <img
-          src={item.logo}
-          alt={item.nombre}
-          className="w-16 h-16 object-contain"
-        />
+            return;
+          }
 
-        <h2 className="text-2xl font-bold">
-          {item.nombre}
-        </h2>
-      </div>
+          if (
+            fichados.length >= 6 ||
+            presupuestoUsado +
+              piloto.precio >
+              172
+          ) {
+            return;
+          }
 
-      <p className="text-lg">
-        ðŸ’° {item.precio} M
-      </p>
+          setFichados([
+            ...fichados,
+            piloto.nombre,
+          ]);
+        }}
+        onReserva={(piloto) => {
+          if (
+            !puedeCambiarReserva()
+          )
+            return;
 
-      <button
-        disabled={!puedeCambiarConstructor()}
-        onClick={() => {
-  if (!puedeCambiarConstructor()) return;
+          setReserva(
+            piloto.nombre
+          );
+        }}
+      />
+<div className="mt-16">
+  <ConstructorsMarket
+    constructores={motores}
+    constructorSeleccionado={motor}
+    mercadoAbierto={puedeCambiarConstructor()}
+    onSeleccionar={(constructor) => {
+      setMotor(constructor.nombre);
 
-  setEquipos((prev) => ({
-    ...prev,
-    [jugadorActual]: {
-      ...prev[jugadorActual],
-      motor: item.nombre,
-      constructorModificado: true,
-    },
-  }));
-}}
-        className={`mt-4 px-4 py-2 rounded-xl transition ${
-         !puedeCambiarConstructor()
-            ? "bg-zinc-700 opacity-50 cursor-not-allowed"
-            : "bg-red-500 hover:bg-red-400"
-        }`}
-      >
-        {motor === item.nombre
-          ? "Seleccionado âœ…"
-          : "Seleccionar"}
-      </button>
-    </div>
-  ))}
+      setEquipos((prev) => ({
+        ...prev,
+        [jugadorActual]: {
+          ...prev[jugadorActual],
+          constructorModificado: true,
+        },
+      }));
+    }}
+  />
 </div>
 
-    <h2 className="text-4xl font-bold mt-16 mb-6">
-      ðŸŽ¯ Predicciones Temporada
-    </h2>
-
-    <div className="grid md:grid-cols-2 gap-6">
-
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
-
-        <h3 className="text-2xl font-bold mb-4">
-          ðŸ† Piloto CampeÃ³n
-        </h3>
-
-        <div className="flex flex-wrap gap-3">
-
-          {pilotos.map((piloto) => (
-
-            <button
-              key={piloto.nombre}
-              disabled={!puedeCambiarPredicciones()}
-              onClick={() => {
-
-                if (!puedeCambiarPredicciones()) return;
-
-                setPrediccionPiloto(
-                  piloto.nombre
-                );
-
-              }}
-              className={`px-4 py-2 rounded-xl transition ${
-                prediccionPiloto === piloto.nombre
-                  ? "bg-green-500"
-                  : mercadoAbierto
-                  ? "bg-zinc-800 hover:bg-zinc-700"
-                  : "bg-zinc-700 opacity-50 cursor-not-allowed"
-              }`}
-            >
-
-              {piloto.nombre}
-
-            </button>
-
-          ))}
-
-        </div>
-
-      </div>
-
-      <div className="bg-zinc-900 border border-zinc-700 p-6 rounded-3xl">
-
-        <h3 className="text-2xl font-bold mb-4">
-          ðŸï¸ Motor CampeÃ³n
-        </h3>
-
-        <div className="flex flex-wrap gap-3">
-
-          {motores.map((item) => (
-
-            <button
-              key={item.nombre}
-              disabled={!puedeCambiarPredicciones()}
-              onClick={() => {
-
-                if (!puedeCambiarPredicciones()) return;
-
-                setPrediccionMotor(
-                  item.nombre
-                );
-
-              }}
-              className={`px-4 py-2 rounded-xl transition ${
-                prediccionMotor === item.nombre
-                  ? "bg-green-500"
-                  : mercadoAbierto
-                  ? "bg-zinc-800 hover:bg-zinc-700"
-                  : "bg-zinc-700 opacity-50 cursor-not-allowed"
-              }`}
-            >
-
-              {item.nombre}
-
-            </button>
-
-          ))}
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </AppLayout>
-
-);
-
+      <SeasonPredictions
+        pilotos={pilotos}
+        constructores={
+          motores
+        }
+        prediccionPiloto={
+          prediccionPiloto
+        }
+        prediccionConstructor={
+          prediccionMotor
+        }
+        puedeCambiarPredicciones={puedeCambiarPredicciones()}
+        onSeleccionarPiloto={
+          setPrediccionPiloto
+        }
+        onSeleccionarConstructor={
+          setPrediccionMotor
+        }
+      />
+    </AppLayout>
+  );
 }
