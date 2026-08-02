@@ -54,8 +54,12 @@ export default function PilotCard({
             onClick={acciones.fichar}
             className={`px-4 py-2 rounded-xl font-bold transition ${
               estado.fichado
-                ? "bg-red-600"
+                ? "bg-red-600 hover:bg-red-500"
                 : "bg-red-500 hover:bg-red-400"
+            } ${
+              !estado.puedeFichar
+                ? "opacity-50 cursor-not-allowed"
+                : ""
             }`}
           >
             {estado.fichado
@@ -72,6 +76,10 @@ export default function PilotCard({
                 estado.reserva
                   ? "bg-blue-600"
                   : "bg-blue-500 hover:bg-blue-400"
+              } ${
+                !estado.puedeReserva
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
               }`}
             >
               {estado.reserva

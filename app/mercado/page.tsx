@@ -221,6 +221,9 @@ export default function MercadoPage() {
 
   const puedeCambiarConstructor =
     () => {
+      if (!equipoInicialCompleto()) {
+  return true;
+}
       if (!mercadoAbierto)
         return false;
 
@@ -239,6 +242,9 @@ export default function MercadoPage() {
 
   const puedeCambiarReserva =
     () => {
+      if (!equipoInicialCompleto()) {
+  return true;
+}
       if (!mercadoAbierto)
         return false;
 
@@ -259,6 +265,9 @@ export default function MercadoPage() {
 
   const puedeCambiarPredicciones =
     () => {
+      if (!equipoInicialCompleto()) {
+  return true;
+}
       if (!mercadoAbierto)
         return false;
 
@@ -310,10 +319,13 @@ export default function MercadoPage() {
         }
       />
       <PilotsMarket
-        pilotos={pilotos}
-        fichados={fichados}
-        reserva={reserva}
-        mercadoAbierto={puedeCambiarPilotos()}
+  pilotos={pilotos}
+  fichados={fichados}
+  reserva={reserva}
+
+  puedeFichar={puedeCambiarPilotos()}
+  puedeQuitar={puedeCambiarPilotos()}
+  puedeElegirReserva={puedeCambiarReserva()}
         onFichar={(piloto) => {
           const fichado =
             fichados.includes(

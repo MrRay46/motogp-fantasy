@@ -3,9 +3,13 @@ import { Piloto } from "./types";
 
 type PilotsMarketProps = {
   pilotos: Piloto[];
+
   fichados: string[];
   reserva: string | null;
-  mercadoAbierto: boolean;
+
+  puedeFichar: boolean;
+  puedeQuitar: boolean;
+  puedeElegirReserva: boolean;
 
   onFichar: (piloto: Piloto) => void;
   onReserva: (piloto: Piloto) => void;
@@ -15,7 +19,9 @@ export default function PilotsMarket({
   pilotos,
   fichados,
   reserva,
-  mercadoAbierto,
+  puedeFichar,
+  puedeQuitar,
+  puedeElegirReserva,
   onFichar,
   onReserva,
 }: PilotsMarketProps) {
@@ -36,13 +42,15 @@ export default function PilotsMarket({
             estado={{
               fichado,
               reserva: esReserva,
-              puedeFichar:
-                mercadoAbierto &&
-                (!fichado || esReserva),
+
+              puedeFichar: fichado
+                ? puedeQuitar
+                : puedeFichar,
+
               puedeReserva:
-                mercadoAbierto &&
                 fichado &&
-                !esReserva,
+                !esReserva &&
+                puedeElegirReserva,
             }}
             acciones={{
               fichar: () =>
