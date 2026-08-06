@@ -6,12 +6,43 @@ import AppLayout from "@/components/layout/AppLayout";
 
 import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
 
+import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 export default function SuperAdminPage() {
   const [procesando, setProcesando] =
     useState(false);
 
   const [mensaje, setMensaje] =
     useState("");
+
+    
+
+
+useEffect(() => {
+  async function comprobar() {
+    console.log(
+      "¿Es SuperAdmin?",
+      await esSuperAdmin()
+    );
+  }
+
+  comprobar();
+}, []);
+const router = useRouter();
+
+useEffect(() => {
+  async function comprobar() {
+    const permitido = await esSuperAdmin();
+
+    if (!permitido) {
+      router.replace("/dashboard");
+    }
+  }
+
+  comprobar();
+}, []);
 
   async function procesar() {
     try {
