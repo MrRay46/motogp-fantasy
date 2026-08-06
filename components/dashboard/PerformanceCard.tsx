@@ -4,16 +4,27 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import StatCard from "./StatCard";
 
+type Equipo = {
+  puntos: number;
+  posicion_actual: number;
+  posicion_anterior: number;
+  diferencia_lider: number;
+  diferencia_lider_anterior: number;
+};
+
 export default function PerformanceCard() {
-  const [equipo, setEquipo] = useState<any>(null);
-  const [posicion, setPosicion] = useState(0);
+  const [equipo, setEquipo] =
+    useState<Equipo | null>(null);
+
   const [color, setColor] = useState<
     "success" | "danger" | undefined
   >();
 
-  const [mensaje, setMensaje] = useState("");
+  const [mensaje, setMensaje] =
+    useState("");
 
-  const [flecha, setFlecha] = useState("");
+  const [flecha, setFlecha] =
+    useState("");
 
   useEffect(() => {
     cargarDatos();
@@ -21,66 +32,77 @@ export default function PerformanceCard() {
 
   async function cargarDatos() {
     const sesion = JSON.parse(
-  localStorage.getItem("usuario") || "{}"
-);
+      localStorage.getItem("usuario") ||
+        "{}"
+    );
 
-if (!sesion.usuario) return;
+    if (!sesion.id) return;
 
-    const { data } = await supabase
-      .from("equipos")
-      .select("*")
-      .order("puntos", {
-        ascending: false,
-      });
+    //------------------------------------------------
+    // Obtener liga actual del usuario
+    //------------------------------------------------
 
-    if (!data) return;
+    const { data: usuario } =
+      await supabase
+        .from("usuarios")
+        .select("liga_actual_id")
+        .eq("id", sesion.id)
+        .single();
 
-   const indice = data.findIndex(
-  (e) => e.usuario === sesion.usuario
-);
+    if (!usuario) return;
 
-    if (indice === -1) return;
+    //------------------------------------------------
+    // Leer únicamente el equipo del usuario
+    //------------------------------------------------
 
-    const miEquipo = data[indice];
+    const { data: miEquipo } =
+      await supabase
+        .from("equipos")
+        .select(`
+          puntos,
+          posicion_actual,
+          posicion_anterior,
+          diferencia_lider,
+          diferencia_lider_anterior
+        `)
+        .eq("usuario_id", sesion.id)
+        .eq(
+          "liga_id",
+          usuario.liga_actual_id
+        )
+        .single();
+
+    if (!miEquipo) return;
 
     setEquipo(miEquipo);
 
-    const posicionActual = indice + 1;
-
-    setPosicion(posicionActual);
-
-    //---------------------------------
-    // CAMBIO DE POSICIÓN
-    //---------------------------------
+    //-----------------------------------------
+    // Flecha posición
+    //-----------------------------------------
 
     if (
       miEquipo.posicion_anterior > 0
     ) {
       if (
-        posicionActual <
+        miEquipo.posicion_actual <
         miEquipo.posicion_anterior
       ) {
         setFlecha("▲");
       } else if (
-        posicionActual >
+        miEquipo.posicion_actual >
         miEquipo.posicion_anterior
       ) {
         setFlecha("▼");
       }
     }
 
-    //---------------------------------
-    // DIFERENCIA CON EL LÍDER
-    //---------------------------------
-
-    const lider = data[0];
-
-    const diferenciaActual =
-      lider.puntos - miEquipo.puntos;
+    //-----------------------------------------
+    // Diferencia líder
+    //-----------------------------------------
 
     const cambio =
       miEquipo.diferencia_lider_anterior -
-      diferenciaActual;
+      miEquipo.diferencia_lider;
 
     if (cambio > 0) {
       setColor("success");
@@ -105,26 +127,23 @@ if (!sesion.usuario) return;
       color={color}
     >
       <div className="text-center">
-
         <h2 className="text-6xl font-black">
-
-          #{posicion}
+          #{equipo.posicion_actual}
 
           {flecha === "▲" && (
-            <span className="text-green-400 ml-2">
+            <span className="ml-2 text-green-400">
               ▲
             </span>
           )}
 
           {flecha === "▼" && (
-            <span className="text-red-500 ml-2">
+            <span className="ml-2 text-red-500">
               ▼
             </span>
           )}
-
         </h2>
 
-        <p className="text-4xl font-bold mt-4">
+        <p className="mt-4 text-4xl font-bold">
           {equipo.puntos} pts
         </p>
 
@@ -133,7 +152,6 @@ if (!sesion.usuario) return;
             {mensaje}
           </p>
         )}
-
       </div>
     </StatCard>
   );
