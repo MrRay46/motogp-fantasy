@@ -1,19 +1,90 @@
 "use client";
 
+import { useState } from "react";
+
+import AppLayout from "@/components/layout/AppLayout";
+
+import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
+
 export default function SuperAdminPage() {
+  const [procesando, setProcesando] =
+    useState(false);
+
+  const [mensaje, setMensaje] =
+    useState("");
+
+  async function procesar() {
+    try {
+      setProcesando(true);
+      setMensaje("");
+
+      // Temporalmente usamos el usuario 1
+      const resultado =
+        await procesarGranPremio(1);
+
+      setMensaje(
+        `✅ ${resultado.granPremio.nombre} procesado correctamente.
+        
+Equipos procesados: ${resultado.equiposProcesados}`
+      );
+    } catch (error: any) {
+      setMensaje(
+        `❌ ${error.message}`
+      );
+    } finally {
+      setProcesando(false);
+    }
+  }
 
   return (
+    <AppLayout>
+      <section className="max-w-4xl mx-auto py-16 px-6">
 
-    <main className="min-h-screen bg-black text-white p-10">
+        <h1 className="text-5xl font-black mb-10">
 
-      <h1 className="text-5xl font-black">
+          🛠 SUPERADMIN
 
-        SuperAdmin
+        </h1>
 
-      </h1>
+        <button
+          onClick={procesar}
+          disabled={procesando}
+          className="
+            bg-red-600
+            hover:bg-red-500
+            px-8
+            py-4
+            rounded-2xl
+            text-xl
+            font-bold
+            transition
+            disabled:opacity-50
+          "
+        >
+          {procesando
+            ? "Procesando..."
+            : "🏁 Procesar GP"}
+        </button>
 
-    </main>
+        {mensaje && (
 
+          <div className="
+            mt-10
+            rounded-2xl
+            bg-zinc-900
+            border
+            border-zinc-700
+            p-6
+            whitespace-pre-line
+          ">
+
+            {mensaje}
+
+          </div>
+
+        )}
+
+      </section>
+    </AppLayout>
   );
-
 }
