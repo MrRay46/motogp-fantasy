@@ -8,6 +8,8 @@ import AppLayout from "@/components/layout/AppLayout";
 import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
 import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
 
+import PilotsResults from "@/components/superadmin/PilotsResults";
+
 export default function SuperAdminPage() {
   const router = useRouter();
 
@@ -79,7 +81,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
   if (comprobandoPermiso) {
     return (
       <AppLayout>
-        <section className="max-w-4xl mx-auto py-16 px-6">
+        <section className="max-w-6xl mx-auto py-16 px-6">
           <div className="rounded-3xl bg-zinc-900 border border-zinc-700 p-8 text-center">
             <p className="text-zinc-400">
               Comprobando permisos...
@@ -104,22 +106,33 @@ Equipos procesados: ${resultado.equiposProcesados}`
 
   return (
     <AppLayout>
-      <section className="max-w-4xl mx-auto py-16 px-6">
+      <section className="max-w-6xl mx-auto py-16 px-6">
 
         <h1 className="text-5xl font-black mb-10">
           🛠️ SUPERADMIN
         </h1>
 
-        <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-8">
+        {/* ---------------------------------- */}
+        {/* RESULTADOS DE PILOTOS */}
+        {/* ---------------------------------- */}
+
+        <PilotsResults />
+
+        {/* ---------------------------------- */}
+        {/* PROCESAMIENTO DEL GP */}
+        {/* ---------------------------------- */}
+
+        <div className="mt-12 bg-zinc-900 border border-zinc-700 rounded-3xl p-8">
 
           <h2 className="text-2xl font-bold mb-3">
-            Procesamiento de Gran Premio
+            🏁 Procesamiento de Gran Premio
           </h2>
 
           <p className="text-zinc-400 mb-8">
-            Procesa el próximo Gran Premio pendiente
-            y actualiza automáticamente los resultados
-            de todas las ligas.
+            Cuando hayas introducido y comprobado
+            todos los puntos, podrás procesar el
+            Gran Premio y actualizar automáticamente
+            las Fantasy.
           </p>
 
           <button
