@@ -8,12 +8,10 @@ import Button from "@/components/ui/Button";
 import Divider from "@/components/ui/Divider";
 
 export default function LoginPage() {
-
   const [usuario, setUsuario] = useState("");
   const [password, setPassword] = useState("");
 
   const iniciarSesion = async () => {
-
     const {
       data,
       error,
@@ -26,34 +24,29 @@ export default function LoginPage() {
       .single();
 
     if (error || !data) {
-
       alert("Usuario o contraseña incorrectos");
       return;
-
     }
 
     localStorage.setItem(
-  "usuario",
-  JSON.stringify({
-    id: data.id,
-    usuario: data.usuario,
-    avatar: data.avatar,
-    liga_actual_id: data.liga_actual_id,
-  })
-);
+      "usuario",
+      JSON.stringify({
+        id: data.id,
+        usuario: data.usuario,
+        avatar: data.avatar,
+        liga_actual_id: data.liga_actual_id,
+        super_admin: data.super_admin,
+      })
+    );
 
     window.location.href = "/dashboard";
-
   };
 
   return (
-
     <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-6 py-12">
-
       <PageHeader />
 
       <div className="w-full max-w-md mt-12 space-y-4">
-
         <input
           type="text"
           placeholder="Usuario"
@@ -93,13 +86,11 @@ export default function LoginPage() {
         <Button onClick={iniciarSesion}>
           Iniciar sesión →
         </Button>
-
       </div>
 
       <Divider />
 
       <div className="text-center">
-
         <p className="text-zinc-500">
           ¿No tienes cuenta?
         </p>
@@ -116,15 +107,11 @@ export default function LoginPage() {
         >
           Crear cuenta
         </button>
-
       </div>
 
       <p className="mt-10 text-xs text-zinc-600">
         v0.9 Alpha
       </p>
-
     </main>
-
   );
-
 }
