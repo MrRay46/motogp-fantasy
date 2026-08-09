@@ -109,12 +109,12 @@ export const circuitos = [
   },
 
   {
-    id: "aragon",
+    id: "Aragon",
     nombre: "MotorLand Aragón",
     pais: "España",
     fechaInicio: "2026-08-28",
     fechaFin: "2026-08-30",
-    imagen: "/circuitos/aragon.png",
+    imagen: "/circuitos/Aragon.png",
   },
 
    {
