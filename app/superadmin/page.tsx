@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import GrandPrixData from "@/components/superadmin/GrandPrixData";
 import AppLayout from "@/components/layout/AppLayout";
 import ConstructorsResults from "@/components/superadmin/ConstructorsResults";
 import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
@@ -121,7 +121,11 @@ Equipos procesados: ${resultado.equiposProcesados}`
         {/* ---------------------------------- */}
         {/* PROCESAMIENTO DEL GP */}
         {/* ---------------------------------- */}
-<ConstructorsResults />
+        
+        <ConstructorsResults />
+        <div className="mt-8">
+  <GrandPrixData />
+</div>
         <div className="mt-12 bg-zinc-900 border border-zinc-700 rounded-3xl p-8">
 
           <h2 className="text-2xl font-bold mb-3">
