@@ -24,6 +24,12 @@ type GranPremio = {
   estado: string;
 };
 
+type ResultadoPilotoGP = {
+  piloto_id: number;
+  puntos_fantasy: number;
+  puntos_oficiales: number;
+};
+
 export default function PilotsResults() {
   const [granPremios, setGranPremios] =
     useState<GranPremio[]>([]);
@@ -44,49 +50,101 @@ export default function PilotsResults() {
     useState("");
 
   // -----------------------------------------
-  // CARGAR GP
+  // CARGAR GP Y PILOTOS
   // -----------------------------------------
 
   useEffect(() => {
-    cargarGranPremios();
+    cargarDatosIniciales();
   }, []);
 
-  async function cargarGranPremios() {
+  async function cargarDatosIniciales() {
     setCargando(true);
     setMensaje("");
 
-    const { data, error } = await supabase
-      .from("grandes_premios")
-      .select(
-        "id, codigo, nombre, temporada, orden, estado"
-      )
-      .eq("temporada", 2026)
-      .order("orden", {
-        ascending: true,
-      });
+    const [gpResponse, pilotosResponse] =
+      await Promise.all([
+        supabase
+          .from("grandes_premios")
+          .select(`
+            id,
+            codigo,
+            nombre,
+            temporada,
+            orden,
+            estado
+          `)
+          .eq("temporada", 2026)
+          .order("orden", {
+            ascending: true,
+          }),
 
-    if (error) {
-      console.error(error);
+        supabase
+          .from("pilotos")
+          .select(`
+            id,
+            nombre,
+            equipo,
+            constructor,
+            puntos_gp,
+            puntos_totales,
+            foto,
+            activo,
+            orden
+          `)
+          .eq("activo", true)
+          .order("orden", {
+            ascending: true,
+          }),
+      ]);
+
+    if (gpResponse.error) {
+      console.error(gpResponse.error);
 
       setMensaje(
-        `❌ Error cargando Grandes Premios: ${error.message}`
+        `❌ Error cargando Grandes Premios: ${gpResponse.error.message}`
       );
 
       setCargando(false);
       return;
     }
 
-    setGranPremios(data || []);
+    if (pilotosResponse.error) {
+      console.error(pilotosResponse.error);
 
-    // Buscar primero un GP finalizado.
+      setMensaje(
+        `❌ Error cargando pilotos: ${pilotosResponse.error.message}`
+      );
+
+      setCargando(false);
+      return;
+    }
+
+    const gps = gpResponse.data || [];
+    const pilotosBase =
+      pilotosResponse.data || [];
+
+    setGranPremios(gps);
+    setPilotos(pilotosBase);
+
+    // GP inicial
     const gpInicial =
-      data?.find(
+      gps.find(
+        (gp) => gp.estado === "en_curso"
+      ) ??
+      gps.find(
         (gp) => gp.estado === "finalizado"
-      ) ?? data?.[0];
+      ) ??
+      gps[0];
 
     if (gpInicial) {
       setGranPremioSeleccionado(
         gpInicial.id
+      );
+
+      await cargarResultadosGP(
+        gpInicial.id,
+        pilotosBase,
+        gps
       );
     }
 
@@ -94,53 +152,126 @@ export default function PilotsResults() {
   }
 
   // -----------------------------------------
-  // CARGAR PILOTOS
+  // CARGAR RESULTADOS HISTÓRICOS DEL GP
   // -----------------------------------------
 
-  useEffect(() => {
-    if (!granPremioSeleccionado) {
-      return;
-    }
-
-    cargarPilotos();
-  }, [granPremioSeleccionado]);
-
-  async function cargarPilotos() {
-    setCargando(true);
+  async function cargarResultadosGP(
+    gpId: number,
+    pilotosBase: Piloto[] = pilotos,
+    gps: GranPremio[] = granPremios
+  ) {
     setMensaje("");
 
     const { data, error } = await supabase
-      .from("pilotos")
+      .from("resultados_pilotos_gp")
       .select(`
-        id,
-        nombre,
-        equipo,
-        constructor,
-        puntos_gp,
-        puntos_totales,
-        foto,
-        activo,
-        orden
+        piloto_id,
+        puntos_fantasy,
+        puntos_oficiales
       `)
-      .eq("activo", true)
-      .order("orden", {
-        ascending: true,
-      });
+      .eq("gran_premio_id", gpId);
 
     if (error) {
       console.error(error);
 
       setMensaje(
-        `❌ Error cargando pilotos: ${error.message}`
+        `❌ Error cargando resultados del GP: ${error.message}`
       );
 
-      setCargando(false);
       return;
     }
 
-    setPilotos(data || []);
+    const resultados =
+      (data || []) as ResultadoPilotoGP[];
 
-    setCargando(false);
+    // ---------------------------------------
+    // EXISTE HISTÓRICO
+    // ---------------------------------------
+
+    if (resultados.length > 0) {
+      setPilotos(
+        pilotosBase.map((piloto) => {
+          const resultado =
+            resultados.find(
+              (item) =>
+                item.piloto_id ===
+                piloto.id
+            );
+
+          if (!resultado) {
+            return {
+              ...piloto,
+              puntos_gp: 0,
+              puntos_totales: 0,
+            };
+          }
+
+          return {
+            ...piloto,
+
+            puntos_gp:
+              resultado.puntos_fantasy,
+
+            puntos_totales:
+              resultado.puntos_oficiales,
+          };
+        })
+      );
+
+      return;
+    }
+
+    // ---------------------------------------
+    // NO EXISTE HISTÓRICO
+    // ---------------------------------------
+
+    const gpSeleccionado =
+      gps.find(
+        (gp) => gp.id === gpId
+      );
+
+    const esGPActual =
+      gpSeleccionado?.estado ===
+        "en_curso";
+
+    /*
+      Si es el GP actual y todavía no hemos
+      creado el histórico, utilizamos los
+      valores actuales de pilotos.
+
+      Si es un GP antiguo sin histórico,
+      mostramos 0 para no inventar datos.
+    */
+
+    if (esGPActual) {
+      return;
+    }
+
+    setPilotos(
+      pilotosBase.map((piloto) => ({
+        ...piloto,
+        puntos_gp: 0,
+        puntos_totales: 0,
+      }))
+    );
+  }
+
+  // -----------------------------------------
+  // CAMBIAR GP
+  // -----------------------------------------
+
+  async function cambiarGP(
+    gpId: number
+  ) {
+    setGranPremioSeleccionado(
+      gpId
+    );
+
+    await cargarResultadosGP(
+      gpId,
+      pilotos,
+      granPremios
+    );
   }
 
   // -----------------------------------------
@@ -149,14 +280,14 @@ export default function PilotsResults() {
 
   function cambiarPuntosGP(
     pilotoId: number,
-    puntos: string
+    valor: string
   ) {
-    const valor =
-      puntos === ""
+    const numero =
+      valor === ""
         ? 0
-        : Number(puntos);
+        : Number(valor);
 
-    if (Number.isNaN(valor)) {
+    if (Number.isNaN(numero)) {
       return;
     }
 
@@ -165,7 +296,7 @@ export default function PilotsResults() {
         piloto.id === pilotoId
           ? {
               ...piloto,
-              puntos_gp: valor,
+              puntos_gp: numero,
             }
           : piloto
       )
@@ -173,19 +304,19 @@ export default function PilotsResults() {
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS TOTALES
+  // CAMBIAR PUNTOS OFICIALES
   // -----------------------------------------
 
   function cambiarPuntosTotales(
     pilotoId: number,
-    puntos: string
+    valor: string
   ) {
-    const valor =
-      puntos === ""
+    const numero =
+      valor === ""
         ? 0
-        : Number(puntos);
+        : Number(valor);
 
-    if (Number.isNaN(valor)) {
+    if (Number.isNaN(numero)) {
       return;
     }
 
@@ -194,7 +325,7 @@ export default function PilotsResults() {
         piloto.id === pilotoId
           ? {
               ...piloto,
-              puntos_totales: valor,
+              puntos_totales: numero,
             }
           : piloto
       )
@@ -217,6 +348,44 @@ export default function PilotsResults() {
       setGuardando(true);
       setMensaje("");
 
+      // ---------------------------------------
+      // 1. GUARDAR HISTÓRICO DEL GP
+      // ---------------------------------------
+
+      for (const piloto of pilotos) {
+        const { error } = await supabase
+          .from("resultados_pilotos_gp")
+          .upsert(
+            {
+              gran_premio_id:
+                granPremioSeleccionado,
+
+              piloto_id:
+                piloto.id,
+
+              puntos_fantasy:
+                piloto.puntos_gp,
+
+              puntos_oficiales:
+                piloto.puntos_totales,
+            },
+            {
+              onConflict:
+                "gran_premio_id,piloto_id",
+            }
+          );
+
+        if (error) {
+          throw new Error(
+            `Error guardando histórico de ${piloto.nombre}: ${error.message}`
+          );
+        }
+      }
+
+      // ---------------------------------------
+      // 2. ACTUALIZAR TABLA PRINCIPAL
+      // ---------------------------------------
+
       for (const piloto of pilotos) {
         const { error } = await supabase
           .from("pilotos")
@@ -227,17 +396,20 @@ export default function PilotsResults() {
             puntos_totales:
               piloto.puntos_totales,
           })
-          .eq("id", piloto.id);
+          .eq(
+            "id",
+            piloto.id
+          );
 
         if (error) {
           throw new Error(
-            `Error guardando ${piloto.nombre}: ${error.message}`
+            `Error actualizando ${piloto.nombre}: ${error.message}`
           );
         }
       }
 
       setMensaje(
-        "✅ Puntos GP y puntos de temporada guardados correctamente."
+        "✅ Resultados de pilotos guardados correctamente."
       );
     } catch (error) {
       const mensajeError =
@@ -305,7 +477,7 @@ export default function PilotsResults() {
             granPremioSeleccionado ?? ""
           }
           onChange={(e) =>
-            setGranPremioSeleccionado(
+            cambiarGP(
               Number(e.target.value)
             )
           }
@@ -462,8 +634,6 @@ export default function PilotsResults() {
                     "
                   >
 
-                    {/* PILOTO */}
-
                     <td className="px-6 py-4">
 
                       <div className="flex items-center gap-3">
@@ -488,8 +658,6 @@ export default function PilotsResults() {
 
                     </td>
 
-                    {/* EQUIPO */}
-
                     <td
                       className="
                         px-6
@@ -499,8 +667,6 @@ export default function PilotsResults() {
                     >
                       {piloto.equipo}
                     </td>
-
-                    {/* PUNTOS GP */}
 
                     <td className="px-6 py-4">
 
@@ -534,8 +700,6 @@ export default function PilotsResults() {
                       />
 
                     </td>
-
-                    {/* PUNTOS TEMPORADA */}
 
                     <td className="px-6 py-4">
 
@@ -583,10 +747,6 @@ export default function PilotsResults() {
         </div>
 
       </div>
-
-      {/* ---------------------------------- */}
-      {/* MENSAJE */}
-      {/* ---------------------------------- */}
 
       {mensaje && (
         <div
