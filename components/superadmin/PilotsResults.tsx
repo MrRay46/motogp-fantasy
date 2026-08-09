@@ -78,8 +78,7 @@ export default function PilotsResults() {
 
     setGranPremios(data || []);
 
-    // Buscar primero un GP finalizado que
-    // todavía no esté procesado.
+    // Buscar primero un GP finalizado.
     const gpInicial =
       data?.find(
         (gp) => gp.estado === "finalizado"
@@ -145,10 +144,10 @@ export default function PilotsResults() {
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS
+  // CAMBIAR PUNTOS GP
   // -----------------------------------------
 
-  function cambiarPuntos(
+  function cambiarPuntosGP(
     pilotoId: number,
     puntos: string
   ) {
@@ -167,6 +166,35 @@ export default function PilotsResults() {
           ? {
               ...piloto,
               puntos_gp: valor,
+            }
+          : piloto
+      )
+    );
+  }
+
+  // -----------------------------------------
+  // CAMBIAR PUNTOS TOTALES
+  // -----------------------------------------
+
+  function cambiarPuntosTotales(
+    pilotoId: number,
+    puntos: string
+  ) {
+    const valor =
+      puntos === ""
+        ? 0
+        : Number(puntos);
+
+    if (Number.isNaN(valor)) {
+      return;
+    }
+
+    setPilotos((prev) =>
+      prev.map((piloto) =>
+        piloto.id === pilotoId
+          ? {
+              ...piloto,
+              puntos_totales: valor,
             }
           : piloto
       )
@@ -193,7 +221,11 @@ export default function PilotsResults() {
         const { error } = await supabase
           .from("pilotos")
           .update({
-            puntos_gp: piloto.puntos_gp,
+            puntos_gp:
+              piloto.puntos_gp,
+
+            puntos_totales:
+              piloto.puntos_totales,
           })
           .eq("id", piloto.id);
 
@@ -205,7 +237,7 @@ export default function PilotsResults() {
       }
 
       setMensaje(
-        "✅ Puntos de pilotos guardados correctamente."
+        "✅ Puntos GP y puntos de temporada guardados correctamente."
       );
     } catch (error) {
       const mensajeError =
@@ -228,13 +260,24 @@ export default function PilotsResults() {
         granPremioSeleccionado
     );
 
-  if (cargando && granPremios.length === 0) {
+  // -----------------------------------------
+  // CARGANDO
+  // -----------------------------------------
+
+  if (
+    cargando &&
+    granPremios.length === 0
+  ) {
     return (
       <div className="text-zinc-400">
         Cargando Grandes Premios...
       </div>
     );
   }
+
+  // -----------------------------------------
+  // RENDER
+  // -----------------------------------------
 
   return (
     <section className="space-y-8">
@@ -243,13 +286,15 @@ export default function PilotsResults() {
       {/* SELECTOR DE GP */}
       {/* ---------------------------------- */}
 
-      <div className="
-        bg-zinc-900
-        border
-        border-zinc-700
-        rounded-3xl
-        p-6
-      ">
+      <div
+        className="
+          bg-zinc-900
+          border
+          border-zinc-700
+          rounded-3xl
+          p-6
+        "
+      >
 
         <h2 className="text-2xl font-bold mb-5">
           🏁 Gran Premio
@@ -311,35 +356,42 @@ export default function PilotsResults() {
       {/* PILOTOS */}
       {/* ---------------------------------- */}
 
-      <div className="
-        bg-zinc-900
-        border
-        border-zinc-700
-        rounded-3xl
-        overflow-hidden
-      ">
-
-        <div className="
-          p-6
-          border-b
+      <div
+        className="
+          bg-zinc-900
+          border
           border-zinc-700
-          flex
-          flex-col
-          md:flex-row
-          md:items-center
-          md:justify-between
-          gap-4
-        ">
+          rounded-3xl
+          overflow-hidden
+        "
+      >
+
+        <div
+          className="
+            p-6
+            border-b
+            border-zinc-700
+            flex
+            flex-col
+            md:flex-row
+            md:items-center
+            md:justify-between
+            gap-4
+          "
+        >
 
           <div>
+
             <h2 className="text-2xl font-bold">
               🏍️ Puntos de pilotos
             </h2>
 
             <p className="text-zinc-400 mt-1">
               Introduce los puntos obtenidos
-              en este Gran Premio.
+              en este Gran Premio y los puntos
+              oficiales de la temporada.
             </p>
+
           </div>
 
           <button
@@ -410,6 +462,8 @@ export default function PilotsResults() {
                     "
                   >
 
+                    {/* PILOTO */}
+
                     <td className="px-6 py-4">
 
                       <div className="flex items-center gap-3">
@@ -434,13 +488,19 @@ export default function PilotsResults() {
 
                     </td>
 
-                    <td className="
-                      px-6
-                      py-4
-                      text-zinc-400
-                    ">
+                    {/* EQUIPO */}
+
+                    <td
+                      className="
+                        px-6
+                        py-4
+                        text-zinc-400
+                      "
+                    >
                       {piloto.equipo}
                     </td>
+
+                    {/* PUNTOS GP */}
 
                     <td className="px-6 py-4">
 
@@ -451,7 +511,7 @@ export default function PilotsResults() {
                           piloto.puntos_gp
                         }
                         onChange={(e) =>
-                          cambiarPuntos(
+                          cambiarPuntosGP(
                             piloto.id,
                             e.target.value
                           )
@@ -475,13 +535,41 @@ export default function PilotsResults() {
 
                     </td>
 
-                    <td className="
-                      px-6
-                      py-4
-                      text-center
-                      text-zinc-400
-                    ">
-                      {piloto.puntos_totales}
+                    {/* PUNTOS TEMPORADA */}
+
+                    <td className="px-6 py-4">
+
+                      <input
+                        type="number"
+                        min="0"
+                        value={
+                          piloto.puntos_totales
+                        }
+                        onChange={(e) =>
+                          cambiarPuntosTotales(
+                            piloto.id,
+                            e.target.value
+                          )
+                        }
+                        className="
+                          w-24
+                          mx-auto
+                          block
+                          bg-zinc-950
+                          border
+                          border-zinc-700
+                          rounded-xl
+                          px-3
+                          py-2
+                          text-center
+                          font-bold
+                          text-white
+                          border-zinc-700
+                          focus:outline-none
+                          focus:border-red-500
+                        "
+                      />
+
                     </td>
 
                   </tr>
@@ -501,14 +589,16 @@ export default function PilotsResults() {
       {/* ---------------------------------- */}
 
       {mensaje && (
-        <div className="
-          bg-zinc-900
-          border
-          border-zinc-700
-          rounded-2xl
-          p-5
-          whitespace-pre-line
-        ">
+        <div
+          className="
+            bg-zinc-900
+            border
+            border-zinc-700
+            rounded-2xl
+            p-5
+            whitespace-pre-line
+          "
+        >
           {mensaje}
         </div>
       )}
