@@ -13,9 +13,30 @@ type Constructor = {
   orden: number;
 };
 
+type GranPremio = {
+  id: number;
+  codigo: string;
+  nombre: string;
+  temporada: number;
+  orden: number;
+  estado: string;
+};
+
+type ResultadoConstructorGP = {
+  constructor_id: number;
+  puntos_fantasy: number;
+  puntos_oficiales: number;
+};
+
 export default function ConstructorsResults() {
   const [constructores, setConstructores] =
     useState<Constructor[]>([]);
+
+  const [granPremios, setGranPremios] =
+    useState<GranPremio[]>([]);
+
+  const [granPremioSeleccionado, setGranPremioSeleccionado] =
+    useState<number | null>(null);
 
   const [cargando, setCargando] =
     useState(true);
@@ -27,50 +48,241 @@ export default function ConstructorsResults() {
     useState("");
 
   // -----------------------------------------
-  // CARGAR CONSTRUCTORES
+  // CARGAR GRANDES PREMIOS Y CONSTRUCTORES
   // -----------------------------------------
 
   useEffect(() => {
-    cargarConstructores();
+    cargarDatosIniciales();
   }, []);
 
-  async function cargarConstructores() {
+  async function cargarDatosIniciales() {
     setCargando(true);
     setMensaje("");
 
-    const { data, error } = await supabase
-      .from("constructores")
-      .select(`
-        id,
-        nombre,
-        slug,
-        puntos,
-        puntos_gp,
-        activo,
-        orden
-      `)
-      .eq("activo", true)
-      .order("orden", {
-        ascending: true,
-      });
+    const [gpResponse, constructoresResponse] =
+      await Promise.all([
+        supabase
+          .from("grandes_premios")
+          .select(`
+            id,
+            codigo,
+            nombre,
+            temporada,
+            orden,
+            estado
+          `)
+          .eq("temporada", 2026)
+          .order("orden", {
+            ascending: true,
+          }),
 
-    if (error) {
-      console.error(error);
+        supabase
+          .from("constructores")
+          .select(`
+            id,
+            nombre,
+            slug,
+            puntos,
+            puntos_gp,
+            activo,
+            orden
+          `)
+          .eq("activo", true)
+          .order("orden", {
+            ascending: true,
+          }),
+      ]);
+
+    if (gpResponse.error) {
+      console.error(gpResponse.error);
 
       setMensaje(
-        `❌ Error cargando constructores: ${error.message}`
+        `❌ Error cargando Grandes Premios: ${gpResponse.error.message}`
       );
 
       setCargando(false);
       return;
     }
 
-    setConstructores(data || []);
+    if (constructoresResponse.error) {
+      console.error(
+        constructoresResponse.error
+      );
+
+      setMensaje(
+        `❌ Error cargando constructores: ${constructoresResponse.error.message}`
+      );
+
+      setCargando(false);
+      return;
+    }
+
+    const gps = gpResponse.data || [];
+
+    const datosConstructores =
+      constructoresResponse.data || [];
+
+    setGranPremios(gps);
+    setConstructores(
+      datosConstructores
+    );
+
+    // Primero buscamos un GP en curso.
+    // Si no existe, uno finalizado.
+    // Si tampoco existe, el primero.
+    const gpInicial =
+      gps.find(
+        (gp) => gp.estado === "en_curso"
+      ) ??
+      gps.find(
+        (gp) => gp.estado === "finalizado"
+      ) ??
+      gps[0];
+
+    if (gpInicial) {
+      setGranPremioSeleccionado(
+        gpInicial.id
+      );
+
+      await cargarResultadosGP(
+        gpInicial.id,
+        datosConstructores
+      );
+    }
+
     setCargando(false);
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS FANTASY GP
+  // CARGAR RESULTADOS DEL GP
+  // -----------------------------------------
+
+  async function cargarResultadosGP(
+    gpId: number,
+    constructoresBase: Constructor[] = constructores
+  ) {
+    setMensaje("");
+
+    const { data, error } = await supabase
+      .from("resultados_constructores_gp")
+      .select(`
+        constructor_id,
+        puntos_fantasy,
+        puntos_oficiales
+      `)
+      .eq("gran_premio_id", gpId);
+
+    if (error) {
+      console.error(error);
+
+      setMensaje(
+        `❌ Error cargando resultados del GP: ${error.message}`
+      );
+
+      return;
+    }
+
+    const resultados =
+      (data || []) as ResultadoConstructorGP[];
+
+    // ---------------------------------------
+    // SI EXISTEN RESULTADOS HISTÓRICOS
+    // ---------------------------------------
+
+    if (resultados.length > 0) {
+      setConstructores(
+        constructoresBase.map(
+          (constructor) => {
+            const resultado =
+              resultados.find(
+                (item) =>
+                  item.constructor_id ===
+                  constructor.id
+              );
+
+            if (!resultado) {
+              return {
+                ...constructor,
+                puntos_gp: 0,
+                puntos: 0,
+              };
+            }
+
+            return {
+              ...constructor,
+
+              puntos_gp:
+                resultado.puntos_fantasy,
+
+              puntos:
+                resultado.puntos_oficiales,
+            };
+          }
+        )
+      );
+
+      return;
+    }
+
+    // ---------------------------------------
+    // NO HAY HISTÓRICO
+    // ---------------------------------------
+
+    /*
+      Si todavía no existe un registro histórico
+      para ese GP, no inventamos datos.
+
+      Para el GP actual usamos los valores
+      actuales de la tabla constructores.
+
+      Para un GP antiguo sin histórico,
+      mostramos 0 hasta que el SuperAdmin
+      introduzca sus resultados.
+    */
+
+    const gpSeleccionado =
+      granPremios.find(
+        (gp) => gp.id === gpId
+      );
+
+    const esGPActual =
+      gpSeleccionado?.estado ===
+        "en_curso";
+
+    if (esGPActual) {
+      return;
+    }
+
+    setConstructores(
+      constructoresBase.map(
+        (constructor) => ({
+          ...constructor,
+          puntos_gp: 0,
+          puntos: 0,
+        })
+      )
+    );
+  }
+
+  // -----------------------------------------
+  // CAMBIAR GP
+  // -----------------------------------------
+
+  async function cambiarGP(
+    gpId: number
+  ) {
+    setGranPremioSeleccionado(
+      gpId
+    );
+
+    await cargarResultadosGP(
+      gpId,
+      constructores
+    );
+  }
+
+  // -----------------------------------------
+  // CAMBIAR PUNTOS FANTASY
   // -----------------------------------------
 
   function cambiarPuntosGP(
@@ -87,13 +299,15 @@ export default function ConstructorsResults() {
     }
 
     setConstructores((prev) =>
-      prev.map((constructor) =>
-        constructor.id === constructorId
-          ? {
-              ...constructor,
-              puntos_gp: numero,
-            }
-          : constructor
+      prev.map(
+        (constructor) =>
+          constructor.id ===
+          constructorId
+            ? {
+                ...constructor,
+                puntos_gp: numero,
+              }
+            : constructor
       )
     );
   }
@@ -102,7 +316,7 @@ export default function ConstructorsResults() {
   // CAMBIAR PUNTOS OFICIALES
   // -----------------------------------------
 
-  function cambiarPuntosTotales(
+  function cambiarPuntosOficiales(
     constructorId: number,
     valor: string
   ) {
@@ -116,13 +330,15 @@ export default function ConstructorsResults() {
     }
 
     setConstructores((prev) =>
-      prev.map((constructor) =>
-        constructor.id === constructorId
-          ? {
-              ...constructor,
-              puntos: numero,
-            }
-          : constructor
+      prev.map(
+        (constructor) =>
+          constructor.id ===
+          constructorId
+            ? {
+                ...constructor,
+                puntos: numero,
+              }
+            : constructor
       )
     );
   }
@@ -132,28 +348,81 @@ export default function ConstructorsResults() {
   // -----------------------------------------
 
   async function guardarPuntos() {
+    if (!granPremioSeleccionado) {
+      setMensaje(
+        "❌ Selecciona primero un Gran Premio."
+      );
+      return;
+    }
+
     try {
       setGuardando(true);
       setMensaje("");
+
+      // ---------------------------------------
+      // 1. GUARDAR HISTÓRICO DEL GP
+      // ---------------------------------------
+
+      for (const constructor of constructores) {
+        const { error } = await supabase
+          .from(
+            "resultados_constructores_gp"
+          )
+          .upsert(
+            {
+              gran_premio_id:
+                granPremioSeleccionado,
+
+              constructor_id:
+                constructor.id,
+
+              puntos_fantasy:
+                constructor.puntos_gp,
+
+              puntos_oficiales:
+                constructor.puntos,
+            },
+            {
+              onConflict:
+                "gran_premio_id,constructor_id",
+            }
+          );
+
+        if (error) {
+          throw new Error(
+            `Error guardando histórico de ${constructor.nombre}: ${error.message}`
+          );
+        }
+      }
+
+      // ---------------------------------------
+      // 2. ACTUALIZAR TABLA PRINCIPAL
+      // ---------------------------------------
 
       for (const constructor of constructores) {
         const { error } = await supabase
           .from("constructores")
           .update({
-            puntos_gp: constructor.puntos_gp,
-            puntos: constructor.puntos,
+            puntos_gp:
+              constructor.puntos_gp,
+
+            puntos:
+              constructor.puntos,
           })
-          .eq("id", constructor.id);
+          .eq(
+            "id",
+            constructor.id
+          );
 
         if (error) {
           throw new Error(
-            `Error guardando ${constructor.nombre}: ${error.message}`
+            `Error actualizando ${constructor.nombre}: ${error.message}`
           );
         }
       }
 
       setMensaje(
-        "✅ Puntos de constructores guardados correctamente."
+        "✅ Resultados de constructores guardados correctamente."
       );
     } catch (error) {
       const mensajeError =
@@ -196,6 +465,67 @@ export default function ConstructorsResults() {
       "
     >
 
+      {/* ---------------------------------- */}
+      {/* SELECTOR GP */}
+      {/* ---------------------------------- */}
+
+      <div className="
+        p-6
+        border-b
+        border-zinc-700
+      ">
+
+        <h2 className="text-2xl font-bold mb-5">
+          🏁 Gran Premio
+        </h2>
+
+        <select
+          value={
+            granPremioSeleccionado ?? ""
+          }
+          onChange={(e) =>
+            cambiarGP(
+              Number(e.target.value)
+            )
+          }
+          className="
+            w-full
+            bg-zinc-950
+            border
+            border-zinc-700
+            rounded-xl
+            px-4
+            py-3
+            text-white
+            focus:outline-none
+            focus:border-red-500
+          "
+        >
+
+          <option value="">
+            Seleccionar Gran Premio
+          </option>
+
+          {granPremios.map(
+            (gp) => (
+              <option
+                key={gp.id}
+                value={gp.id}
+              >
+                GP {gp.orden} — {gp.nombre}
+                {" "}({gp.estado})
+              </option>
+            )
+          )}
+
+        </select>
+
+      </div>
+
+      {/* ---------------------------------- */}
+      {/* CABECERA */}
+      {/* ---------------------------------- */}
+
       <div
         className="
           p-6
@@ -211,20 +541,25 @@ export default function ConstructorsResults() {
       >
 
         <div>
+
           <h2 className="text-2xl font-bold">
             🏎️ Puntos de constructores
           </h2>
 
           <p className="text-zinc-400 mt-1">
-            Introduce los puntos Fantasy y los
-            puntos oficiales del campeonato.
+            Introduce los puntos Fantasy y
+            los puntos oficiales del GP.
           </p>
+
         </div>
 
         <button
           type="button"
           onClick={guardarPuntos}
-          disabled={guardando}
+          disabled={
+            guardando ||
+            !granPremioSeleccionado
+          }
           className="
             bg-green-600
             hover:bg-green-500
@@ -243,6 +578,10 @@ export default function ConstructorsResults() {
         </button>
 
       </div>
+
+      {/* ---------------------------------- */}
+      {/* TABLA */}
+      {/* ---------------------------------- */}
 
       <div className="overflow-x-auto">
 
@@ -292,6 +631,8 @@ export default function ConstructorsResults() {
                     {constructor.nombre}
                   </td>
 
+                  {/* FANTASY */}
+
                   <td className="px-6 py-4">
 
                     <input
@@ -325,6 +666,8 @@ export default function ConstructorsResults() {
 
                   </td>
 
+                  {/* OFICIALES */}
+
                   <td className="px-6 py-4">
 
                     <input
@@ -334,7 +677,7 @@ export default function ConstructorsResults() {
                         constructor.puntos
                       }
                       onChange={(e) =>
-                        cambiarPuntosTotales(
+                        cambiarPuntosOficiales(
                           constructor.id,
                           e.target.value
                         )
@@ -367,6 +710,10 @@ export default function ConstructorsResults() {
         </table>
 
       </div>
+
+      {/* ---------------------------------- */}
+      {/* MENSAJE */}
+      {/* ---------------------------------- */}
 
       {mensaje && (
         <div
