@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import AppLayout from "@/components/layout/AppLayout";
-
+import ConstructorsResults from "@/components/superadmin/ConstructorsResults";
 import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
 import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
 
@@ -121,7 +121,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
         {/* ---------------------------------- */}
         {/* PROCESAMIENTO DEL GP */}
         {/* ---------------------------------- */}
-
+<ConstructorsResults />
         <div className="mt-12 bg-zinc-900 border border-zinc-700 rounded-3xl p-8">
 
           <h2 className="text-2xl font-bold mb-3">
