@@ -112,16 +112,6 @@ function SuperAdminContenido() {
       // GP INICIAL
       // ---------------------------------------
 
-      /*
-        Si ya existe un GP seleccionado en el
-        contexto, lo respetamos.
-
-        Si no existe, seleccionamos:
-        1. GP en curso
-        2. Último GP finalizado
-        3. Primer GP disponible
-      */
-
       if (granPremioId) {
         return;
       }
@@ -158,6 +148,7 @@ function SuperAdminContenido() {
       setMensaje(
         "❌ Selecciona primero un Gran Premio."
       );
+
       return;
     }
 
@@ -324,96 +315,104 @@ Equipos procesados: ${resultado.equiposProcesados}`
         </div>
 
         {/* ---------------------------------- */}
-        {/* CONTENIDO CONTROLADO POR EL GP */}
+        {/* PILOTOS */}
         {/* ---------------------------------- */}
 
-        <SuperAdminGPProvider>
+        <PilotsResults />
 
-          <PilotsResults />
+        {/* ---------------------------------- */}
+        {/* CONSTRUCTORES */}
+        {/* ---------------------------------- */}
 
-          <div className="mt-8">
-            <ConstructorsResults />
-          </div>
+        <div className="mt-8">
+          <ConstructorsResults />
+        </div>
 
-          <div className="mt-8">
-            <GrandPrixData />
-          </div>
+        {/* ---------------------------------- */}
+        {/* DATOS DEL GP */}
+        {/* ---------------------------------- */}
 
-          {/* -------------------------------- */}
-          {/* PROCESAMIENTO */}
-          {/* -------------------------------- */}
+        <div className="mt-8">
+          <GrandPrixData />
+        </div>
 
-          <div
+        {/* ---------------------------------- */}
+        {/* PROCESAMIENTO */}
+        {/* ---------------------------------- */}
+
+        <div
+          className="
+            mt-8
+            bg-zinc-900
+            border
+            border-zinc-700
+            rounded-3xl
+            p-8
+          "
+        >
+
+          <h2 className="text-2xl font-bold mb-3">
+            🏁 Procesamiento de Gran Premio
+          </h2>
+
+          <p className="text-zinc-400 mb-8">
+            Cuando hayas introducido y comprobado
+            todos los puntos, podrás procesar el
+            Gran Premio y actualizar automáticamente
+            las Fantasy.
+          </p>
+
+          <button
+            type="button"
+            onClick={procesar}
+            disabled={
+              procesando ||
+              !granPremioId
+            }
             className="
-              mt-8
-              bg-zinc-900
-              border
-              border-zinc-700
-              rounded-3xl
-              p-8
+              bg-red-600
+              hover:bg-red-500
+              px-8
+              py-4
+              rounded-2xl
+              text-xl
+              font-bold
+              transition
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             "
           >
+            {procesando
+              ? "Procesando..."
+              : "🏁 Procesar GP"}
+          </button>
 
-            <h2 className="text-2xl font-bold mb-3">
-              🏁 Procesamiento de Gran Premio
-            </h2>
-
-            <p className="text-zinc-400 mb-8">
-              Cuando hayas introducido y comprobado
-              todos los puntos, podrás procesar el
-              Gran Premio y actualizar automáticamente
-              las Fantasy.
-            </p>
-
-            <button
-              type="button"
-              onClick={procesar}
-              disabled={
-                procesando ||
-                !granPremioId
-              }
+          {mensaje && (
+            <div
               className="
-                bg-red-600
-                hover:bg-red-500
-                px-8
-                py-4
+                mt-10
                 rounded-2xl
-                text-xl
-                font-bold
-                transition
-                disabled:opacity-50
-                disabled:cursor-not-allowed
+                bg-zinc-950
+                border
+                border-zinc-700
+                p-6
+                whitespace-pre-line
               "
             >
-              {procesando
-                ? "Procesando..."
-                : "🏁 Procesar GP"}
-            </button>
+              {mensaje}
+            </div>
+          )}
 
-            {mensaje && (
-              <div
-                className="
-                  mt-10
-                  rounded-2xl
-                  bg-zinc-950
-                  border
-                  border-zinc-700
-                  p-6
-                  whitespace-pre-line
-                "
-              >
-                {mensaje}
-              </div>
-            )}
-
-          </div>
-
-        </SuperAdminGPProvider>
+        </div>
 
       </section>
     </AppLayout>
   );
 }
+
+// -----------------------------------------
+// PÁGINA
+// -----------------------------------------
 
 export default function SuperAdminPage() {
   return (
