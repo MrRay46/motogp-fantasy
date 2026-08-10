@@ -15,10 +15,7 @@ import {
   useSuperAdminGP,
 } from "@/context/SuperAdminGPContext";
 
-import {
-  procesarGranPremio,
-} from "@/lib/fantasy/procesarGranPremio";
-
+import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
 import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
 
 type GranPremio = {
@@ -111,7 +108,24 @@ function SuperAdminContenido() {
 
       setGranPremios(gps);
 
-      // GP inicial
+      // ---------------------------------------
+      // GP INICIAL
+      // ---------------------------------------
+
+      /*
+        Si ya existe un GP seleccionado en el
+        contexto, lo respetamos.
+
+        Si no existe, seleccionamos:
+        1. GP en curso
+        2. Último GP finalizado
+        3. Primer GP disponible
+      */
+
+      if (granPremioId) {
+        return;
+      }
+
       const gpInicial =
         gps.find(
           (gp) => gp.estado === "en_curso"
@@ -131,6 +145,7 @@ function SuperAdminContenido() {
     cargarGranPremios();
   }, [
     autorizado,
+    granPremioId,
     setGranPremioId,
   ]);
 
@@ -150,18 +165,29 @@ function SuperAdminContenido() {
       setProcesando(true);
       setMensaje("");
 
-      /*
-        TEMPORALMENTE seguimos usando el
-        sistema anterior.
+      // ---------------------------------------
+      // OBTENER USUARIO REAL
+      // ---------------------------------------
 
-        En el siguiente paso sustituiremos
-        este 1 por el GP seleccionado y
-        eliminaremos definitivamente la
-        dependencia del usuario 1.
-      */
+      const sesion = JSON.parse(
+        localStorage.getItem("usuario") || "{}"
+      );
+
+      if (!sesion.id) {
+        throw new Error(
+          "No se ha encontrado la sesión del usuario."
+        );
+      }
+
+      // ---------------------------------------
+      // PROCESAR GP SELECCIONADO
+      // ---------------------------------------
 
       const resultado =
-        await procesarGranPremio(1);
+        await procesarGranPremio(
+          granPremioId,
+          sesion.id
+        );
 
       setMensaje(
         `✅ ${resultado.granPremio.nombre} procesado correctamente.
@@ -298,95 +324,91 @@ Equipos procesados: ${resultado.equiposProcesados}`
         </div>
 
         {/* ---------------------------------- */}
-        {/* PILOTOS */}
+        {/* CONTENIDO CONTROLADO POR EL GP */}
         {/* ---------------------------------- */}
 
-        <PilotsResults />
+        <SuperAdminGPProvider>
 
-        {/* ---------------------------------- */}
-        {/* CONSTRUCTORES */}
-        {/* ---------------------------------- */}
+          <PilotsResults />
 
-        <div className="mt-8">
-          <ConstructorsResults />
-        </div>
+          <div className="mt-8">
+            <ConstructorsResults />
+          </div>
 
-        {/* ---------------------------------- */}
-        {/* DATOS DEL GP */}
-        {/* ---------------------------------- */}
+          <div className="mt-8">
+            <GrandPrixData />
+          </div>
 
-        <div className="mt-8">
-          <GrandPrixData />
-        </div>
+          {/* -------------------------------- */}
+          {/* PROCESAMIENTO */}
+          {/* -------------------------------- */}
 
-        {/* ---------------------------------- */}
-        {/* PROCESAMIENTO */}
-        {/* ---------------------------------- */}
-
-        <div
-          className="
-            mt-8
-            bg-zinc-900
-            border
-            border-zinc-700
-            rounded-3xl
-            p-8
-          "
-        >
-
-          <h2 className="text-2xl font-bold mb-3">
-            🏁 Procesamiento de Gran Premio
-          </h2>
-
-          <p className="text-zinc-400 mb-8">
-            Cuando hayas introducido y comprobado
-            todos los puntos, podrás procesar el
-            Gran Premio y actualizar automáticamente
-            las Fantasy.
-          </p>
-
-          <button
-            type="button"
-            onClick={procesar}
-            disabled={
-              procesando ||
-              !granPremioId
-            }
+          <div
             className="
-              bg-red-600
-              hover:bg-red-500
-              px-8
-              py-4
-              rounded-2xl
-              text-xl
-              font-bold
-              transition
-              disabled:opacity-50
-              disabled:cursor-not-allowed
+              mt-8
+              bg-zinc-900
+              border
+              border-zinc-700
+              rounded-3xl
+              p-8
             "
           >
-            {procesando
-              ? "Procesando..."
-              : "🏁 Procesar GP"}
-          </button>
 
-          {mensaje && (
-            <div
+            <h2 className="text-2xl font-bold mb-3">
+              🏁 Procesamiento de Gran Premio
+            </h2>
+
+            <p className="text-zinc-400 mb-8">
+              Cuando hayas introducido y comprobado
+              todos los puntos, podrás procesar el
+              Gran Premio y actualizar automáticamente
+              las Fantasy.
+            </p>
+
+            <button
+              type="button"
+              onClick={procesar}
+              disabled={
+                procesando ||
+                !granPremioId
+              }
               className="
-                mt-10
+                bg-red-600
+                hover:bg-red-500
+                px-8
+                py-4
                 rounded-2xl
-                bg-zinc-950
-                border
-                border-zinc-700
-                p-6
-                whitespace-pre-line
+                text-xl
+                font-bold
+                transition
+                disabled:opacity-50
+                disabled:cursor-not-allowed
               "
             >
-              {mensaje}
-            </div>
-          )}
+              {procesando
+                ? "Procesando..."
+                : "🏁 Procesar GP"}
+            </button>
 
-        </div>
+            {mensaje && (
+              <div
+                className="
+                  mt-10
+                  rounded-2xl
+                  bg-zinc-950
+                  border
+                  border-zinc-700
+                  p-6
+                  whitespace-pre-line
+                "
+              >
+                {mensaje}
+              </div>
+            )}
+
+          </div>
+
+        </SuperAdminGPProvider>
 
       </section>
     </AppLayout>
