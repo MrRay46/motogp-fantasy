@@ -1,4 +1,3 @@
-
 type EquipoFantasy = {
   id: number;
   usuario: string;
@@ -28,7 +27,6 @@ export type ResultadoEquipoGP = {
   equipoId: number;
   usuario: string;
   ligaId: number;
-
   puntosGP: number;
   bonusGP: number;
 };
@@ -39,61 +37,66 @@ export function calcularPuntosEquipos(
   return datos.equipos.map((equipo) => {
     let puntosGP = 0;
 
-    // Pilotos
-    for (const nombrePiloto of equipo.fichados) {
+    // -----------------------------------------
+    // PILOTOS TITULARES
+    // -----------------------------------------
+
+    const titulares = equipo.fichados.filter(
+      (nombrePiloto) =>
+        nombrePiloto !== equipo.reserva
+    );
+
+    let hayTitularConCero = false;
+
+    for (const nombrePiloto of titulares) {
       const piloto = datos.pilotos.find(
         (p) => p.nombre === nombrePiloto
       );
 
-      if (piloto) {
-        puntosGP += piloto.puntos_gp;
+      if (!piloto) {
+        continue;
+      }
+
+      puntosGP += piloto.puntos_gp;
+
+      if (piloto.puntos_gp === 0) {
+        hayTitularConCero = true;
       }
     }
 
-    // Constructor
+    // -----------------------------------------
+    // RESERVA
+    // -----------------------------------------
+
+    if (hayTitularConCero && equipo.reserva) {
+      const pilotoReserva = datos.pilotos.find(
+        (p) => p.nombre === equipo.reserva
+      );
+
+      if (pilotoReserva) {
+        puntosGP += pilotoReserva.puntos_gp;
+      }
+    }
+
+    // -----------------------------------------
+    // MOTOR
+    // -----------------------------------------
+
     if (equipo.motor) {
       const constructor =
         datos.constructores.find(
-          (c) =>
-            c.nombre === equipo.motor
+          (c) => c.nombre === equipo.motor
         );
 
       if (constructor) {
-        puntosGP +=
-          constructor.puntos_gp;
+        puntosGP += constructor.puntos_gp;
       }
     }
-
-    console.log("🔍 DEBUG EQUIPO", {
-  equipo: equipo.usuario,
-  fichados: equipo.fichados,
-  reserva: equipo.reserva,
-  motor: equipo.motor,
-  puntosGPCalculados: puntosGP,
-
-  detallePilotos: equipo.fichados.map((nombrePiloto) => {
-    const piloto = datos.pilotos.find(
-      (p) => p.nombre === nombrePiloto
-    );
-
-    return {
-      nombre: nombrePiloto,
-      puntosGP: piloto?.puntos_gp ?? "NO ENCONTRADO",
-    };
-  }),
-
-  detalleMotor: equipo.motor
-    ? datos.constructores.find(
-        (c) => c.nombre === equipo.motor
-      )
-    : null,
-});
 
     return {
       equipoId: equipo.id,
       usuario: equipo.usuario,
       ligaId: equipo.liga_id,
-
       puntosGP,
       bonusGP: 0,
     };
