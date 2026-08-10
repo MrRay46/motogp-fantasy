@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+import { useSuperAdminGP } from "@/context/SuperAdminGPContext";
+
 type Piloto = {
   id: number;
   nombre: string;
@@ -33,6 +35,11 @@ type GranPremio = {
 };
 
 export default function GrandPrixData() {
+  const {
+    granPremioId,
+    setGranPremioId,
+  } = useSuperAdminGP();
+
   const [granPremios, setGranPremios] =
     useState<GranPremio[]>([]);
 
@@ -41,9 +48,6 @@ export default function GrandPrixData() {
 
   const [constructores, setConstructores] =
     useState<Constructor[]>([]);
-
-  const [gpId, setGpId] =
-    useState<number | null>(null);
 
   const [ganadorSprint, setGanadorSprint] =
     useState<number | null>(null);
@@ -161,36 +165,68 @@ export default function GrandPrixData() {
     const gps = gpResponse.data || [];
 
     setGranPremios(gps);
-    setPilotos(pilotosResponse.data || []);
+    setPilotos(
+      pilotosResponse.data || []
+    );
     setConstructores(
       constructoresResponse.data || []
     );
 
-    // Buscar el GP actual:
-    // primero uno en curso, después uno finalizado.
-    const gpInicial =
-      gps.find(
-        (gp) => gp.estado === "en_curso"
-      ) ??
-      gps.find(
-        (gp) => gp.estado === "finalizado"
-      ) ??
-      gps[0];
+    /*
+      Si el contexto todavía no tiene GP,
+      establecemos uno inicial.
+    */
 
-    if (gpInicial) {
-      cargarDatosGP(gpInicial);
+    if (!granPremioId) {
+      const gpInicial =
+        gps.find(
+          (gp) =>
+            gp.estado === "en_curso"
+        ) ??
+        gps.find(
+          (gp) =>
+            gp.estado === "finalizado"
+        ) ??
+        gps[0];
+
+      if (gpInicial) {
+        setGranPremioId(
+          gpInicial.id
+        );
+      }
     }
 
     setCargando(false);
   }
 
   // -----------------------------------------
-  // CARGAR DATOS DEL GP
+  // CARGAR DATOS DEL GP SELECCIONADO
   // -----------------------------------------
 
-  function cargarDatosGP(gp: GranPremio) {
-    setGpId(gp.id);
+  useEffect(() => {
+    if (!granPremioId) {
+      return;
+    }
 
+    const gp =
+      granPremios.find(
+        (item) =>
+          item.id === granPremioId
+      );
+
+    if (!gp) {
+      return;
+    }
+
+    cargarDatosGP(gp);
+  }, [
+    granPremioId,
+    granPremios,
+  ]);
+
+  function cargarDatosGP(
+    gp: GranPremio
+  ) {
     setGanadorSprint(
       gp.piloto_ganador_sprint_id
     );
@@ -210,16 +246,7 @@ export default function GrandPrixData() {
     setConstructorForma(
       gp.constructor_forma || ""
     );
-  }
 
-  function cambiarGP(id: number) {
-    const gp = granPremios.find(
-      (item) => item.id === id
-    );
-
-    if (!gp) return;
-
-    cargarDatosGP(gp);
     setMensaje("");
   }
 
@@ -228,7 +255,7 @@ export default function GrandPrixData() {
   // -----------------------------------------
 
   async function guardarDatos() {
-    if (!gpId) {
+    if (!granPremioId) {
       setMensaje(
         "❌ Selecciona un Gran Premio."
       );
@@ -257,44 +284,53 @@ export default function GrandPrixData() {
             p.id === pilotoForma
         );
 
-      const { error } = await supabase
-        .from("grandes_premios")
-        .update({
-          piloto_ganador_sprint_id:
-            ganadorSprint,
+      const { error } =
+        await supabase
+          .from("grandes_premios")
+          .update({
+            piloto_ganador_sprint_id:
+              ganadorSprint,
 
-          piloto_ganador_sprint:
-            pilotoSprint?.nombre ?? null,
+            piloto_ganador_sprint:
+              pilotoSprint?.nombre ??
+              null,
 
-          piloto_ganador_id:
-            ganadorCarrera,
+            piloto_ganador_id:
+              ganadorCarrera,
 
-          piloto_ganador:
-            pilotoCarrera?.nombre ?? null,
+            piloto_ganador:
+              pilotoCarrera?.nombre ??
+              null,
 
-          piloto_forma_id:
-            pilotoForma,
+            piloto_forma_id:
+              pilotoForma,
 
-          piloto_forma:
-            pilotoFormaSeleccionado?.nombre ??
-            null,
+            piloto_forma:
+              pilotoFormaSeleccionado?.nombre ??
+              null,
 
-          constructor_ganador:
-            constructorGanador || null,
+            constructor_ganador:
+              constructorGanador ||
+              null,
 
-          constructor_forma:
-            constructorForma || null,
-        })
-        .eq("id", gpId);
+            constructor_forma:
+              constructorForma ||
+              null,
+          })
+          .eq(
+            "id",
+            granPremioId
+          );
 
       if (error) {
-        throw new Error(error.message);
+        throw new Error(
+          error.message
+        );
       }
 
-      // Actualizamos también el estado local.
       setGranPremios((prev) =>
         prev.map((gp) =>
-          gp.id === gpId
+          gp.id === granPremioId
             ? {
                 ...gp,
 
@@ -302,13 +338,15 @@ export default function GrandPrixData() {
                   ganadorSprint,
 
                 piloto_ganador_sprint:
-                  pilotoSprint?.nombre ?? null,
+                  pilotoSprint?.nombre ??
+                  null,
 
                 piloto_ganador_id:
                   ganadorCarrera,
 
                 piloto_ganador:
-                  pilotoCarrera?.nombre ?? null,
+                  pilotoCarrera?.nombre ??
+                  null,
 
                 piloto_forma_id:
                   pilotoForma,
@@ -318,10 +356,12 @@ export default function GrandPrixData() {
                   null,
 
                 constructor_ganador:
-                  constructorGanador || null,
+                  constructorGanador ||
+                  null,
 
                 constructor_forma:
-                  constructorForma || null,
+                  constructorForma ||
+                  null,
               }
             : gp
         )
@@ -384,61 +424,51 @@ export default function GrandPrixData() {
 
       </div>
 
-      {/* SELECTOR GP */}
+      {/* ---------------------------------- */}
+      {/* GP SELECCIONADO */}
+      {/* ---------------------------------- */}
 
-      <div className="mb-8">
+      <div className="
+        mb-8
+        rounded-xl
+        bg-zinc-950
+        border
+        border-zinc-800
+        px-4
+        py-3
+      ">
 
-        <label className="
-          block
-          text-sm
-          text-zinc-400
-          mb-2
-        ">
-          Gran Premio
-        </label>
+        {granPremioId
+          ? (() => {
+              const gp =
+                granPremios.find(
+                  (item) =>
+                    item.id ===
+                    granPremioId
+                );
 
-        <select
-          value={gpId ?? ""}
-          onChange={(e) =>
-            cambiarGP(
-              Number(e.target.value)
-            )
-          }
-          className="
-            w-full
-            bg-zinc-950
-            border
-            border-zinc-700
-            rounded-xl
-            px-4
-            py-3
-            text-white
-            focus:outline-none
-            focus:border-red-500
-          "
-        >
-
-          <option value="">
-            Seleccionar Gran Premio
-          </option>
-
-          {granPremios.map(
-            (gp) => (
-              <option
-                key={gp.id}
-                value={gp.id}
-              >
-                GP {gp.orden} — {gp.nombre}
-                {" "}({gp.estado})
-              </option>
-            )
+              return gp ? (
+                <span className="text-white font-semibold">
+                  🏁 GP {gp.orden} —{" "}
+                  {gp.nombre}
+                </span>
+              ) : (
+                <span className="text-zinc-400">
+                  GP seleccionado
+                </span>
+              );
+            })()
+          : (
+            <span className="text-zinc-400">
+              No hay Gran Premio seleccionado
+            </span>
           )}
-
-        </select>
 
       </div>
 
+      {/* ---------------------------------- */}
       {/* DESTACADOS */}
+      {/* ---------------------------------- */}
 
       <div className="
         grid
@@ -460,11 +490,15 @@ export default function GrandPrixData() {
           </label>
 
           <select
-            value={ganadorSprint ?? ""}
+            value={
+              ganadorSprint ?? ""
+            }
             onChange={(e) =>
               setGanadorSprint(
                 e.target.value
-                  ? Number(e.target.value)
+                  ? Number(
+                      e.target.value
+                    )
                   : null
               )
             }
@@ -512,11 +546,15 @@ export default function GrandPrixData() {
           </label>
 
           <select
-            value={ganadorCarrera ?? ""}
+            value={
+              ganadorCarrera ?? ""
+            }
             onChange={(e) =>
               setGanadorCarrera(
                 e.target.value
-                  ? Number(e.target.value)
+                  ? Number(
+                      e.target.value
+                    )
                   : null
               )
             }
@@ -551,7 +589,7 @@ export default function GrandPrixData() {
           </select>
         </div>
 
-        {/* LÍDER / FORMA */}
+        {/* LÍDER DEL MUNDIAL */}
 
         <div>
           <label className="
@@ -564,11 +602,15 @@ export default function GrandPrixData() {
           </label>
 
           <select
-            value={pilotoForma ?? ""}
+            value={
+              pilotoForma ?? ""
+            }
             onChange={(e) =>
               setPilotoForma(
                 e.target.value
-                  ? Number(e.target.value)
+                  ? Number(
+                      e.target.value
+                    )
                   : null
               )
             }
@@ -616,7 +658,9 @@ export default function GrandPrixData() {
           </label>
 
           <select
-            value={constructorGanador}
+            value={
+              constructorGanador
+            }
             onChange={(e) =>
               setConstructorGanador(
                 e.target.value
@@ -643,7 +687,9 @@ export default function GrandPrixData() {
               (constructor) => (
                 <option
                   key={constructor.id}
-                  value={constructor.nombre}
+                  value={
+                    constructor.nombre
+                  }
                 >
                   {constructor.nombre}
                 </option>
@@ -653,7 +699,7 @@ export default function GrandPrixData() {
           </select>
         </div>
 
-        {/* CONSTRUCTOR FORMA */}
+        {/* CONSTRUCTOR EN FORMA */}
 
         <div>
           <label className="
@@ -666,7 +712,9 @@ export default function GrandPrixData() {
           </label>
 
           <select
-            value={constructorForma}
+            value={
+              constructorForma
+            }
             onChange={(e) =>
               setConstructorForma(
                 e.target.value
@@ -693,7 +741,9 @@ export default function GrandPrixData() {
               (constructor) => (
                 <option
                   key={constructor.id}
-                  value={constructor.nombre}
+                  value={
+                    constructor.nombre
+                  }
                 >
                   {constructor.nombre}
                 </option>
@@ -701,11 +751,14 @@ export default function GrandPrixData() {
             )}
 
           </select>
+
         </div>
 
       </div>
 
+      {/* ---------------------------------- */}
       {/* GUARDAR */}
+      {/* ---------------------------------- */}
 
       <div className="mt-8">
 
@@ -714,7 +767,7 @@ export default function GrandPrixData() {
           onClick={guardarDatos}
           disabled={
             guardando ||
-            !gpId
+            !granPremioId
           }
           className="
             bg-green-600

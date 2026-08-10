@@ -8,14 +8,16 @@ import { guardarGanadorGranPremio } from "./guardarGanadorGranPremio";
 import { marcarGranPremioProcesado } from "./marcarGranPremioProcesado";
 
 export async function procesarGranPremio(
+  granPremioId: number,
   usuarioId: number
 ) {
+
   //-------------------------------------------------
-  // Validar GP pendiente
+  // Validar GP seleccionado
   //-------------------------------------------------
 
   const granPremio =
-    await validarGranPremio();
+    await validarGranPremio(granPremioId);
 
   //-------------------------------------------------
   // Leer datos Fantasy

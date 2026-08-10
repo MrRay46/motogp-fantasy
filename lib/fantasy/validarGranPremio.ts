@@ -7,26 +7,22 @@ export type GranPremioProcesable = {
   temporada: number;
 };
 
-export async function validarGranPremio(): Promise<GranPremioProcesable> {
+export async function validarGranPremio(
+  granPremioId: number
+): Promise<GranPremioProcesable> {
+
   const { data, error } = await supabase
     .from("grandes_premios")
-    .select(
-      `
+    .select(`
       id,
       codigo,
       nombre,
       temporada,
       estado,
       fantasy_procesado
-      `
-    )
-    .eq("estado", "finalizado")
-    .eq("fantasy_procesado", false)
-    .order("fecha_fin", {
-      ascending: false,
-    })
-    .limit(1)
-    .maybeSingle();
+    `)
+    .eq("id", granPremioId)
+    .single();
 
   if (error) {
     throw new Error(
@@ -36,7 +32,19 @@ export async function validarGranPremio(): Promise<GranPremioProcesable> {
 
   if (!data) {
     throw new Error(
-      "No existe ningún Gran Premio pendiente de procesar."
+      "El Gran Premio seleccionado no existe."
+    );
+  }
+
+  if (data.estado !== "finalizado") {
+    throw new Error(
+      `El GP ${data.nombre} todavía no está finalizado.`
+    );
+  }
+
+  if (data.fantasy_procesado) {
+    throw new Error(
+      `El GP ${data.nombre} ya ha sido procesado.`
     );
   }
 
