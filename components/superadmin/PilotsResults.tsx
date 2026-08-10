@@ -30,9 +30,8 @@ type ResultadoPilotoGP = {
 };
 
 export default function PilotsResults() {
-  const {
-    granPremioId,
-  } = useSuperAdminGP();
+  const { granPremioId } =
+    useSuperAdminGP();
 
   const [pilotosBase, setPilotosBase] =
     useState<Piloto[]>([]);
@@ -57,55 +56,55 @@ export default function PilotsResults() {
   // -----------------------------------------
 
   useEffect(() => {
-    cargarPilotos();
-  }, []);
+    async function cargarPilotos() {
+      setCargando(true);
+      setMensaje("");
 
-  async function cargarPilotos() {
-    setCargando(true);
-    setMensaje("");
+      const { data, error } = await supabase
+        .from("pilotos")
+        .select(`
+          id,
+          nombre,
+          equipo,
+          constructor,
+          puntos_gp,
+          puntos_totales,
+          foto,
+          activo,
+          orden
+        `)
+        .eq("activo", true)
+        .order("orden", {
+          ascending: true,
+        });
 
-    const { data, error } = await supabase
-      .from("pilotos")
-      .select(`
-        id,
-        nombre,
-        equipo,
-        constructor,
-        puntos_gp,
-        puntos_totales,
-        foto,
-        activo,
-        orden
-      `)
-      .eq("activo", true)
-      .order("orden", {
-        ascending: true,
-      });
+      if (error) {
+        console.error(error);
 
-    if (error) {
-      console.error(error);
+        setMensaje(
+          `❌ Error cargando pilotos: ${error.message}`
+        );
 
-      setMensaje(
-        `❌ Error cargando pilotos: ${error.message}`
+        setCargando(false);
+        return;
+      }
+
+      const pilotosCargados =
+        data || [];
+
+      setPilotosBase(
+        pilotosCargados
+      );
+
+      setPilotos(
+        pilotosCargados
       );
 
       setCargando(false);
-      return;
     }
 
-    const pilotosCargados =
-      data || [];
-
-    setPilotosBase(
-      pilotosCargados
-    );
-
-    setPilotos(
-      pilotosCargados
-    );
-
-    setCargando(false);
-  }
+    cargarPilotos();
+  }, []);
 
   // -----------------------------------------
   // CARGAR GP SELECCIONADO
@@ -164,7 +163,7 @@ export default function PilotsResults() {
     );
 
     // ---------------------------------------
-    // CARGAR HISTÓRICO
+    // CARGAR HISTÓRICO DEL GP
     // ---------------------------------------
 
     const {
@@ -242,12 +241,12 @@ export default function PilotsResults() {
 
     /*
       Si el GP está en curso y todavía no
-      hemos creado su histórico, mostramos
-      los valores actuales de la tabla
-      principal.
+      tiene histórico, utilizamos los valores
+      actuales de la tabla principal.
 
-      Si es un GP antiguo sin histórico,
-      mostramos 0 para no inventar datos.
+      Si es un GP finalizado sin histórico,
+      mostramos 0 para evitar reutilizar por
+      error los puntos de otro GP.
     */
 
     if (
@@ -272,7 +271,7 @@ export default function PilotsResults() {
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS FANTASY
+  // CAMBIAR PUNTOS FANTASY GP
   // -----------------------------------------
 
   function cambiarPuntosGP(
