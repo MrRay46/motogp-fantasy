@@ -1,3 +1,4 @@
+
 type EquipoFantasy = {
   id: number;
   usuario: string;
@@ -62,6 +63,31 @@ export function calcularPuntosEquipos(
           constructor.puntos_gp;
       }
     }
+
+    console.log("🔍 DEBUG EQUIPO", {
+  equipo: equipo.usuario,
+  fichados: equipo.fichados,
+  reserva: equipo.reserva,
+  motor: equipo.motor,
+  puntosGPCalculados: puntosGP,
+
+  detallePilotos: equipo.fichados.map((nombrePiloto) => {
+    const piloto = datos.pilotos.find(
+      (p) => p.nombre === nombrePiloto
+    );
+
+    return {
+      nombre: nombrePiloto,
+      puntosGP: piloto?.puntos_gp ?? "NO ENCONTRADO",
+    };
+  }),
+
+  detalleMotor: equipo.motor
+    ? datos.constructores.find(
+        (c) => c.nombre === equipo.motor
+      )
+    : null,
+});
 
     return {
       equipoId: equipo.id,
