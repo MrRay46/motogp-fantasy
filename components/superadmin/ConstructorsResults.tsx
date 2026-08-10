@@ -28,9 +28,7 @@ type ResultadoConstructorGP = {
 };
 
 export default function ConstructorsResults() {
-  const {
-    granPremioId,
-  } = useSuperAdminGP();
+  const { granPremioId } = useSuperAdminGP();
 
   const [constructoresBase, setConstructoresBase] =
     useState<Constructor[]>([]);
@@ -160,7 +158,7 @@ export default function ConstructorsResults() {
     );
 
     // ---------------------------------------
-    // CARGAR HISTÓRICO
+    // CARGAR HISTÓRICO DEL GP
     // ---------------------------------------
 
     const {
@@ -212,6 +210,14 @@ export default function ConstructorsResults() {
               return {
                 ...constructor,
                 puntos_gp: 0,
+
+                // IMPORTANTE:
+                // No utilizamos aquí
+                // constructor.puntos.
+                //
+                // Este campo representa
+                // los puntos oficiales
+                // DEL GP seleccionado.
                 puntos: 0,
               };
             }
@@ -219,9 +225,16 @@ export default function ConstructorsResults() {
             return {
               ...constructor,
 
+              // Fantasy conseguido
+              // en ESTE GP.
               puntos_gp:
                 resultado.puntos_fantasy,
 
+              // Puntos oficiales conseguidos
+              // en ESTE GP.
+              //
+              // NO son los puntos acumulados
+              // de la temporada.
               puntos:
                 resultado.puntos_oficiales,
             };
@@ -237,29 +250,32 @@ export default function ConstructorsResults() {
     // ---------------------------------------
 
     /*
-      Si el GP está en curso y todavía no
-      existe histórico, utilizamos los valores
-      actuales de la tabla principal.
+      Si todavía no existe un resultado para
+      este GP, empezamos los valores del GP
+      desde 0.
 
-      Si es un GP antiguo sin histórico,
-      mostramos 0 para evitar inventar datos.
+      MUY IMPORTANTE:
+
+      NO copiamos constructor.puntos aquí.
+
+      constructor.puntos contiene los puntos
+      oficiales ACUMULADOS de la temporada.
+
+      Los puntos oficiales que introducimos
+      aquí pertenecen únicamente al GP actual
+      y se guardarán en:
+
+        resultados_constructores_gp
+          .puntos_oficiales
     */
-
-    if (
-      gpData.estado === "en_curso"
-    ) {
-      setConstructores(
-        constructoresBase
-      );
-
-      return;
-    }
 
     setConstructores(
       constructoresBase.map(
         (constructor) => ({
           ...constructor,
+
           puntos_gp: 0,
+
           puntos: 0,
         })
       )
@@ -267,7 +283,7 @@ export default function ConstructorsResults() {
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS FANTASY
+  // CAMBIAR PUNTOS FANTASY DEL GP
   // -----------------------------------------
 
   function cambiarPuntosGP(
@@ -302,7 +318,7 @@ export default function ConstructorsResults() {
   }
 
   // -----------------------------------------
-  // CAMBIAR PUNTOS OFICIALES
+  // CAMBIAR PUNTOS OFICIALES DEL GP
   // -----------------------------------------
 
   function cambiarPuntosOficiales(
@@ -374,9 +390,13 @@ export default function ConstructorsResults() {
               constructor_id:
                 constructor.id,
 
+              // Fantasy conseguido
+              // en este GP.
               puntos_fantasy:
                 constructor.puntos_gp,
 
+              // Puntos oficiales conseguidos
+              // en este GP.
               puntos_oficiales:
                 constructor.puntos,
             },
@@ -394,8 +414,28 @@ export default function ConstructorsResults() {
       }
 
       // ---------------------------------------
-      // 2. ACTUALIZAR TABLA PRINCIPAL
+      // 2. ACTUALIZAR SOLO PUNTOS FANTASY
+      //    DE LA TABLA PRINCIPAL
       // ---------------------------------------
+
+      /*
+        IMPORTANTE:
+
+        NO actualizamos:
+
+          constructores.puntos
+
+        porque esa columna contiene los
+        puntos oficiales ACUMULADOS de
+        toda la temporada.
+
+        Solo actualizamos:
+
+          constructores.puntos_gp
+
+        porque el procesador necesita saber
+        los puntos Fantasy del GP seleccionado.
+      */
 
       for (
         const constructor of constructores
@@ -407,9 +447,6 @@ export default function ConstructorsResults() {
           .update({
             puntos_gp:
               constructor.puntos_gp,
-
-            puntos:
-              constructor.puntos,
           })
           .eq(
             "id",
@@ -418,7 +455,7 @@ export default function ConstructorsResults() {
 
         if (error) {
           throw new Error(
-            `Error actualizando ${constructor.nombre}: ${error.message}`
+            `Error actualizando puntos Fantasy de ${constructor.nombre}: ${error.message}`
           );
         }
       }
@@ -426,6 +463,7 @@ export default function ConstructorsResults() {
       setMensaje(
         "✅ Resultados de constructores guardados correctamente."
       );
+
     } catch (error) {
       const mensajeError =
         error instanceof Error
@@ -435,6 +473,7 @@ export default function ConstructorsResults() {
       setMensaje(
         `❌ ${mensajeError}`
       );
+
     } finally {
       setGuardando(false);
     }
@@ -526,7 +565,7 @@ export default function ConstructorsResults() {
 
           <p className="text-zinc-500 text-sm mt-1">
             Introduce los puntos Fantasy
-            y los puntos oficiales.
+            y los puntos oficiales del GP.
           </p>
 
         </div>
@@ -580,7 +619,7 @@ export default function ConstructorsResults() {
               </th>
 
               <th className="px-6 py-4 text-center">
-                Puntos oficiales
+                Puntos oficiales GP
               </th>
 
             </tr>
@@ -611,7 +650,7 @@ export default function ConstructorsResults() {
                     {constructor.nombre}
                   </td>
 
-                  {/* FANTASY */}
+                  {/* FANTASY GP */}
 
                   <td className="px-6 py-4">
 
@@ -646,7 +685,7 @@ export default function ConstructorsResults() {
 
                   </td>
 
-                  {/* OFICIALES */}
+                  {/* OFICIALES GP */}
 
                   <td className="px-6 py-4">
 
