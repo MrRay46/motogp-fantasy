@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+import { useSuperAdminGP } from "@/context/SuperAdminGPContext";
+
 type Constructor = {
   id: number;
   nombre: string;
@@ -15,10 +17,7 @@ type Constructor = {
 
 type GranPremio = {
   id: number;
-  codigo: string;
   nombre: string;
-  temporada: number;
-  orden: number;
   estado: string;
 };
 
@@ -29,14 +28,18 @@ type ResultadoConstructorGP = {
 };
 
 export default function ConstructorsResults() {
+  const {
+    granPremioId,
+  } = useSuperAdminGP();
+
+  const [constructoresBase, setConstructoresBase] =
+    useState<Constructor[]>([]);
+
   const [constructores, setConstructores] =
     useState<Constructor[]>([]);
 
-  const [granPremios, setGranPremios] =
-    useState<GranPremio[]>([]);
-
-  const [granPremioSeleccionado, setGranPremioSeleccionado] =
-    useState<number | null>(null);
+  const [granPremio, setGranPremio] =
+    useState<GranPremio | null>(null);
 
   const [cargando, setCargando] =
     useState(true);
@@ -48,129 +51,132 @@ export default function ConstructorsResults() {
     useState("");
 
   // -----------------------------------------
-  // CARGAR GRANDES PREMIOS Y CONSTRUCTORES
+  // CARGAR CONSTRUCTORES
   // -----------------------------------------
 
   useEffect(() => {
-    cargarDatosIniciales();
+    cargarConstructores();
   }, []);
 
-  async function cargarDatosIniciales() {
+  async function cargarConstructores() {
     setCargando(true);
     setMensaje("");
 
-    const [gpResponse, constructoresResponse] =
-      await Promise.all([
-        supabase
-          .from("grandes_premios")
-          .select(`
-            id,
-            codigo,
-            nombre,
-            temporada,
-            orden,
-            estado
-          `)
-          .eq("temporada", 2026)
-          .order("orden", {
-            ascending: true,
-          }),
+    const { data, error } = await supabase
+      .from("constructores")
+      .select(`
+        id,
+        nombre,
+        slug,
+        puntos,
+        puntos_gp,
+        activo,
+        orden
+      `)
+      .eq("activo", true)
+      .order("orden", {
+        ascending: true,
+      });
 
-        supabase
-          .from("constructores")
-          .select(`
-            id,
-            nombre,
-            slug,
-            puntos,
-            puntos_gp,
-            activo,
-            orden
-          `)
-          .eq("activo", true)
-          .order("orden", {
-            ascending: true,
-          }),
-      ]);
-
-    if (gpResponse.error) {
-      console.error(gpResponse.error);
+    if (error) {
+      console.error(error);
 
       setMensaje(
-        `❌ Error cargando Grandes Premios: ${gpResponse.error.message}`
+        `❌ Error cargando constructores: ${error.message}`
       );
 
       setCargando(false);
       return;
     }
-
-    if (constructoresResponse.error) {
-      console.error(
-        constructoresResponse.error
-      );
-
-      setMensaje(
-        `❌ Error cargando constructores: ${constructoresResponse.error.message}`
-      );
-
-      setCargando(false);
-      return;
-    }
-
-    const gps = gpResponse.data || [];
 
     const datosConstructores =
-      constructoresResponse.data || [];
+      data || [];
 
-    setGranPremios(gps);
-    setConstructores(
+    setConstructoresBase(
       datosConstructores
     );
 
-    // Primero buscamos un GP en curso.
-    // Si no existe, uno finalizado.
-    // Si tampoco existe, el primero.
-    const gpInicial =
-      gps.find(
-        (gp) => gp.estado === "en_curso"
-      ) ??
-      gps.find(
-        (gp) => gp.estado === "finalizado"
-      ) ??
-      gps[0];
-
-    if (gpInicial) {
-      setGranPremioSeleccionado(
-        gpInicial.id
-      );
-
-      await cargarResultadosGP(
-        gpInicial.id,
-        datosConstructores
-      );
-    }
+    setConstructores(
+      datosConstructores
+    );
 
     setCargando(false);
   }
 
   // -----------------------------------------
-  // CARGAR RESULTADOS DEL GP
+  // CARGAR GP SELECCIONADO
   // -----------------------------------------
 
+  useEffect(() => {
+    if (
+      !granPremioId ||
+      constructoresBase.length === 0
+    ) {
+      return;
+    }
+
+    cargarResultadosGP(
+      granPremioId
+    );
+  }, [
+    granPremioId,
+    constructoresBase,
+  ]);
+
   async function cargarResultadosGP(
-    gpId: number,
-    constructoresBase: Constructor[] = constructores
+    gpId: number
   ) {
     setMensaje("");
 
-    const { data, error } = await supabase
+    // ---------------------------------------
+    // CARGAR DATOS DEL GP
+    // ---------------------------------------
+
+    const {
+      data: gpData,
+      error: gpError,
+    } = await supabase
+      .from("grandes_premios")
+      .select(`
+        id,
+        nombre,
+        estado
+      `)
+      .eq("id", gpId)
+      .single();
+
+    if (gpError) {
+      console.error(gpError);
+
+      setMensaje(
+        `❌ Error cargando el GP: ${gpError.message}`
+      );
+
+      return;
+    }
+
+    setGranPremio(
+      gpData
+    );
+
+    // ---------------------------------------
+    // CARGAR HISTÓRICO
+    // ---------------------------------------
+
+    const {
+      data,
+      error,
+    } = await supabase
       .from("resultados_constructores_gp")
       .select(`
         constructor_id,
         puntos_fantasy,
         puntos_oficiales
       `)
-      .eq("gran_premio_id", gpId);
+      .eq(
+        "gran_premio_id",
+        gpId
+      );
 
     if (error) {
       console.error(error);
@@ -186,10 +192,12 @@ export default function ConstructorsResults() {
       (data || []) as ResultadoConstructorGP[];
 
     // ---------------------------------------
-    // SI EXISTEN RESULTADOS HISTÓRICOS
+    // EXISTE HISTÓRICO
     // ---------------------------------------
 
-    if (resultados.length > 0) {
+    if (
+      resultados.length > 0
+    ) {
       setConstructores(
         constructoresBase.map(
           (constructor) => {
@@ -225,31 +233,25 @@ export default function ConstructorsResults() {
     }
 
     // ---------------------------------------
-    // NO HAY HISTÓRICO
+    // NO EXISTE HISTÓRICO
     // ---------------------------------------
 
     /*
-      Si todavía no existe un registro histórico
-      para ese GP, no inventamos datos.
+      Si el GP está en curso y todavía no
+      existe histórico, utilizamos los valores
+      actuales de la tabla principal.
 
-      Para el GP actual usamos los valores
-      actuales de la tabla constructores.
-
-      Para un GP antiguo sin histórico,
-      mostramos 0 hasta que el SuperAdmin
-      introduzca sus resultados.
+      Si es un GP antiguo sin histórico,
+      mostramos 0 para evitar inventar datos.
     */
 
-    const gpSeleccionado =
-      granPremios.find(
-        (gp) => gp.id === gpId
+    if (
+      gpData.estado === "en_curso"
+    ) {
+      setConstructores(
+        constructoresBase
       );
 
-    const esGPActual =
-      gpSeleccionado?.estado ===
-        "en_curso";
-
-    if (esGPActual) {
       return;
     }
 
@@ -261,23 +263,6 @@ export default function ConstructorsResults() {
           puntos: 0,
         })
       )
-    );
-  }
-
-  // -----------------------------------------
-  // CAMBIAR GP
-  // -----------------------------------------
-
-  async function cambiarGP(
-    gpId: number
-  ) {
-    setGranPremioSeleccionado(
-      gpId
-    );
-
-    await cargarResultadosGP(
-      gpId,
-      constructores
     );
   }
 
@@ -294,21 +279,25 @@ export default function ConstructorsResults() {
         ? 0
         : Number(valor);
 
-    if (Number.isNaN(numero)) {
+    if (
+      Number.isNaN(numero)
+    ) {
       return;
     }
 
-    setConstructores((prev) =>
-      prev.map(
-        (constructor) =>
-          constructor.id ===
-          constructorId
-            ? {
-                ...constructor,
-                puntos_gp: numero,
-              }
-            : constructor
-      )
+    setConstructores(
+      (prev) =>
+        prev.map(
+          (constructor) =>
+            constructor.id ===
+            constructorId
+              ? {
+                  ...constructor,
+                  puntos_gp:
+                    numero,
+                }
+              : constructor
+        )
     );
   }
 
@@ -325,21 +314,25 @@ export default function ConstructorsResults() {
         ? 0
         : Number(valor);
 
-    if (Number.isNaN(numero)) {
+    if (
+      Number.isNaN(numero)
+    ) {
       return;
     }
 
-    setConstructores((prev) =>
-      prev.map(
-        (constructor) =>
-          constructor.id ===
-          constructorId
-            ? {
-                ...constructor,
-                puntos: numero,
-              }
-            : constructor
-      )
+    setConstructores(
+      (prev) =>
+        prev.map(
+          (constructor) =>
+            constructor.id ===
+            constructorId
+              ? {
+                  ...constructor,
+                  puntos:
+                    numero,
+                }
+              : constructor
+        )
     );
   }
 
@@ -348,10 +341,11 @@ export default function ConstructorsResults() {
   // -----------------------------------------
 
   async function guardarPuntos() {
-    if (!granPremioSeleccionado) {
+    if (!granPremioId) {
       setMensaje(
         "❌ Selecciona primero un Gran Premio."
       );
+
       return;
     }
 
@@ -363,15 +357,19 @@ export default function ConstructorsResults() {
       // 1. GUARDAR HISTÓRICO DEL GP
       // ---------------------------------------
 
-      for (const constructor of constructores) {
-        const { error } = await supabase
+      for (
+        const constructor of constructores
+      ) {
+        const {
+          error,
+        } = await supabase
           .from(
             "resultados_constructores_gp"
           )
           .upsert(
             {
               gran_premio_id:
-                granPremioSeleccionado,
+                granPremioId,
 
               constructor_id:
                 constructor.id,
@@ -399,8 +397,12 @@ export default function ConstructorsResults() {
       // 2. ACTUALIZAR TABLA PRINCIPAL
       // ---------------------------------------
 
-      for (const constructor of constructores) {
-        const { error } = await supabase
+      for (
+        const constructor of constructores
+      ) {
+        const {
+          error,
+        } = await supabase
           .from("constructores")
           .update({
             puntos_gp:
@@ -451,6 +453,33 @@ export default function ConstructorsResults() {
   }
 
   // -----------------------------------------
+  // SIN GP
+  // -----------------------------------------
+
+  if (!granPremioId) {
+    return (
+      <section
+        className="
+          bg-zinc-900
+          border
+          border-zinc-700
+          rounded-3xl
+          p-6
+        "
+      >
+        <h2 className="text-2xl font-bold">
+          🏎️ Puntos de constructores
+        </h2>
+
+        <p className="mt-4 text-zinc-400">
+          Selecciona un Gran Premio
+          para introducir los resultados.
+        </p>
+      </section>
+    );
+  }
+
+  // -----------------------------------------
   // RENDER
   // -----------------------------------------
 
@@ -464,63 +493,6 @@ export default function ConstructorsResults() {
         overflow-hidden
       "
     >
-
-      {/* ---------------------------------- */}
-      {/* SELECTOR GP */}
-      {/* ---------------------------------- */}
-
-      <div className="
-        p-6
-        border-b
-        border-zinc-700
-      ">
-
-        <h2 className="text-2xl font-bold mb-5">
-          🏁 Gran Premio
-        </h2>
-
-        <select
-          value={
-            granPremioSeleccionado ?? ""
-          }
-          onChange={(e) =>
-            cambiarGP(
-              Number(e.target.value)
-            )
-          }
-          className="
-            w-full
-            bg-zinc-950
-            border
-            border-zinc-700
-            rounded-xl
-            px-4
-            py-3
-            text-white
-            focus:outline-none
-            focus:border-red-500
-          "
-        >
-
-          <option value="">
-            Seleccionar Gran Premio
-          </option>
-
-          {granPremios.map(
-            (gp) => (
-              <option
-                key={gp.id}
-                value={gp.id}
-              >
-                GP {gp.orden} — {gp.nombre}
-                {" "}({gp.estado})
-              </option>
-            )
-          )}
-
-        </select>
-
-      </div>
 
       {/* ---------------------------------- */}
       {/* CABECERA */}
@@ -547,18 +519,26 @@ export default function ConstructorsResults() {
           </h2>
 
           <p className="text-zinc-400 mt-1">
-            Introduce los puntos Fantasy y
-            los puntos oficiales del GP.
+            {granPremio
+              ? `GP ${granPremio.nombre}`
+              : "Gran Premio seleccionado"}
+          </p>
+
+          <p className="text-zinc-500 text-sm mt-1">
+            Introduce los puntos Fantasy
+            y los puntos oficiales.
           </p>
 
         </div>
 
         <button
           type="button"
-          onClick={guardarPuntos}
+          onClick={
+            guardarPuntos
+          }
           disabled={
             guardando ||
-            !granPremioSeleccionado
+            !granPremioId
           }
           className="
             bg-green-600

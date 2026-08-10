@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
+import { useSuperAdminGP } from "@/context/SuperAdminGPContext";
+
 type Piloto = {
   id: number;
   nombre: string;
@@ -17,10 +19,7 @@ type Piloto = {
 
 type GranPremio = {
   id: number;
-  codigo: string;
   nombre: string;
-  temporada: number;
-  orden: number;
   estado: string;
 };
 
@@ -31,14 +30,18 @@ type ResultadoPilotoGP = {
 };
 
 export default function PilotsResults() {
-  const [granPremios, setGranPremios] =
-    useState<GranPremio[]>([]);
+  const {
+    granPremioId,
+  } = useSuperAdminGP();
 
-  const [granPremioSeleccionado, setGranPremioSeleccionado] =
-    useState<number | null>(null);
+  const [pilotosBase, setPilotosBase] =
+    useState<Piloto[]>([]);
 
   const [pilotos, setPilotos] =
     useState<Piloto[]>([]);
+
+  const [granPremio, setGranPremio] =
+    useState<GranPremio | null>(null);
 
   const [cargando, setCargando] =
     useState(true);
@@ -50,126 +53,134 @@ export default function PilotsResults() {
     useState("");
 
   // -----------------------------------------
-  // CARGAR GP Y PILOTOS
+  // CARGAR PILOTOS
   // -----------------------------------------
 
   useEffect(() => {
-    cargarDatosIniciales();
+    cargarPilotos();
   }, []);
 
-  async function cargarDatosIniciales() {
+  async function cargarPilotos() {
     setCargando(true);
     setMensaje("");
 
-    const [gpResponse, pilotosResponse] =
-      await Promise.all([
-        supabase
-          .from("grandes_premios")
-          .select(`
-            id,
-            codigo,
-            nombre,
-            temporada,
-            orden,
-            estado
-          `)
-          .eq("temporada", 2026)
-          .order("orden", {
-            ascending: true,
-          }),
+    const { data, error } = await supabase
+      .from("pilotos")
+      .select(`
+        id,
+        nombre,
+        equipo,
+        constructor,
+        puntos_gp,
+        puntos_totales,
+        foto,
+        activo,
+        orden
+      `)
+      .eq("activo", true)
+      .order("orden", {
+        ascending: true,
+      });
 
-        supabase
-          .from("pilotos")
-          .select(`
-            id,
-            nombre,
-            equipo,
-            constructor,
-            puntos_gp,
-            puntos_totales,
-            foto,
-            activo,
-            orden
-          `)
-          .eq("activo", true)
-          .order("orden", {
-            ascending: true,
-          }),
-      ]);
-
-    if (gpResponse.error) {
-      console.error(gpResponse.error);
+    if (error) {
+      console.error(error);
 
       setMensaje(
-        `❌ Error cargando Grandes Premios: ${gpResponse.error.message}`
+        `❌ Error cargando pilotos: ${error.message}`
       );
 
       setCargando(false);
       return;
     }
 
-    if (pilotosResponse.error) {
-      console.error(pilotosResponse.error);
+    const pilotosCargados =
+      data || [];
 
-      setMensaje(
-        `❌ Error cargando pilotos: ${pilotosResponse.error.message}`
-      );
+    setPilotosBase(
+      pilotosCargados
+    );
 
-      setCargando(false);
-      return;
-    }
-
-    const gps = gpResponse.data || [];
-    const pilotosBase =
-      pilotosResponse.data || [];
-
-    setGranPremios(gps);
-    setPilotos(pilotosBase);
-
-    // GP inicial
-    const gpInicial =
-      gps.find(
-        (gp) => gp.estado === "en_curso"
-      ) ??
-      gps.find(
-        (gp) => gp.estado === "finalizado"
-      ) ??
-      gps[0];
-
-    if (gpInicial) {
-      setGranPremioSeleccionado(
-        gpInicial.id
-      );
-
-      await cargarResultadosGP(
-        gpInicial.id,
-        pilotosBase,
-        gps
-      );
-    }
+    setPilotos(
+      pilotosCargados
+    );
 
     setCargando(false);
   }
 
   // -----------------------------------------
-  // CARGAR RESULTADOS HISTÓRICOS DEL GP
+  // CARGAR GP SELECCIONADO
   // -----------------------------------------
 
+  useEffect(() => {
+    if (
+      !granPremioId ||
+      pilotosBase.length === 0
+    ) {
+      return;
+    }
+
+    cargarResultadosGP(
+      granPremioId
+    );
+  }, [
+    granPremioId,
+    pilotosBase,
+  ]);
+
   async function cargarResultadosGP(
-    gpId: number,
-    pilotosBase: Piloto[] = pilotos,
-    gps: GranPremio[] = granPremios
+    gpId: number
   ) {
     setMensaje("");
 
-    const { data, error } = await supabase
+    // ---------------------------------------
+    // CARGAR DATOS DEL GP
+    // ---------------------------------------
+
+    const {
+      data: gpData,
+      error: gpError,
+    } = await supabase
+      .from("grandes_premios")
+      .select(`
+        id,
+        nombre,
+        estado
+      `)
+      .eq("id", gpId)
+      .single();
+
+    if (gpError) {
+      console.error(gpError);
+
+      setMensaje(
+        `❌ Error cargando el GP: ${gpError.message}`
+      );
+
+      return;
+    }
+
+    setGranPremio(
+      gpData
+    );
+
+    // ---------------------------------------
+    // CARGAR HISTÓRICO
+    // ---------------------------------------
+
+    const {
+      data,
+      error,
+    } = await supabase
       .from("resultados_pilotos_gp")
       .select(`
         piloto_id,
         puntos_fantasy,
         puntos_oficiales
       `)
-      .eq("gran_premio_id", gpId);
+      .eq(
+        "gran_premio_id",
+        gpId
+      );
 
     if (error) {
       console.error(error);
@@ -188,34 +199,38 @@ export default function PilotsResults() {
     // EXISTE HISTÓRICO
     // ---------------------------------------
 
-    if (resultados.length > 0) {
+    if (
+      resultados.length > 0
+    ) {
       setPilotos(
-        pilotosBase.map((piloto) => {
-          const resultado =
-            resultados.find(
-              (item) =>
-                item.piloto_id ===
-                piloto.id
-            );
+        pilotosBase.map(
+          (piloto) => {
+            const resultado =
+              resultados.find(
+                (item) =>
+                  item.piloto_id ===
+                  piloto.id
+              );
 
-          if (!resultado) {
+            if (!resultado) {
+              return {
+                ...piloto,
+                puntos_gp: 0,
+                puntos_totales: 0,
+              };
+            }
+
             return {
               ...piloto,
-              puntos_gp: 0,
-              puntos_totales: 0,
+
+              puntos_gp:
+                resultado.puntos_fantasy,
+
+              puntos_totales:
+                resultado.puntos_oficiales,
             };
           }
-
-          return {
-            ...piloto,
-
-            puntos_gp:
-              resultado.puntos_fantasy,
-
-            puntos_totales:
-              resultado.puntos_oficiales,
-          };
-        })
+        )
       );
 
       return;
@@ -225,57 +240,39 @@ export default function PilotsResults() {
     // NO EXISTE HISTÓRICO
     // ---------------------------------------
 
-    const gpSeleccionado =
-      gps.find(
-        (gp) => gp.id === gpId
-      );
-
-    const esGPActual =
-      gpSeleccionado?.estado ===
-        "en_curso";
-
     /*
-      Si es el GP actual y todavía no hemos
-      creado el histórico, utilizamos los
-      valores actuales de pilotos.
+      Si el GP está en curso y todavía no
+      hemos creado su histórico, mostramos
+      los valores actuales de la tabla
+      principal.
 
       Si es un GP antiguo sin histórico,
       mostramos 0 para no inventar datos.
     */
 
-    if (esGPActual) {
+    if (
+      gpData.estado === "en_curso"
+    ) {
+      setPilotos(
+        pilotosBase
+      );
+
       return;
     }
 
     setPilotos(
-      pilotosBase.map((piloto) => ({
-        ...piloto,
-        puntos_gp: 0,
-        puntos_totales: 0,
-      }))
+      pilotosBase.map(
+        (piloto) => ({
+          ...piloto,
+          puntos_gp: 0,
+          puntos_totales: 0,
+        })
+      )
     );
   }
 
   // -----------------------------------------
-  // CAMBIAR GP
-  // -----------------------------------------
-
-  async function cambiarGP(
-    gpId: number
-  ) {
-    setGranPremioSeleccionado(
-      gpId
-    );
-
-    await cargarResultadosGP(
-      gpId,
-      pilotos,
-      granPremios
-    );
-  }
-
-  // -----------------------------------------
-  // CAMBIAR PUNTOS GP
+  // CAMBIAR PUNTOS FANTASY
   // -----------------------------------------
 
   function cambiarPuntosGP(
@@ -287,19 +284,25 @@ export default function PilotsResults() {
         ? 0
         : Number(valor);
 
-    if (Number.isNaN(numero)) {
+    if (
+      Number.isNaN(numero)
+    ) {
       return;
     }
 
-    setPilotos((prev) =>
-      prev.map((piloto) =>
-        piloto.id === pilotoId
-          ? {
-              ...piloto,
-              puntos_gp: numero,
-            }
-          : piloto
-      )
+    setPilotos(
+      (prev) =>
+        prev.map(
+          (piloto) =>
+            piloto.id ===
+            pilotoId
+              ? {
+                  ...piloto,
+                  puntos_gp:
+                    numero,
+                }
+              : piloto
+        )
     );
   }
 
@@ -316,19 +319,25 @@ export default function PilotsResults() {
         ? 0
         : Number(valor);
 
-    if (Number.isNaN(numero)) {
+    if (
+      Number.isNaN(numero)
+    ) {
       return;
     }
 
-    setPilotos((prev) =>
-      prev.map((piloto) =>
-        piloto.id === pilotoId
-          ? {
-              ...piloto,
-              puntos_totales: numero,
-            }
-          : piloto
-      )
+    setPilotos(
+      (prev) =>
+        prev.map(
+          (piloto) =>
+            piloto.id ===
+            pilotoId
+              ? {
+                  ...piloto,
+                  puntos_totales:
+                    numero,
+                }
+              : piloto
+        )
     );
   }
 
@@ -337,10 +346,11 @@ export default function PilotsResults() {
   // -----------------------------------------
 
   async function guardarPuntos() {
-    if (!granPremioSeleccionado) {
+    if (!granPremioId) {
       setMensaje(
         "❌ Selecciona primero un Gran Premio."
       );
+
       return;
     }
 
@@ -352,13 +362,19 @@ export default function PilotsResults() {
       // 1. GUARDAR HISTÓRICO DEL GP
       // ---------------------------------------
 
-      for (const piloto of pilotos) {
-        const { error } = await supabase
-          .from("resultados_pilotos_gp")
+      for (
+        const piloto of pilotos
+      ) {
+        const {
+          error,
+        } = await supabase
+          .from(
+            "resultados_pilotos_gp"
+          )
           .upsert(
             {
               gran_premio_id:
-                granPremioSeleccionado,
+                granPremioId,
 
               piloto_id:
                 piloto.id,
@@ -386,8 +402,12 @@ export default function PilotsResults() {
       // 2. ACTUALIZAR TABLA PRINCIPAL
       // ---------------------------------------
 
-      for (const piloto of pilotos) {
-        const { error } = await supabase
+      for (
+        const piloto of pilotos
+      ) {
+        const {
+          error,
+        } = await supabase
           .from("pilotos")
           .update({
             puntos_gp:
@@ -425,40 +445,25 @@ export default function PilotsResults() {
     }
   }
 
-  const gpActual =
-    granPremios.find(
-      (gp) =>
-        gp.id ===
-        granPremioSeleccionado
-    );
-
   // -----------------------------------------
   // CARGANDO
   // -----------------------------------------
 
-  if (
-    cargando &&
-    granPremios.length === 0
-  ) {
+  if (cargando) {
     return (
       <div className="text-zinc-400">
-        Cargando Grandes Premios...
+        Cargando pilotos...
       </div>
     );
   }
 
   // -----------------------------------------
-  // RENDER
+  // SIN GP
   // -----------------------------------------
 
-  return (
-    <section className="space-y-8">
-
-      {/* ---------------------------------- */}
-      {/* SELECTOR DE GP */}
-      {/* ---------------------------------- */}
-
-      <div
+  if (!granPremioId) {
+    return (
+      <section
         className="
           bg-zinc-900
           border
@@ -467,291 +472,272 @@ export default function PilotsResults() {
           p-6
         "
       >
-
-        <h2 className="text-2xl font-bold mb-5">
-          🏁 Gran Premio
+        <h2 className="text-2xl font-bold">
+          🏍️ Puntos de pilotos
         </h2>
 
-        <select
-          value={
-            granPremioSeleccionado ?? ""
-          }
-          onChange={(e) =>
-            cambiarGP(
-              Number(e.target.value)
-            )
-          }
-          className="
-            w-full
-            bg-zinc-950
-            border
-            border-zinc-700
-            rounded-xl
-            px-4
-            py-3
-            text-white
-            focus:outline-none
-            focus:border-red-500
-          "
-        >
+        <p className="mt-4 text-zinc-400">
+          Selecciona un Gran Premio
+          para introducir los resultados.
+        </p>
+      </section>
+    );
+  }
 
-          <option value="">
-            Seleccionar Gran Premio
-          </option>
+  // -----------------------------------------
+  // RENDER
+  // -----------------------------------------
 
-          {granPremios.map(
-            (gp) => (
-              <option
-                key={gp.id}
-                value={gp.id}
-              >
-                GP {gp.orden} — {gp.nombre}
-                {" "}({gp.estado})
-              </option>
-            )
-          )}
-
-        </select>
-
-        {gpActual && (
-          <div className="mt-4 text-zinc-400">
-            Estado:{" "}
-            <span className="text-white font-semibold">
-              {gpActual.estado}
-            </span>
-          </div>
-        )}
-
-      </div>
+  return (
+    <section
+      className="
+        bg-zinc-900
+        border
+        border-zinc-700
+        rounded-3xl
+        overflow-hidden
+      "
+    >
 
       {/* ---------------------------------- */}
-      {/* PILOTOS */}
+      {/* CABECERA */}
       {/* ---------------------------------- */}
 
       <div
         className="
-          bg-zinc-900
-          border
+          p-6
+          border-b
           border-zinc-700
-          rounded-3xl
-          overflow-hidden
+          flex
+          flex-col
+          md:flex-row
+          md:items-center
+          md:justify-between
+          gap-4
         "
       >
 
-        <div
+        <div>
+
+          <h2 className="text-2xl font-bold">
+            🏍️ Puntos de pilotos
+          </h2>
+
+          <p className="text-zinc-400 mt-1">
+            {granPremio
+              ? `GP ${granPremio.nombre}`
+              : "Gran Premio seleccionado"}
+          </p>
+
+          <p className="text-zinc-500 text-sm mt-1">
+            Introduce los puntos Fantasy
+            y los puntos oficiales.
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          onClick={
+            guardarPuntos
+          }
+          disabled={
+            guardando ||
+            !granPremioId
+          }
           className="
-            p-6
-            border-b
-            border-zinc-700
-            flex
-            flex-col
-            md:flex-row
-            md:items-center
-            md:justify-between
-            gap-4
+            bg-green-600
+            hover:bg-green-500
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            px-6
+            py-3
+            rounded-xl
+            font-bold
+            transition
           "
         >
-
-          <div>
-
-            <h2 className="text-2xl font-bold">
-              🏍️ Puntos de pilotos
-            </h2>
-
-            <p className="text-zinc-400 mt-1">
-              Introduce los puntos obtenidos
-              en este Gran Premio y los puntos
-              oficiales de la temporada.
-            </p>
-
-          </div>
-
-          <button
-            type="button"
-            onClick={guardarPuntos}
-            disabled={
-              guardando ||
-              !granPremioSeleccionado
-            }
-            className="
-              bg-green-600
-              hover:bg-green-500
-              disabled:opacity-50
-              disabled:cursor-not-allowed
-              px-6
-              py-3
-              rounded-xl
-              font-bold
-              transition
-            "
-          >
-            {guardando
-              ? "Guardando..."
-              : "💾 Guardar puntos"}
-          </button>
-
-        </div>
-
-        <div className="overflow-x-auto">
-
-          <table className="w-full">
-
-            <thead className="bg-zinc-950">
-
-              <tr className="text-left text-zinc-400">
-
-                <th className="px-6 py-4">
-                  Piloto
-                </th>
-
-                <th className="px-6 py-4">
-                  Equipo
-                </th>
-
-                <th className="px-6 py-4 text-center">
-                  Puntos GP
-                </th>
-
-                <th className="px-6 py-4 text-center">
-                  Puntos temporada
-                </th>
-
-              </tr>
-
-            </thead>
-
-            <tbody>
-
-              {pilotos.map(
-                (piloto) => (
-                  <tr
-                    key={piloto.id}
-                    className="
-                      border-t
-                      border-zinc-800
-                      hover:bg-zinc-800/50
-                      transition
-                    "
-                  >
-
-                    <td className="px-6 py-4">
-
-                      <div className="flex items-center gap-3">
-
-                        {piloto.foto && (
-                          <img
-                            src={piloto.foto}
-                            alt={piloto.nombre}
-                            className="
-                              w-12
-                              h-12
-                              object-contain
-                            "
-                          />
-                        )}
-
-                        <span className="font-bold">
-                          {piloto.nombre}
-                        </span>
-
-                      </div>
-
-                    </td>
-
-                    <td
-                      className="
-                        px-6
-                        py-4
-                        text-zinc-400
-                      "
-                    >
-                      {piloto.equipo}
-                    </td>
-
-                    <td className="px-6 py-4">
-
-                      <input
-                        type="number"
-                        min="0"
-                        value={
-                          piloto.puntos_gp
-                        }
-                        onChange={(e) =>
-                          cambiarPuntosGP(
-                            piloto.id,
-                            e.target.value
-                          )
-                        }
-                        className="
-                          w-24
-                          mx-auto
-                          block
-                          bg-zinc-950
-                          border
-                          border-zinc-700
-                          rounded-xl
-                          px-3
-                          py-2
-                          text-center
-                          font-bold
-                          focus:outline-none
-                          focus:border-red-500
-                        "
-                      />
-
-                    </td>
-
-                    <td className="px-6 py-4">
-
-                      <input
-                        type="number"
-                        min="0"
-                        value={
-                          piloto.puntos_totales
-                        }
-                        onChange={(e) =>
-                          cambiarPuntosTotales(
-                            piloto.id,
-                            e.target.value
-                          )
-                        }
-                        className="
-                          w-24
-                          mx-auto
-                          block
-                          bg-zinc-950
-                          border
-                          border-zinc-700
-                          rounded-xl
-                          px-3
-                          py-2
-                          text-center
-                          font-bold
-                          text-white
-                          border-zinc-700
-                          focus:outline-none
-                          focus:border-red-500
-                        "
-                      />
-
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
+          {guardando
+            ? "Guardando..."
+            : "💾 Guardar puntos"}
+        </button>
 
       </div>
+
+      {/* ---------------------------------- */}
+      {/* TABLA */}
+      {/* ---------------------------------- */}
+
+      <div className="overflow-x-auto">
+
+        <table className="w-full">
+
+          <thead className="bg-zinc-950">
+
+            <tr className="text-left text-zinc-400">
+
+              <th className="px-6 py-4">
+                Piloto
+              </th>
+
+              <th className="px-6 py-4">
+                Equipo
+              </th>
+
+              <th className="px-6 py-4 text-center">
+                Puntos GP
+              </th>
+
+              <th className="px-6 py-4 text-center">
+                Puntos temporada
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {pilotos.map(
+              (piloto) => (
+                <tr
+                  key={piloto.id}
+                  className="
+                    border-t
+                    border-zinc-800
+                    hover:bg-zinc-800/50
+                    transition
+                  "
+                >
+
+                  <td className="px-6 py-4">
+
+                    <div className="flex items-center gap-3">
+
+                      {piloto.foto && (
+                        <img
+                          src={
+                            piloto.foto
+                          }
+                          alt={
+                            piloto.nombre
+                          }
+                          className="
+                            w-12
+                            h-12
+                            object-contain
+                          "
+                        />
+                      )}
+
+                      <span className="font-bold">
+                        {piloto.nombre}
+                      </span>
+
+                    </div>
+
+                  </td>
+
+                  <td
+                    className="
+                      px-6
+                      py-4
+                      text-zinc-400
+                    "
+                  >
+                    {piloto.equipo}
+                  </td>
+
+                  {/* PUNTOS FANTASY */}
+
+                  <td className="px-6 py-4">
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={
+                        piloto.puntos_gp
+                      }
+                      onChange={(e) =>
+                        cambiarPuntosGP(
+                          piloto.id,
+                          e.target.value
+                        )
+                      }
+                      className="
+                        w-24
+                        mx-auto
+                        block
+                        bg-zinc-950
+                        border
+                        border-zinc-700
+                        rounded-xl
+                        px-3
+                        py-2
+                        text-center
+                        font-bold
+                        focus:outline-none
+                        focus:border-red-500
+                      "
+                    />
+
+                  </td>
+
+                  {/* PUNTOS OFICIALES */}
+
+                  <td className="px-6 py-4">
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={
+                        piloto.puntos_totales
+                      }
+                      onChange={(e) =>
+                        cambiarPuntosTotales(
+                          piloto.id,
+                          e.target.value
+                        )
+                      }
+                      className="
+                        w-24
+                        mx-auto
+                        block
+                        bg-zinc-950
+                        border
+                        border-zinc-700
+                        rounded-xl
+                        px-3
+                        py-2
+                        text-center
+                        font-bold
+                        text-white
+                        focus:outline-none
+                        focus:border-red-500
+                      "
+                    />
+
+                  </td>
+
+                </tr>
+              )
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* ---------------------------------- */}
+      {/* MENSAJE */}
+      {/* ---------------------------------- */}
 
       {mensaje && (
         <div
           className="
-            bg-zinc-900
+            m-6
+            bg-zinc-950
             border
             border-zinc-700
             rounded-2xl
