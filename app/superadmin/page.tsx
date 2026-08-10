@@ -112,10 +112,6 @@ function SuperAdminContenido() {
       // GP INICIAL
       // ---------------------------------------
 
-      if (granPremioId) {
-        return;
-      }
-
       const gpInicial =
         gps.find(
           (gp) => gp.estado === "en_curso"
@@ -126,16 +122,13 @@ function SuperAdminContenido() {
         gps[0];
 
       if (gpInicial) {
-        setGranPremioId(
-          gpInicial.id
-        );
+        setGranPremioId(gpInicial.id);
       }
     }
 
     cargarGranPremios();
   }, [
     autorizado,
-    granPremioId,
     setGranPremioId,
   ]);
 
@@ -148,7 +141,6 @@ function SuperAdminContenido() {
       setMensaje(
         "❌ Selecciona primero un Gran Premio."
       );
-
       return;
     }
 
@@ -206,7 +198,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
   if (comprobandoPermiso) {
     return (
       <AppLayout>
-        <section className="text-white">
+        <section className="p-8">
           <p className="text-zinc-400">
             Comprobando permisos...
           </p>
@@ -234,7 +226,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
 
   return (
     <AppLayout>
-      <section className="text-white">
+      <section className="p-8">
 
         <h1 className="text-5xl font-black mb-10">
           🛠️ SUPERADMIN
