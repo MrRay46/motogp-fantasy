@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { supabase } from "@/lib/supabase";
+
 import StatCard from "./StatCard";
 
 type GanadorGP = {
@@ -15,86 +17,183 @@ export default function WinnerCard() {
   const [ganador, setGanador] =
     useState<GanadorGP | null>(null);
 
+  const [cargando, setCargando] =
+    useState(true);
+
   useEffect(() => {
     cargarGanador();
   }, []);
 
   async function cargarGanador() {
-    const sesion = JSON.parse(
-      localStorage.getItem("usuario") ||
-        "{}"
-    );
+    try {
+      setCargando(true);
 
-    if (!sesion.id) return;
+      // -----------------------------------------
+      // SESIÓN
+      // -----------------------------------------
 
-    //--------------------------------------
-    // Liga actual
-    //--------------------------------------
+      const sesion = JSON.parse(
+        localStorage.getItem("usuario") || "{}"
+      );
 
-    const { data: usuario } =
-      await supabase
-        .from("usuarios")
-        .select("liga_actual_id")
-        .eq("id", sesion.id)
-        .single();
+      if (!sesion.id) {
+        return;
+      }
 
-    if (!usuario) return;
+      // -----------------------------------------
+      // LIGA ACTUAL DEL USUARIO
+      // -----------------------------------------
 
-    //--------------------------------------
-    // Último GP procesado
-    //--------------------------------------
+      const { data: usuario, error: usuarioError } =
+        await supabase
+          .from("usuarios")
+          .select("liga_actual_id")
+          .eq("id", sesion.id)
+          .single();
 
-    const { data: gp } =
-      await supabase
-        .from("grandes_premios")
-        .select(`
-          nombre,
-          procesado
-        `)
-        .eq("procesado", true)
-        .order("orden", {
-          ascending: false,
-        })
-        .limit(1)
-        .single();
+      if (usuarioError) {
+        console.error(
+          "Error obteniendo usuario:",
+          usuarioError
+        );
 
-    if (!gp) return;
+        return;
+      }
 
-    //--------------------------------------
-    // Ganador Fantasy del GP
-    //--------------------------------------
+      if (!usuario?.liga_actual_id) {
+        return;
+      }
 
-    const { data: equipo } =
-      await supabase
-        .from("equipos")
-        .select(`
-          usuario,
-          avatar,
-          puntos_gp_actual
-        `)
-        .eq(
-          "liga_id",
-          usuario.liga_actual_id
-        )
-        .order("puntos_gp_actual", {
-          ascending: false,
-        })
-        .limit(1)
-        .single();
+      // -----------------------------------------
+      // ÚLTIMO GP PROCESADO
+      // -----------------------------------------
 
-    if (!equipo) return;
+      const { data: gp, error: gpError } =
+        await supabase
+          .from("grandes_premios")
+          .select(`
+            id,
+            nombre,
+            orden,
+            fantasy_procesado
+          `)
+          .eq("temporada", 2026)
+          .eq("fantasy_procesado", true)
+          .order("orden", {
+            ascending: false,
+          })
+          .limit(1)
+          .maybeSingle();
 
-    setGanador({
-      nombreGP: gp.nombre,
-      usuario: equipo.usuario,
-      puntos: equipo.puntos_gp_actual,
-      avatar:
-        equipo.avatar ||
-        "avatar1.png",
-    });
+      if (gpError) {
+        console.error(
+          "Error obteniendo último GP procesado:",
+          gpError
+        );
+
+        return;
+      }
+
+      if (!gp) {
+        return;
+      }
+
+      // -----------------------------------------
+      // GANADOR DEL GP EN LA LIGA ACTUAL
+      // -----------------------------------------
+
+      const { data: equipo, error: equipoError } =
+        await supabase
+          .from("equipos")
+          .select(`
+            usuario,
+            avatar,
+            puntos_gp_actual
+          `)
+          .eq(
+            "liga_id",
+            usuario.liga_actual_id
+          )
+          .order("puntos_gp_actual", {
+            ascending: false,
+          })
+          .limit(1)
+          .maybeSingle();
+
+      if (equipoError) {
+        console.error(
+          "Error obteniendo ganador del GP:",
+          equipoError
+        );
+
+        return;
+      }
+
+      if (!equipo) {
+        return;
+      }
+
+      // -----------------------------------------
+      // GUARDAR GANADOR
+      // -----------------------------------------
+
+      setGanador({
+        nombreGP: gp.nombre,
+        usuario: equipo.usuario,
+        puntos: equipo.puntos_gp_actual ?? 0,
+        avatar:
+          equipo.avatar || "avatar1.png",
+      });
+    } catch (error) {
+      console.error(
+        "Error cargando ganador del GP:",
+        error
+      );
+    } finally {
+      setCargando(false);
+    }
   }
 
-  if (!ganador) return null;
+  // -----------------------------------------
+  // CARGANDO
+  // -----------------------------------------
+
+  if (cargando) {
+    return (
+      <StatCard color="gold">
+        <div className="text-center py-8">
+          <p className="text-zinc-400">
+            Cargando ganador...
+          </p>
+        </div>
+      </StatCard>
+    );
+  }
+
+  // -----------------------------------------
+  // SIN GANADOR
+  // -----------------------------------------
+
+  if (!ganador) {
+    return (
+      <StatCard color="gold">
+        <div className="text-center py-8">
+          <h2 className="text-lg font-semibold text-yellow-300">
+            🏆 Ganador del GP
+          </h2>
+
+          <p className="mt-4 text-zinc-400">
+            Todavía no hay ningún Gran Premio
+            procesado.
+          </p>
+        </div>
+      </StatCard>
+    );
+  }
+
+  // -----------------------------------------
+  // RENDER
+  // -----------------------------------------
 
   return (
     <StatCard color="gold">
