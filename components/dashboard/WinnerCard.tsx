@@ -17,183 +17,143 @@ export default function WinnerCard() {
   const [ganador, setGanador] =
     useState<GanadorGP | null>(null);
 
-  const [cargando, setCargando] =
-    useState(true);
-
   useEffect(() => {
     cargarGanador();
   }, []);
 
   async function cargarGanador() {
-    try {
-      setCargando(true);
+    // --------------------------------------
+    // USUARIO ACTUAL
+    // --------------------------------------
 
-      // -----------------------------------------
-      // SESIÓN
-      // -----------------------------------------
+    const sesion = JSON.parse(
+      localStorage.getItem("usuario") || "{}"
+    );
 
-      const sesion = JSON.parse(
-        localStorage.getItem("usuario") || "{}"
-      );
+    if (!sesion.id) return;
 
-      if (!sesion.id) {
-        return;
-      }
+    // --------------------------------------
+    // LIGA ACTUAL DEL USUARIO
+    // --------------------------------------
 
-      // -----------------------------------------
-      // LIGA ACTUAL DEL USUARIO
-      // -----------------------------------------
+    const { data: usuario, error: usuarioError } =
+      await supabase
+        .from("usuarios")
+        .select("liga_actual_id")
+        .eq("id", sesion.id)
+        .single();
 
-      const { data: usuario, error: usuarioError } =
-        await supabase
-          .from("usuarios")
-          .select("liga_actual_id")
-          .eq("id", sesion.id)
-          .single();
-
-      if (usuarioError) {
-        console.error(
-          "Error obteniendo usuario:",
-          usuarioError
-        );
-
-        return;
-      }
-
-      if (!usuario?.liga_actual_id) {
-        return;
-      }
-
-      // -----------------------------------------
-      // ÚLTIMO GP PROCESADO
-      // -----------------------------------------
-
-      const { data: gp, error: gpError } =
-        await supabase
-          .from("grandes_premios")
-          .select(`
-            id,
-            nombre,
-            orden,
-            fantasy_procesado
-          `)
-          .eq("temporada", 2026)
-          .eq("fantasy_procesado", true)
-          .order("orden", {
-            ascending: false,
-          })
-          .limit(1)
-          .maybeSingle();
-
-      if (gpError) {
-        console.error(
-          "Error obteniendo último GP procesado:",
-          gpError
-        );
-
-        return;
-      }
-
-      if (!gp) {
-        return;
-      }
-
-      // -----------------------------------------
-      // GANADOR DEL GP EN LA LIGA ACTUAL
-      // -----------------------------------------
-
-      const { data: equipo, error: equipoError } =
-        await supabase
-          .from("equipos")
-          .select(`
-            usuario,
-            avatar,
-            puntos_gp_actual
-          `)
-          .eq(
-            "liga_id",
-            usuario.liga_actual_id
-          )
-          .order("puntos_gp_actual", {
-            ascending: false,
-          })
-          .limit(1)
-          .maybeSingle();
-
-      if (equipoError) {
-        console.error(
-          "Error obteniendo ganador del GP:",
-          equipoError
-        );
-
-        return;
-      }
-
-      if (!equipo) {
-        return;
-      }
-
-      // -----------------------------------------
-      // GUARDAR GANADOR
-      // -----------------------------------------
-
-      setGanador({
-        nombreGP: gp.nombre,
-        usuario: equipo.usuario,
-        puntos: equipo.puntos_gp_actual ?? 0,
-        avatar:
-          equipo.avatar || "avatar1.png",
-      });
-    } catch (error) {
+    if (usuarioError || !usuario) {
       console.error(
-        "Error cargando ganador del GP:",
-        error
+        "Error obteniendo usuario:",
+        usuarioError
       );
-    } finally {
-      setCargando(false);
+
+      return;
     }
+
+    if (!usuario.liga_actual_id) return;
+
+    // --------------------------------------
+    // ÚLTIMO GP PROCESADO
+    // --------------------------------------
+
+    const { data: gp, error: gpError } =
+      await supabase
+        .from("grandes_premios")
+        .select(`
+          nombre,
+          fantasy_procesado,
+          ganador_fantasy_equipo_id
+        `)
+        .eq("fantasy_procesado", true)
+        .order("orden", {
+          ascending: false,
+        })
+        .limit(1)
+        .single();
+
+    if (gpError || !gp) {
+      console.error(
+        "Error obteniendo último GP procesado:",
+        gpError
+      );
+
+      return;
+    }
+
+    // --------------------------------------
+    // EQUIPO GANADOR DE LA LIGA ACTUAL
+    // --------------------------------------
+
+    const { data: equipo, error: equipoError } =
+      await supabase
+        .from("equipos")
+        .select(`
+          usuario_id,
+          usuario,
+          puntos_gp_actual
+        `)
+        .eq(
+          "id",
+          gp.ganador_fantasy_equipo_id
+        )
+        .eq(
+          "liga_id",
+          usuario.liga_actual_id
+        )
+        .single();
+
+    if (equipoError || !equipo) {
+      console.error(
+        "Error obteniendo equipo ganador:",
+        equipoError
+      );
+
+      return;
+    }
+
+    // --------------------------------------
+    // AVATAR DEL USUARIO
+    // --------------------------------------
+
+    const { data: usuarioGanador, error: avatarError } =
+      await supabase
+        .from("usuarios")
+        .select("avatar")
+        .eq("id", equipo.usuario_id)
+        .single();
+
+    if (avatarError) {
+      console.error(
+        "Error obteniendo avatar:",
+        avatarError
+      );
+    }
+
+    // --------------------------------------
+    // GUARDAR GANADOR
+    // --------------------------------------
+
+    setGanador({
+      nombreGP: gp.nombre,
+      usuario: equipo.usuario,
+      puntos: equipo.puntos_gp_actual ?? 0,
+      avatar:
+        usuarioGanador?.avatar ||
+        "avatar1.png",
+    });
   }
 
-  // -----------------------------------------
-  // CARGANDO
-  // -----------------------------------------
+  // --------------------------------------
+  // SIN DATOS
+  // --------------------------------------
 
-  if (cargando) {
-    return (
-      <StatCard color="gold">
-        <div className="text-center py-8">
-          <p className="text-zinc-400">
-            Cargando ganador...
-          </p>
-        </div>
-      </StatCard>
-    );
-  }
+  if (!ganador) return null;
 
-  // -----------------------------------------
-  // SIN GANADOR
-  // -----------------------------------------
-
-  if (!ganador) {
-    return (
-      <StatCard color="gold">
-        <div className="text-center py-8">
-          <h2 className="text-lg font-semibold text-yellow-300">
-            🏆 Ganador del GP
-          </h2>
-
-          <p className="mt-4 text-zinc-400">
-            Todavía no hay ningún Gran Premio
-            procesado.
-          </p>
-        </div>
-      </StatCard>
-    );
-  }
-
-  // -----------------------------------------
+  // --------------------------------------
   // RENDER
-  // -----------------------------------------
+  // --------------------------------------
 
   return (
     <StatCard color="gold">
