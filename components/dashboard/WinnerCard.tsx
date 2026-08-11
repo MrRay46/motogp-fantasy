@@ -33,7 +33,7 @@ export default function WinnerCard() {
     if (!sesion.id) return;
 
     // --------------------------------------
-    // LIGA ACTUAL DEL USUARIO
+    // OBTENER LIGA ACTUAL
     // --------------------------------------
 
     const { data: usuario, error: usuarioError } =
@@ -63,8 +63,7 @@ export default function WinnerCard() {
         .from("grandes_premios")
         .select(`
           nombre,
-          fantasy_procesado,
-          ganador_fantasy_equipo_id
+          fantasy_procesado
         `)
         .eq("fantasy_procesado", true)
         .order("orden", {
@@ -83,7 +82,7 @@ export default function WinnerCard() {
     }
 
     // --------------------------------------
-    // EQUIPO GANADOR DE LA LIGA ACTUAL
+    // GANADOR DEL GP EN LA LIGA ACTUAL
     // --------------------------------------
 
     const { data: equipo, error: equipoError } =
@@ -95,13 +94,13 @@ export default function WinnerCard() {
           puntos_gp_actual
         `)
         .eq(
-          "id",
-          gp.ganador_fantasy_equipo_id
-        )
-        .eq(
           "liga_id",
           usuario.liga_actual_id
         )
+        .order("puntos_gp_actual", {
+          ascending: false,
+        })
+        .limit(1)
         .single();
 
     if (equipoError || !equipo) {
@@ -114,7 +113,7 @@ export default function WinnerCard() {
     }
 
     // --------------------------------------
-    // AVATAR DEL USUARIO
+    // OBTENER AVATAR DEL USUARIO GANADOR
     // --------------------------------------
 
     const { data: usuarioGanador, error: avatarError } =
@@ -126,7 +125,7 @@ export default function WinnerCard() {
 
     if (avatarError) {
       console.error(
-        "Error obteniendo avatar:",
+        "Error obteniendo avatar del ganador:",
         avatarError
       );
     }
