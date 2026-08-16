@@ -1,4 +1,5 @@
 "use client";
+
 import { supabase } from "@/lib/supabase";
 import {
   createContext,
@@ -49,192 +50,340 @@ type FantasyContextType = {
 };
 
 const FantasyContext =
-  createContext<FantasyContextType | null>(
-    null
-  );
+  createContext<FantasyContextType | null>(null);
 
 export function FantasyProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [jugadorActual, setJugadorActual] =
+    useState("");
 
-  const [
-  jugadorActual,
-  setJugadorActual,
-] = useState("");
-
-  const [
-    equipos,
-    setEquipos,
-  ] = useState<{
+  const [equipos, setEquipos] = useState<{
     [jugador: string]: EquipoJugador;
   }>({});
 
   const [cargando, setCargando] =
     useState(true);
-const cargarEquiposSupabase =
-  async () => {
 
-    const { data, error } =
-      await supabase
+  // =====================================================
+  // CARGAR EQUIPO DEL USUARIO EN LA LIGA ACTUAL
+  // =====================================================
+
+  async function cargarEquipoActual() {
+    try {
+      setCargando(true);
+
+      const guardado =
+        localStorage.getItem("usuario");
+
+      if (!guardado) {
+        setEquipos({});
+        setJugadorActual("");
+        setCargando(false);
+        return;
+      }
+
+      const sesion = JSON.parse(guardado);
+
+      if (!sesion.id || !sesion.usuario) {
+        setEquipos({});
+        setJugadorActual("");
+        setCargando(false);
+        return;
+      }
+
+      setJugadorActual(sesion.usuario);
+
+      // -------------------------------------------------
+      // USUARIO SIN LIGA
+      // -------------------------------------------------
+
+      if (!sesion.liga_actual_id) {
+        console.log(
+          "Usuario sin liga activa. No se carga ningún equipo."
+        );
+
+        setEquipos({});
+        setCargando(false);
+        return;
+      }
+
+      // -------------------------------------------------
+      // BUSCAR SOLO EL EQUIPO DE ESTA LIGA
+      // -------------------------------------------------
+
+      const {
+        data: equipo,
+        error,
+      } = await supabase
         .from("equipos")
-        .select("*");
+        .select("*")
+        .eq("usuario_id", sesion.id)
+        .eq(
+          "liga_id",
+          sesion.liga_actual_id
+        )
+        .maybeSingle();
 
-    if (error) {
-      console.error(error);
-      setCargando(false);
-      return;
-    }
+      if (error) {
+        console.error(
+          "Error cargando equipo actual:",
+          error
+        );
 
-    const equiposCargados: {
-      [jugador: string]: EquipoJugador;
-    } = {};
+        setEquipos({});
+        setCargando(false);
+        return;
+      }
 
-    data.forEach((fila) => {
+      // -------------------------------------------------
+      // EL USUARIO PERTENECE A LA LIGA PERO TODAVÍA
+      // NO TIENE EQUIPO
+      // -------------------------------------------------
 
-      equiposCargados[fila.usuario] = {
+      if (!equipo) {
+        console.log(
+          "El usuario pertenece a la liga pero todavía no tiene equipo."
+        );
 
+        setEquipos({});
+        setCargando(false);
+        return;
+      }
+
+      // -------------------------------------------------
+      // CONVERTIR EQUIPO SUPABASE → FORMATO CONTEXTO
+      // -------------------------------------------------
+
+      const equipoCargado: EquipoJugador = {
         fichados:
-          fila.fichados || [],
+          equipo.fichados || [],
 
         reserva:
-          fila.reserva,
+          equipo.reserva ?? null,
 
         motor:
-          fila.motor,
-          
-          puntos: fila.puntos ?? 0,
+          equipo.motor ?? null,
+
+        puntos:
+          equipo.puntos ?? 0,
 
         prediccionPiloto:
-          fila.prediccion_piloto,
+          equipo.prediccion_piloto ?? null,
 
         prediccionMotor:
-          fila.prediccion_motor,
+          equipo.prediccion_motor ?? null,
 
-          prediccionPilotoOriginal:
-  fila.prediccion_piloto_original,
+        prediccionPilotoOriginal:
+          equipo.prediccion_piloto_original ??
+          null,
 
-prediccionMotorOriginal:
-  fila.prediccion_motor_original,
+        prediccionMotorOriginal:
+          equipo.prediccion_motor_original ??
+          null,
 
-  prediccionPilotoModificada:
-  fila.prediccion_piloto_modificada,
+        prediccionPilotoModificada:
+          equipo.prediccion_piloto_modificada ??
+          false,
 
-prediccionMotorModificada:
-  fila.prediccion_motor_modificada,
-  constructorModificado:
-  fila.constructor_modificado ?? false,
+        prediccionMotorModificada:
+          equipo.prediccion_motor_modificada ??
+          false,
 
-reservaModificada:
-  fila.reserva_modificada ?? false,
+        constructorModificado:
+          equipo.constructor_modificado ??
+          false,
 
-cambiosPilotos:
-  fila.cambios_pilotos ?? 0,
+        reservaModificada:
+          equipo.reserva_modificada ??
+          false,
+
+        cambiosPilotos:
+          equipo.cambios_pilotos ?? 0,
       };
 
-    });
+      setEquipos({
+        [sesion.usuario]: equipoCargado,
+      });
 
-    setEquipos(
-      equiposCargados
-    );
+    } catch (error) {
+      console.error(
+        "Error inesperado cargando equipo:",
+        error
+      );
 
-    setCargando(false);
-
-  };
-  useEffect(() => {
-
-    const sesion = JSON.parse(
-  localStorage.getItem("usuario") || "{}"
-);
-
-if (sesion.usuario) {
-  setJugadorActual(sesion.usuario);
-}
-
-  }, []);
-
- useEffect(() => {
-
-  cargarEquiposSupabase();
-
-}, []);
-
-  useEffect(() => {
-
-  localStorage.setItem(
-    "equipos",
-    JSON.stringify(equipos)
-  );
-
-  if (
-    Object.keys(equipos).length > 0
-  ) {
-    guardarEquiposSupabase();
+      setEquipos({});
+    } finally {
+      setCargando(false);
+    }
   }
 
-}, [equipos]);
+  // =====================================================
+  // GUARDAR SOLO EL EQUIPO ACTUAL
+  // =====================================================
+
+  async function guardarEquipoActual(
+    equiposActuales: {
+      [jugador: string]: EquipoJugador;
+    }
+  ) {
+    try {
+      const guardado =
+        localStorage.getItem("usuario");
+
+      if (!guardado) return;
+
+      const sesion = JSON.parse(guardado);
+
+      if (!sesion.id) return;
+
+      // -------------------------------------------------
+      // SIN LIGA → NO GUARDAR NINGÚN EQUIPO
+      // -------------------------------------------------
+
+      if (!sesion.liga_actual_id) {
+        return;
+      }
+
+      const equipo =
+        equiposActuales[sesion.usuario];
+
+      // -------------------------------------------------
+      // NO HAY EQUIPO → NO HACER UPSERT
+      // -------------------------------------------------
+
+      if (!equipo) {
+        return;
+      }
+
+      console.log(
+        "GUARDANDO EQUIPO ACTUAL EN SUPABASE",
+        {
+          usuario_id: sesion.id,
+          liga_id: sesion.liga_actual_id,
+        }
+      );
+
+      const { error } =
+        await supabase
+          .from("equipos")
+          .upsert(
+            {
+              usuario_id: sesion.id,
+
+              usuario: sesion.usuario,
+
+              liga_id:
+                sesion.liga_actual_id,
+
+              fichados:
+                equipo.fichados,
+
+              reserva:
+                equipo.reserva,
+
+              motor:
+                equipo.motor,
+
+              prediccion_piloto:
+                equipo.prediccionPiloto,
+
+              prediccion_motor:
+                equipo.prediccionMotor,
+
+              prediccion_piloto_original:
+                equipo.prediccionPilotoOriginal,
+
+              prediccion_motor_original:
+                equipo.prediccionMotorOriginal,
+
+              prediccion_piloto_modificada:
+                equipo.prediccionPilotoModificada ??
+                false,
+
+              prediccion_motor_modificada:
+                equipo.prediccionMotorModificada ??
+                false,
+
+              constructor_modificado:
+                equipo.constructorModificado ??
+                false,
+
+              reserva_modificada:
+                equipo.reservaModificada ??
+                false,
+
+              cambios_pilotos:
+                equipo.cambiosPilotos ?? 0,
+            },
+            {
+              onConflict:
+                "usuario_id,liga_id",
+            }
+          );
+
+      if (error) {
+        console.error(
+          "Error guardando equipo:",
+          error
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        "Error inesperado guardando equipo:",
+        error
+      );
+    }
+  }
+
+  // =====================================================
+  // INICIALIZAR
+  // =====================================================
 
   useEffect(() => {
+    cargarEquipoActual();
+  }, []);
+
+  // =====================================================
+  // GUARDAR EN LOCALSTORAGE + SUPABASE
+  // =====================================================
+
+  useEffect(() => {
+    if (cargando) return;
+
+    localStorage.setItem(
+      "equipos",
+      JSON.stringify(equipos)
+    );
+
+    if (
+      Object.keys(equipos).length > 0
+    ) {
+      guardarEquipoActual(equipos);
+    }
+
+  }, [equipos, cargando]);
+
+  // =====================================================
+  // GUARDAR JUGADOR ACTUAL
+  // =====================================================
+
+  useEffect(() => {
+    if (!jugadorActual) return;
 
     localStorage.setItem(
       "jugadorActual",
       jugadorActual
     );
-
   }, [jugadorActual]);
-const guardarEquiposSupabase = async () => {
 
-  console.log(
-    "GUARDANDO EN SUPABASE",
-    equipos
-  );
+  // =====================================================
+  // PROVIDER
+  // =====================================================
 
-  for (const jugador in equipos) {
-
-  const equipo = equipos[jugador];
-
- 
-  const { error } =
-    await supabase
-      .from("equipos")
-      .upsert(
-    {
-      usuario: jugador,
-      fichados: equipo.fichados,
-      reserva: equipo.reserva,
-      motor: equipo.motor,
-      prediccion_piloto:
-        equipo.prediccionPiloto,
-      prediccion_motor:
-        equipo.prediccionMotor,
-        prediccion_piloto_original:
-  equipo.prediccionPilotoOriginal,
-prediccion_motor_original:
-  equipo.prediccionMotorOriginal,
-  prediccion_piloto_modificada:
-  equipo.prediccionPilotoModificada,
-
-prediccion_motor_modificada:
-  equipo.prediccionMotorModificada,
-  constructor_modificado:
-  equipo.constructorModificado,
-
-reserva_modificada:
-  equipo.reservaModificada,
-
-cambios_pilotos:
-  equipo.cambiosPilotos,
-    },
-    {
-      onConflict: "usuario",
-    }
-  );
-  if (error) {
-  console.error(error);
-}
-  }
-};
   return (
     <FantasyContext.Provider
       value={{
@@ -250,17 +399,18 @@ cambios_pilotos:
   );
 }
 
-export function useFantasy() {
+// =======================================================
+// HOOK
+// =======================================================
 
+export function useFantasy() {
   const context =
     useContext(FantasyContext);
 
   if (!context) {
-
     throw new Error(
       "useFantasy debe usarse dentro de FantasyProvider"
     );
-
   }
 
   return context;
