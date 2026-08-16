@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import AppLayout from "@/components/layout/AppLayout";
 
 import {
@@ -14,11 +17,70 @@ import { motores } from "@/data/motores";
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function EquipoPage() {
+  const router = useRouter();
+
+  const [comprobandoLiga, setComprobandoLiga] =
+    useState(true);
+
   const {
     equipos,
     jugadorActual,
     cargando,
   } = useFantasy();
+
+  // --------------------------------------------------
+  // COMPROBAR SI EL USUARIO TIENE LIGA ACTIVA
+  // --------------------------------------------------
+
+  useEffect(() => {
+    const guardado =
+      localStorage.getItem("usuario");
+
+    if (!guardado) {
+      router.replace("/");
+      return;
+    }
+
+    try {
+      const usuario = JSON.parse(guardado);
+
+      // No pertenece actualmente a ninguna liga
+      if (
+        usuario.liga_actual_id === null ||
+        usuario.liga_actual_id === undefined
+      ) {
+        router.replace("/ligas");
+        return;
+      }
+
+      setComprobandoLiga(false);
+    } catch (error) {
+      console.error(
+        "Error leyendo usuario:",
+        error
+      );
+
+      router.replace("/");
+    }
+  }, [router]);
+
+  // --------------------------------------------------
+  // ESPERAR A COMPROBAR LA LIGA
+  // --------------------------------------------------
+
+  if (comprobandoLiga) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-zinc-400">
+          Comprobando liga...
+        </div>
+      </main>
+    );
+  }
+
+  // --------------------------------------------------
+  // CARGANDO EQUIPO
+  // --------------------------------------------------
 
   if (cargando) {
     return (
@@ -28,15 +90,19 @@ export default function EquipoPage() {
     );
   }
 
- const equipoActual =
-  equipos[jugadorActual] || {
-    fichados: [],
-    reserva: null,
-    motor: null,
-    prediccionPiloto: null,
-    prediccionMotor: null,
-    puntos: 0,
-  };
+  // --------------------------------------------------
+  // EQUIPO ACTUAL
+  // --------------------------------------------------
+
+  const equipoActual =
+    equipos[jugadorActual] || {
+      fichados: [],
+      reserva: null,
+      motor: null,
+      prediccionPiloto: null,
+      prediccionMotor: null,
+      puntos: 0,
+    };
 
   const fichados = equipoActual.fichados;
   const reserva = equipoActual.reserva;
@@ -47,11 +113,14 @@ export default function EquipoPage() {
 
   const prediccionMotor =
     equipoActual.prediccionMotor;
-const prediccionPilotoModificada =
-  equipoActual.prediccionPilotoModificada ?? false;
 
-const prediccionMotorModificada =
-  equipoActual.prediccionMotorModificada ?? false;
+  const prediccionPilotoModificada =
+    equipoActual.prediccionPilotoModificada ??
+    false;
+
+  const prediccionMotorModificada =
+    equipoActual.prediccionMotorModificada ??
+    false;
 
   const equipo = pilotos.filter((piloto) =>
     fichados.includes(piloto.nombre)
@@ -139,7 +208,8 @@ const prediccionMotorModificada =
 
   const motoresOrdenados =
     resultadosMotores.sort(
-      (a, b) => b.totalGP - a.totalGP
+      (a, b) =>
+        b.totalGP - a.totalGP
     );
 
   const puntosMotorFantasy = {
@@ -167,74 +237,78 @@ const prediccionMotorModificada =
     puntosTitulares +
     puntosReserva +
     puntosMotor;
-const puntosTotales =
-  equipoActual.puntos ?? 0;
+
+  const puntosTotales =
+    equipoActual.puntos ?? 0;
 
   return (
     <AppLayout>
       <div className="relative">
 
-
         <div className="relative z-10">
 
           <h1 className="text-4xl md:text-5xl font-bold text-red-500 mb-8">
-  
-</h1>
+          </h1>
 
           <div className="flex flex-wrap gap-6 mb-10">
 
-  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
 
-    <div className="text-sm text-zinc-400">
-      🏆 Puntos GP
-    </div>
+              <div className="text-sm text-zinc-400">
+                🏆 Puntos GP
+              </div>
 
-    <div className="mt-1 text-3xl font-bold text-white">
-      {puntosEquipo}
-    </div>
+              <div className="mt-1 text-3xl font-bold text-white">
+                {puntosEquipo}
+              </div>
 
-  </div>
+            </div>
 
-  <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
 
-    <div className="text-sm text-zinc-400">
-      ⭐ Puntos Totales
-    </div>
+              <div className="text-sm text-zinc-400">
+                ⭐ Puntos Totales
+              </div>
 
-    <div className="mt-1 text-3xl font-bold text-white">
-      {puntosTotales}
-    </div>
+              <div className="mt-1 text-3xl font-bold text-white">
+                {puntosTotales}
+              </div>
 
-  </div>
+            </div>
 
-</div>
+          </div>
 
           <StartingGrid
             titulares={titulares}
             reserva={pilotoReserva ?? null}
           />
-                    <div className="mt-8">
+
+          <div className="mt-8">
 
             <MotorCard
               motor={motorSeleccionado ?? null}
               puntos={puntosMotor}
             />
-<div className="mt-6">
 
-</div>
-           <PredictionsCard
-    piloto={prediccionPiloto}
-    motor={prediccionMotor}
-    pilotoModificado={prediccionPilotoModificada}
-    motorModificado={prediccionMotorModificada}
-/>
+            <div className="mt-6">
+            </div>
+
+            <PredictionsCard
+              piloto={prediccionPiloto}
+              motor={prediccionMotor}
+              pilotoModificado={
+                prediccionPilotoModificada
+              }
+              motorModificado={
+                prediccionMotorModificada
+              }
+            />
 
           </div>
 
         </div>
 
       </div>
-
     </AppLayout>
   );
 }

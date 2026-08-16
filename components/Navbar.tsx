@@ -9,28 +9,65 @@ import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
 export default function Navbar() {
   const [esAdmin, setEsAdmin] = useState(false);
   const [esSuper, setEsSuper] = useState(false);
+  const [tieneLiga, setTieneLiga] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   useEffect(() => {
-    async function comprobarPermisos() {
-      const sesion = JSON.parse(
-        localStorage.getItem("usuario") || "{}"
-      );
+    async function comprobarSesion() {
+      const guardado = localStorage.getItem("usuario");
+
+      if (!guardado) {
+        setTieneLiga(false);
+        setEsAdmin(false);
+        setEsSuper(false);
+        return;
+      }
+
+      let sesion;
+
+      try {
+        sesion = JSON.parse(guardado);
+      } catch (error) {
+        console.error(
+          "Error leyendo sesión:",
+          error
+        );
+
+        setTieneLiga(false);
+        setEsAdmin(false);
+        setEsSuper(false);
+
+        return;
+      }
 
       if (!sesion.id) {
+        setTieneLiga(false);
+        setEsAdmin(false);
+        setEsSuper(false);
         return;
       }
 
       // -----------------------------------------
+      // ¿TIENE LIGA ACTIVA?
+      // -----------------------------------------
+
+      const tieneLigaActual =
+        sesion.liga_actual_id !== null &&
+        sesion.liga_actual_id !== undefined;
+
+      setTieneLiga(tieneLigaActual);
+
+      // -----------------------------------------
       // SUPERADMIN
       // -----------------------------------------
-      // Es independiente de la liga actual.
+
       setEsSuper(esSuperAdmin());
 
       // -----------------------------------------
-      // ADMINISTRADOR DE LIGA
+      // ADMINISTRADOR DE LA LIGA ACTUAL
       // -----------------------------------------
-      if (!sesion.liga_actual_id) {
+
+      if (!tieneLigaActual) {
         setEsAdmin(false);
         return;
       }
@@ -60,7 +97,7 @@ export default function Navbar() {
       );
     }
 
-    comprobarPermisos();
+    comprobarSesion();
   }, []);
 
   function cerrarSesion() {
@@ -91,12 +128,14 @@ export default function Navbar() {
         </a>
 
         {/* EQUIPO */}
-        <a
-          href="/equipo"
-          className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
-        >
-          Equipo
-        </a>
+        {tieneLiga && (
+          <a
+            href="/equipo"
+            className="bg-zinc-800 px-4 py-2 rounded-xl hover:bg-zinc-700 transition"
+          >
+            Equipo
+          </a>
+        )}
 
         {/* MERCADO */}
         <a
