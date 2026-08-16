@@ -44,7 +44,6 @@ export default function EquipoPage() {
     try {
       const usuario = JSON.parse(guardado);
 
-      // No pertenece actualmente a ninguna liga
       if (
         usuario.liga_actual_id === null ||
         usuario.liga_actual_id === undefined
@@ -65,7 +64,7 @@ export default function EquipoPage() {
   }, [router]);
 
   // --------------------------------------------------
-  // ESPERAR A COMPROBAR LA LIGA
+  // COMPROBANDO LIGA
   // --------------------------------------------------
 
   if (comprobandoLiga) {
@@ -85,7 +84,9 @@ export default function EquipoPage() {
   if (cargando) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
-        Cargando equipo...
+        <div className="text-zinc-400">
+          Cargando equipo...
+        </div>
       </main>
     );
   }
@@ -108,6 +109,67 @@ export default function EquipoPage() {
   const reserva = equipoActual.reserva;
   const motor = equipoActual.motor;
 
+  // --------------------------------------------------
+  // USUARIO EN LIGA PERO SIN EQUIPO
+  // --------------------------------------------------
+
+  if (fichados.length === 0) {
+    return (
+      <AppLayout>
+        <div className="max-w-3xl mx-auto py-16 px-6">
+          <div
+            className="
+              rounded-3xl
+              border
+              border-zinc-800
+              bg-zinc-900/70
+              p-10
+              text-center
+            "
+          >
+            <div className="text-6xl mb-6">
+              🏁
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-5">
+              Tu equipo todavía no está creado
+            </h1>
+
+            <p className="text-zinc-400 text-lg mb-8">
+              Ya perteneces a una liga.
+              Puedes crear tu equipo cuando quieras.
+            </p>
+
+            <button
+              onClick={() =>
+                router.push("/mercado")
+              }
+              className="
+                inline-flex
+                items-center
+                justify-center
+                bg-orange-500
+                hover:bg-orange-400
+                text-white
+                font-bold
+                px-8
+                py-4
+                rounded-xl
+                transition
+              "
+            >
+              🏍️ Crear mi equipo
+            </button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // --------------------------------------------------
+  // PREDICCIONES
+  // --------------------------------------------------
+
   const prediccionPiloto =
     equipoActual.prediccionPiloto;
 
@@ -122,22 +184,38 @@ export default function EquipoPage() {
     equipoActual.prediccionMotorModificada ??
     false;
 
-  const equipo = pilotos.filter((piloto) =>
-    fichados.includes(piloto.nombre)
+  // --------------------------------------------------
+  // PILOTOS DEL EQUIPO
+  // --------------------------------------------------
+
+  const equipo = pilotos.filter(
+    (piloto) =>
+      fichados.includes(piloto.nombre)
   );
 
   const titulares = equipo.filter(
-    (piloto) => piloto.nombre !== reserva
+    (piloto) =>
+      piloto.nombre !== reserva
   );
 
   const pilotoReserva = pilotos.find(
-    (piloto) => piloto.nombre === reserva
+    (piloto) =>
+      piloto.nombre === reserva
   );
+
+  // --------------------------------------------------
+  // MOTOR
+  // --------------------------------------------------
 
   const motorSeleccionado =
     motores.find(
-      (item) => item.nombre === motor
+      (item) =>
+        item.nombre === motor
     );
+
+  // --------------------------------------------------
+  // PRESUPUESTO
+  // --------------------------------------------------
 
   const presupuestoPilotos =
     equipo.reduce(
@@ -150,7 +228,12 @@ export default function EquipoPage() {
     motorSeleccionado?.precio || 0;
 
   const presupuestoUsado =
-    presupuestoPilotos + precioMotor;
+    presupuestoPilotos +
+    precioMotor;
+
+  // --------------------------------------------------
+  // PUNTOS DE PILOTOS
+  // --------------------------------------------------
 
   const puntosTitulares =
     titulares.reduce(
@@ -166,9 +249,14 @@ export default function EquipoPage() {
     );
 
   const puntosReserva =
-    titularConCero && pilotoReserva
+    titularConCero &&
+    pilotoReserva
       ? pilotoReserva.puntosGP
       : 0;
+
+  // --------------------------------------------------
+  // PUNTOS DE MOTORES
+  // --------------------------------------------------
 
   const marcas = [
     "Ducati",
@@ -187,7 +275,8 @@ export default function EquipoPage() {
         )
         .sort(
           (a, b) =>
-            b.puntosGP - a.puntosGP
+            b.puntosGP -
+            a.puntosGP
         );
 
       const mejoresDos =
@@ -196,7 +285,8 @@ export default function EquipoPage() {
       const totalGP =
         mejoresDos.reduce(
           (total, piloto) =>
-            total + piloto.puntosGP,
+            total +
+            piloto.puntosGP,
           0
         );
 
@@ -209,7 +299,8 @@ export default function EquipoPage() {
   const motoresOrdenados =
     resultadosMotores.sort(
       (a, b) =>
-        b.totalGP - a.totalGP
+        b.totalGP -
+        a.totalGP
     );
 
   const puntosMotorFantasy = {
@@ -233,6 +324,10 @@ export default function EquipoPage() {
         ]
       : 0;
 
+  // --------------------------------------------------
+  // PUNTOS TOTALES
+  // --------------------------------------------------
+
   const puntosEquipo =
     puntosTitulares +
     puntosReserva +
@@ -241,19 +336,33 @@ export default function EquipoPage() {
   const puntosTotales =
     equipoActual.puntos ?? 0;
 
+  // --------------------------------------------------
+  // RENDER EQUIPO
+  // --------------------------------------------------
+
   return (
     <AppLayout>
       <div className="relative">
-
         <div className="relative z-10">
 
           <h1 className="text-4xl md:text-5xl font-bold text-red-500 mb-8">
           </h1>
 
+          {/* ---------------------------------------- */}
+          {/* PUNTOS */}
+          {/* ---------------------------------------- */}
+
           <div className="flex flex-wrap gap-6 mb-10">
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
-
+            <div className="
+              rounded-xl
+              border
+              border-zinc-800
+              bg-zinc-900/40
+              px-5
+              py-3
+              min-w-[180px]
+            ">
               <div className="text-sm text-zinc-400">
                 🏆 Puntos GP
               </div>
@@ -261,11 +370,17 @@ export default function EquipoPage() {
               <div className="mt-1 text-3xl font-bold text-white">
                 {puntosEquipo}
               </div>
-
             </div>
 
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-5 py-3 min-w-[180px]">
-
+            <div className="
+              rounded-xl
+              border
+              border-zinc-800
+              bg-zinc-900/40
+              px-5
+              py-3
+              min-w-[180px]
+            ">
               <div className="text-sm text-zinc-400">
                 ⭐ Puntos Totales
               </div>
@@ -273,41 +388,59 @@ export default function EquipoPage() {
               <div className="mt-1 text-3xl font-bold text-white">
                 {puntosTotales}
               </div>
-
             </div>
 
           </div>
 
+          {/* ---------------------------------------- */}
+          {/* PARRILLA */}
+          {/* ---------------------------------------- */}
+
           <StartingGrid
             titulares={titulares}
-            reserva={pilotoReserva ?? null}
+            reserva={
+              pilotoReserva ?? null
+            }
           />
+
+          {/* ---------------------------------------- */}
+          {/* MOTOR */}
+          {/* ---------------------------------------- */}
 
           <div className="mt-8">
 
             <MotorCard
-              motor={motorSeleccionado ?? null}
+              motor={
+                motorSeleccionado ??
+                null
+              }
               puntos={puntosMotor}
             />
 
-            <div className="mt-6">
-            </div>
+            {/* -------------------------------------- */}
+            {/* PREDICCIONES */}
+            {/* -------------------------------------- */}
 
-            <PredictionsCard
-              piloto={prediccionPiloto}
-              motor={prediccionMotor}
-              pilotoModificado={
-                prediccionPilotoModificada
-              }
-              motorModificado={
-                prediccionMotorModificada
-              }
-            />
+            <div className="mt-6">
+              <PredictionsCard
+                piloto={
+                  prediccionPiloto
+                }
+                motor={
+                  prediccionMotor
+                }
+                pilotoModificado={
+                  prediccionPilotoModificada
+                }
+                motorModificado={
+                  prediccionMotorModificada
+                }
+              />
+            </div>
 
           </div>
 
         </div>
-
       </div>
     </AppLayout>
   );

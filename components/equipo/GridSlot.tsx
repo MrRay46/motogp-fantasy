@@ -5,7 +5,7 @@ type PilotoGrid = {
 };
 
 type GridSlotProps = {
-  piloto: PilotoGrid;
+  piloto?: PilotoGrid | null;
   tipo: "titular" | "reserva";
 };
 
@@ -23,49 +23,57 @@ export default function GridSlot({
 
       {/* Cajón */}
       <div
-  className={`
-    w-24
-    md:w-36
-    h-7
-    md:h-8
-    border-t-4
-    border-l-4
-    border-r-4
-    rounded-t-md
-    ${borderColor}
-  `}
-/>
+        className={`
+          w-24
+          md:w-36
+          h-7
+          md:h-8
+          border-t-4
+          border-l-4
+          border-r-4
+          rounded-t-md
+          ${borderColor}
+        `}
+      />
 
-      {/* Piloto */}
-      <img
-  src={piloto.miniatura}
-  alt={piloto.nombre}
-  className="
-    -mt-4
-    md:-mt-5
-    h-16
-    md:h-28
-    object-contain
-    select-none
-    pointer-events-none
-  "
-  draggable={false}
-/>
+      {piloto ? (
+        <>
+          {/* Piloto */}
+          <img
+            src={piloto.miniatura}
+            alt={piloto.nombre}
+            className="
+              -mt-4
+              md:-mt-5
+              h-16
+              md:h-28
+              object-contain
+              select-none
+              pointer-events-none
+            "
+            draggable={false}
+          />
 
-      {/* Nombre */}
-      <p
-  className="
-    mt-1
-    text-center
-    text-sm
-    md:text-base
-    font-semibold
-    text-white
-    leading-tight
-  "
->
-  {piloto.nombre}
-</p>
+          {/* Nombre */}
+          <p
+            className="
+              mt-1
+              text-center
+              text-sm
+              md:text-base
+              font-semibold
+              text-white
+              leading-tight
+            "
+          >
+            {piloto.nombre}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-zinc-600 text-sm">
+          Vacío
+        </p>
+      )}
 
     </div>
   );
