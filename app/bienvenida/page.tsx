@@ -2,14 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import CreateLeagueForm from "@/components/auth/CreateLeagueForm";
-import JoinLeagueForm from "@/components/auth/JoinLeagueForm";
+
+interface Usuario {
+  id: number;
+  usuario: string;
+  email: string;
+  avatar: string;
+  liga_actual_id: number | null;
+}
 
 export default function BienvenidaPage() {
   const router = useRouter();
 
-  const [modo, setModo] = useState<"crear" | "unirse">("crear");
-  const [usuario, setUsuario] = useState<any>(null);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
 
   useEffect(() => {
     const guardado = localStorage.getItem("usuario");
@@ -19,83 +24,87 @@ export default function BienvenidaPage() {
       return;
     }
 
-    const datos = JSON.parse(guardado);
+    try {
+      const datos = JSON.parse(guardado);
 
-    // Si ya pertenece a una liga, ir al dashboard
-    if (datos.liga_actual_id) {
-      router.replace("/dashboard");
-      return;
+      setUsuario(datos);
+    } catch (error) {
+      console.error(
+        "Error leyendo la sesión:",
+        error
+      );
+
+      localStorage.removeItem("usuario");
+
+      router.replace("/registro");
     }
-
-    setUsuario(datos);
   }, [router]);
 
-  if (!usuario) return null;
+  if (!usuario) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen bg-black flex items-center justify-center px-6">
-
       <div className="w-full max-w-lg">
 
-        <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
+        <div
+          className="
+            bg-zinc-900
+            rounded-3xl
+            border
+            border-zinc-800
+            p-8
+            text-center
+          "
+        >
 
-          <h1 className="text-4xl font-black text-center mb-2">
-            Bienvenido
-          </h1>
-
-          <p className="text-center text-zinc-400 mb-8">
-            Hola <span className="font-bold">{usuario.usuario}</span>.
-            Ahora debes elegir cómo quieres comenzar.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mb-8">
-
-            <button
-              onClick={() => setModo("crear")}
-              className={`
-                rounded-xl
-                py-3
-                font-bold
-                transition
-                ${
-                  modo === "crear"
-                    ? "bg-orange-500 text-white"
-                    : "bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-                }
-              `}
-            >
-              Crear liga
-            </button>
-
-            <button
-              onClick={() => setModo("unirse")}
-              className={`
-                rounded-xl
-                py-3
-                font-bold
-                transition
-                ${
-                  modo === "unirse"
-                    ? "bg-orange-500 text-white"
-                    : "bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-                }
-              `}
-            >
-              Unirme
-            </button>
-
+          <div className="text-6xl mb-6">
+            🏁
           </div>
 
-          {modo === "crear" ? (
-            <CreateLeagueForm usuario={usuario} />
-          ) : (
-            <JoinLeagueForm usuario={usuario} />
-          )}
+          <h1 className="text-4xl font-black mb-3">
+            Bienvenido a Rayongrid
+          </h1>
+
+          <p className="text-xl text-white mb-3">
+            Hola{" "}
+            <span className="font-bold text-orange-400">
+              {usuario.usuario}
+            </span>
+          </p>
+
+          <p className="text-zinc-400 leading-relaxed mb-8">
+            Tu cuenta se ha creado correctamente.
+            <br />
+            Ya puedes explorar Rayongrid y,
+            cuando quieras competir, podrás
+            crear una liga o unirte a una existente.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/dashboard")
+            }
+            className="
+              w-full
+              bg-orange-500
+              hover:bg-orange-600
+              text-white
+              rounded-xl
+              py-4
+              font-bold
+              text-lg
+              transition
+            "
+          >
+            🚀 Entrar en Rayongrid
+          </button>
 
         </div>
 
       </div>
-
     </main>
   );
 }
