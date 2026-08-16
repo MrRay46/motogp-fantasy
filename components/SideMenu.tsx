@@ -116,6 +116,33 @@ export default function SideMenu({
             <LeagueCard />
 
             {/* -------------------------------- */}
+            {/* MIS LIGAS */}
+            {/* -------------------------------- */}
+
+            <a
+              href="/ligas"
+              onClick={onClose}
+              className="
+                block
+                w-full
+                rounded-2xl
+                bg-zinc-800
+                hover:bg-zinc-700
+                border
+                border-zinc-700
+                hover:border-orange-500
+                text-white
+                px-5
+                py-4
+                font-bold
+                text-lg
+                transition
+              "
+            >
+              🏁 Mis ligas
+            </a>
+
+            {/* -------------------------------- */}
             {/* ADMINISTRACIÓN DE LIGA */}
             {/* -------------------------------- */}
 
