@@ -8,26 +8,41 @@ import {
   useState,
 } from "react";
 
+// =====================================================
+// TIPOS
+// =====================================================
+
 export type EquipoJugador = {
   fichados: string[];
+
   reserva: string | null;
+
   motor: string | null;
 
   puntos: number;
 
   prediccionPiloto: string | null;
+
   prediccionMotor: string | null;
 
   prediccionPilotoOriginal: string | null;
+
   prediccionMotorOriginal: string | null;
 
   prediccionPilotoModificada?: boolean;
+
   prediccionMotorModificada?: boolean;
 
   constructorModificado?: boolean;
+
   reservaModificada?: boolean;
+
   cambiosPilotos?: number;
 };
+
+// =====================================================
+// CONTEXTO
+// =====================================================
 
 type FantasyContextType = {
   equipos: {
@@ -47,10 +62,20 @@ type FantasyContextType = {
   >;
 
   cargando: boolean;
+
+  recargarEquipo: () => Promise<void>;
 };
+
+// =====================================================
+// CONTEXT
+// =====================================================
 
 const FantasyContext =
   createContext<FantasyContextType | null>(null);
+
+// =====================================================
+// PROVIDER
+// =====================================================
 
 export function FantasyProvider({
   children,
@@ -67,9 +92,9 @@ export function FantasyProvider({
   const [cargando, setCargando] =
     useState(true);
 
-  // =====================================================
-  // CARGAR EQUIPO DEL USUARIO EN LA LIGA ACTUAL
-  // =====================================================
+  // ===================================================
+  // CARGAR EQUIPO DE LA LIGA ACTUAL
+  // ===================================================
 
   async function cargarEquipoActual() {
     try {
@@ -78,41 +103,72 @@ export function FantasyProvider({
       const guardado =
         localStorage.getItem("usuario");
 
+      // -----------------------------------------------
+      // NO HAY SESIÓN
+      // -----------------------------------------------
+
       if (!guardado) {
         setEquipos({});
         setJugadorActual("");
-        setCargando(false);
         return;
       }
 
-      const sesion = JSON.parse(guardado);
+      let sesion;
+
+      try {
+        sesion = JSON.parse(guardado);
+      } catch (error) {
+        console.error(
+          "Error leyendo sesión:",
+          error
+        );
+
+        setEquipos({});
+        setJugadorActual("");
+        return;
+      }
+
+      // -----------------------------------------------
+      // SESIÓN INVÁLIDA
+      // -----------------------------------------------
 
       if (!sesion.id || !sesion.usuario) {
         setEquipos({});
         setJugadorActual("");
-        setCargando(false);
         return;
       }
 
       setJugadorActual(sesion.usuario);
 
-      // -------------------------------------------------
+      // -----------------------------------------------
       // USUARIO SIN LIGA
-      // -------------------------------------------------
+      // -----------------------------------------------
 
       if (!sesion.liga_actual_id) {
         console.log(
-          "Usuario sin liga activa. No se carga ningún equipo."
+          "Usuario sin liga activa."
         );
 
         setEquipos({});
-        setCargando(false);
+
+        // Limpiamos también el equipo cacheado
+        // porque pertenece a otra situación.
+        localStorage.removeItem("equipos");
+
         return;
       }
 
-      // -------------------------------------------------
-      // BUSCAR SOLO EL EQUIPO DE ESTA LIGA
-      // -------------------------------------------------
+      console.log(
+        "Cargando equipo:",
+        {
+          usuario_id: sesion.id,
+          liga_id: sesion.liga_actual_id,
+        }
+      );
+
+      // -----------------------------------------------
+      // BUSCAR EQUIPO DE USUARIO + LIGA
+      // -----------------------------------------------
 
       const {
         data: equipo,
@@ -134,14 +190,12 @@ export function FantasyProvider({
         );
 
         setEquipos({});
-        setCargando(false);
         return;
       }
 
-      // -------------------------------------------------
-      // EL USUARIO PERTENECE A LA LIGA PERO TODAVÍA
-      // NO TIENE EQUIPO
-      // -------------------------------------------------
+      // -----------------------------------------------
+      // NO EXISTE EQUIPO EN ESTA LIGA
+      // -----------------------------------------------
 
       if (!equipo) {
         console.log(
@@ -149,17 +203,19 @@ export function FantasyProvider({
         );
 
         setEquipos({});
-        setCargando(false);
+
+        localStorage.removeItem("equipos");
+
         return;
       }
 
-      // -------------------------------------------------
-      // CONVERTIR EQUIPO SUPABASE → FORMATO CONTEXTO
-      // -------------------------------------------------
+      // -----------------------------------------------
+      // CONVERTIR SUPABASE → CONTEXTO
+      // -----------------------------------------------
 
       const equipoCargado: EquipoJugador = {
         fichados:
-          equipo.fichados || [],
+          equipo.fichados ?? [],
 
         reserva:
           equipo.reserva ?? null,
@@ -204,9 +260,22 @@ export function FantasyProvider({
           equipo.cambios_pilotos ?? 0,
       };
 
+      // -----------------------------------------------
+      // GUARDAR SOLO EL EQUIPO DE LA LIGA ACTUAL
+      // -----------------------------------------------
+
       setEquipos({
         [sesion.usuario]: equipoCargado,
       });
+
+      // Guardamos también la versión correcta
+      // en localStorage.
+      localStorage.setItem(
+        "equipos",
+        JSON.stringify({
+          [sesion.usuario]: equipoCargado,
+        })
+      );
 
     } catch (error) {
       console.error(
@@ -220,9 +289,9 @@ export function FantasyProvider({
     }
   }
 
-  // =====================================================
-  // GUARDAR SOLO EL EQUIPO ACTUAL
-  // =====================================================
+  // ===================================================
+  // GUARDAR EQUIPO ACTUAL
+  // ===================================================
 
   async function guardarEquipoActual(
     equiposActuales: {
@@ -235,45 +304,74 @@ export function FantasyProvider({
 
       if (!guardado) return;
 
-      const sesion = JSON.parse(guardado);
+      let sesion;
 
-      if (!sesion.id) return;
-
-      // -------------------------------------------------
-      // SIN LIGA → NO GUARDAR NINGÚN EQUIPO
-      // -------------------------------------------------
-
-      if (!sesion.liga_actual_id) {
+      try {
+        sesion = JSON.parse(guardado);
+      } catch {
         return;
       }
+
+      // -----------------------------------------------
+      // DATOS NECESARIOS
+      // -----------------------------------------------
+
+      if (
+        !sesion.id ||
+        !sesion.usuario ||
+        !sesion.liga_actual_id
+      ) {
+        return;
+      }
+
+      // -----------------------------------------------
+      // OBTENER EQUIPO DEL CONTEXTO
+      // -----------------------------------------------
 
       const equipo =
         equiposActuales[sesion.usuario];
 
-      // -------------------------------------------------
-      // NO HAY EQUIPO → NO HACER UPSERT
-      // -------------------------------------------------
+      // -----------------------------------------------
+      // NO EXISTE EQUIPO
+      // -----------------------------------------------
 
       if (!equipo) {
         return;
       }
 
       console.log(
-        "GUARDANDO EQUIPO ACTUAL EN SUPABASE",
+        "GUARDANDO EQUIPO ACTUAL",
         {
           usuario_id: sesion.id,
           liga_id: sesion.liga_actual_id,
+          usuario: sesion.usuario,
         }
       );
+
+      // -----------------------------------------------
+      // UPSERT
+      //
+      // MUY IMPORTANTE:
+      //
+      // No enviamos "puntos".
+      //
+      // Así:
+      //
+      // - equipo nuevo → Supabase usa puntos = 0
+      // - equipo existente → conserva sus puntos
+      //
+      // -----------------------------------------------
 
       const { error } =
         await supabase
           .from("equipos")
           .upsert(
             {
-              usuario_id: sesion.id,
+              usuario_id:
+                sesion.id,
 
-              usuario: sesion.usuario,
+              usuario:
+                sesion.usuario,
 
               liga_id:
                 sesion.liga_actual_id,
@@ -339,37 +437,47 @@ export function FantasyProvider({
     }
   }
 
-  // =====================================================
-  // INICIALIZAR
-  // =====================================================
+  // ===================================================
+  // INICIALIZACIÓN
+  // ===================================================
 
   useEffect(() => {
     cargarEquipoActual();
   }, []);
 
-  // =====================================================
-  // GUARDAR EN LOCALSTORAGE + SUPABASE
-  // =====================================================
+  // ===================================================
+  // GUARDAR CAMBIOS DEL EQUIPO
+  // ===================================================
 
   useEffect(() => {
     if (cargando) return;
+
+    // -----------------------------------------------
+    // GUARDAR CACHE LOCAL
+    // -----------------------------------------------
 
     localStorage.setItem(
       "equipos",
       JSON.stringify(equipos)
     );
 
+    // -----------------------------------------------
+    // SI NO HAY EQUIPO, NO GUARDAR
+    // -----------------------------------------------
+
     if (
-      Object.keys(equipos).length > 0
+      Object.keys(equipos).length === 0
     ) {
-      guardarEquipoActual(equipos);
+      return;
     }
+
+    guardarEquipoActual(equipos);
 
   }, [equipos, cargando]);
 
-  // =====================================================
+  // ===================================================
   // GUARDAR JUGADOR ACTUAL
-  // =====================================================
+  // ===================================================
 
   useEffect(() => {
     if (!jugadorActual) return;
@@ -380,18 +488,25 @@ export function FantasyProvider({
     );
   }, [jugadorActual]);
 
-  // =====================================================
+  // ===================================================
   // PROVIDER
-  // =====================================================
+  // ===================================================
 
   return (
     <FantasyContext.Provider
       value={{
         equipos,
+
         setEquipos,
+
         jugadorActual,
+
         setJugadorActual,
+
         cargando,
+
+        recargarEquipo:
+          cargarEquipoActual,
       }}
     >
       {children}
@@ -399,9 +514,9 @@ export function FantasyProvider({
   );
 }
 
-// =======================================================
+// =====================================================
 // HOOK
-// =======================================================
+// =====================================================
 
 export function useFantasy() {
   const context =
