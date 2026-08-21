@@ -16,32 +16,32 @@ import type { ConstructorDB } from "@/types/liga";
 /*                               API PÚBLICA                                  */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Obtiene la clasificación Fantasy de una liga concreta.
+ *
+ * IMPORTANTE:
+ * Los equipos se buscan siempre utilizando el ligaId recibido.
+ * Esto evita mezclar los puntos de un mismo usuario entre diferentes ligas.
+ */
 export async function obtenerRankingFantasy(
   ligaId: number
 ): Promise<RankingJugador[]> {
   try {
-    const usuarios =
-      await obtenerUsuariosLiga(ligaId);
+    const usuarios = await obtenerUsuariosLiga(ligaId);
 
-    const equipos =
-      await obtenerEquiposLiga(
-        ligaId,
-        usuarios
-      );
-
-    const ranking =
-      construirRanking(
-        usuarios,
-        equipos
-      );
-
-    const rankingOrdenado =
-      ordenarRanking(ranking);
-
-    return calcularPosiciones(
-      rankingOrdenado
+    const equipos = await obtenerEquiposLiga(
+      ligaId,
+      usuarios
     );
 
+    const ranking = construirRanking(
+      usuarios,
+      equipos
+    );
+
+    const rankingOrdenado = ordenarRanking(ranking);
+
+    return calcularPosiciones(rankingOrdenado);
   } catch (error) {
     console.error(
       "Error obteniendo ranking fantasy:",
@@ -56,9 +56,10 @@ export async function obtenerRankingFantasy(
 /*                              DESTACADOS GP                                 */
 /* -------------------------------------------------------------------------- */
 
-export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
+export async function obtenerDestacadosGP(): Promise<
+  DestacadosGP | null
+> {
   try {
-
     // Último GP finalizado
     const {
       data: gp,
@@ -127,24 +128,15 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
         nombre: gp.nombre,
         pais: gp.pais,
         imagen: gp.imagen,
-        fechaInicio:
-          gp.fecha_inicio,
-        fechaFin:
-          gp.fecha_fin,
+        fechaInicio: gp.fecha_inicio,
+        fechaFin: gp.fecha_fin,
       },
 
-      sprintWinner:
-        sprintWinner ?? null,
-
-      raceWinner:
-        raceWinner ?? null,
-
-      riderInForm:
-        riderInForm ?? null,
+      sprintWinner: sprintWinner ?? null,
+      raceWinner: raceWinner ?? null,
+      riderInForm: riderInForm ?? null,
     };
-
   } catch (error) {
-
     console.error(
       "Error obteniendo destacados GP:",
       error
@@ -158,7 +150,9 @@ export async function obtenerDestacadosGP(): Promise<DestacadosGP | null> {
 /*                         CLASIFICACIÓN PILOTOS                              */
 /* -------------------------------------------------------------------------- */
 
-export async function obtenerRankingPilotos(): Promise<PilotoDB[]> {
+export async function obtenerRankingPilotos(): Promise<
+  PilotoDB[]
+> {
   const {
     data,
     error,
@@ -166,10 +160,9 @@ export async function obtenerRankingPilotos(): Promise<PilotoDB[]> {
     .from("pilotos")
     .select("*")
     .eq("activo", true)
-    .order(
-      "puntos_totales",
-      { ascending: false }
-    );
+    .order("puntos_totales", {
+      ascending: false,
+    });
 
   if (error) throw error;
 
@@ -180,7 +173,9 @@ export async function obtenerRankingPilotos(): Promise<PilotoDB[]> {
 /*                      CLASIFICACIÓN CONSTRUCTORES                           */
 /* -------------------------------------------------------------------------- */
 
-export async function obtenerRankingConstructores(): Promise<ConstructorDB[]> {
+export async function obtenerRankingConstructores(): Promise<
+  ConstructorDB[]
+> {
   const {
     data,
     error,
@@ -188,10 +183,9 @@ export async function obtenerRankingConstructores(): Promise<ConstructorDB[]> {
     .from("constructores")
     .select("*")
     .eq("activo", true)
-    .order(
-      "puntos",
-      { ascending: false }
-    );
+    .order("puntos", {
+      ascending: false,
+    });
 
   if (error) throw error;
 
@@ -202,11 +196,17 @@ export async function obtenerRankingConstructores(): Promise<ConstructorDB[]> {
 /*                              EQUIPO FANTASY                                */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Obtiene el equipo de un usuario dentro de una liga concreta.
+ *
+ * IMPORTANTE:
+ * Se utilizan usuario_id + liga_id.
+ * Nunca se busca solamente por usuario_id.
+ */
 export async function obtenerEquipoFantasy(
   usuarioId: number,
   ligaId: number
 ): Promise<EquipoFantasy> {
-
   const {
     data,
     error,
@@ -221,14 +221,8 @@ export async function obtenerEquipoFantasy(
       prediccion_piloto_modificada,
       prediccion_motor_modificada
     `)
-    .eq(
-      "usuario_id",
-      usuarioId
-    )
-    .eq(
-      "liga_id",
-      ligaId
-    )
+    .eq("usuario_id", usuarioId)
+    .eq("liga_id", ligaId)
     .maybeSingle();
 
   if (error) {
@@ -242,17 +236,13 @@ export async function obtenerEquipoFantasy(
   }
 
   return {
-    titulares:
-      (data.fichados ?? []).filter(
-        (piloto: string) =>
-          piloto !== data.reserva
-      ),
+    titulares: (data.fichados ?? []).filter(
+      (piloto: string) =>
+        piloto !== data.reserva
+    ),
 
-    reserva:
-      data.reserva,
-
-    motor:
-      data.motor,
+    reserva: data.reserva,
+    motor: data.motor,
 
     prediccionPiloto:
       data.prediccion_piloto,
@@ -279,17 +269,13 @@ export async function obtenerEquipoFantasy(
 async function obtenerUsuariosLiga(
   ligaId: number
 ): Promise<UsuarioLigaDB[]> {
-
   const {
     data: relaciones,
     error,
   } = await supabase
     .from("usuarios_ligas")
     .select("usuario_id")
-    .eq(
-      "liga_id",
-      ligaId
-    );
+    .eq("liga_id", ligaId);
 
   if (error) throw error;
 
@@ -297,11 +283,10 @@ async function obtenerUsuariosLiga(
     return [];
   }
 
-  const ids =
-    relaciones.map(
-      (relacion) =>
-        relacion.usuario_id
-    );
+  const ids = relaciones.map(
+    (relacion) =>
+      relacion.usuario_id
+  );
 
   const {
     data,
@@ -311,10 +296,7 @@ async function obtenerUsuariosLiga(
     .select(
       "id,usuario,avatar"
     )
-    .in(
-      "id",
-      ids
-    );
+    .in("id", ids);
 
   if (usuariosError) {
     throw usuariosError;
@@ -329,20 +311,21 @@ async function obtenerUsuariosLiga(
 /*                             EQUIPOS DE LIGA                                */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Obtiene exclusivamente los equipos pertenecientes a la liga indicada.
+ */
 async function obtenerEquiposLiga(
   ligaId: number,
   usuarios: UsuarioLigaDB[]
 ): Promise<EquipoLigaDB[]> {
-
   if (!usuarios.length) {
     return [];
   }
 
-  const nombres =
-    usuarios.map(
-      (usuario) =>
-        usuario.usuario
-    );
+  const nombres = usuarios.map(
+    (usuario) =>
+      usuario.usuario
+  );
 
   const {
     data,
@@ -352,14 +335,8 @@ async function obtenerEquiposLiga(
     .select(
       "usuario,puntos,posicion_anterior"
     )
-    .eq(
-      "liga_id",
-      ligaId
-    )
-    .in(
-      "usuario",
-      nombres
-    );
+    .eq("liga_id", ligaId)
+    .in("usuario", nombres);
 
   if (error) {
     throw error;
@@ -377,7 +354,6 @@ async function obtenerEquiposLiga(
 function crearMapaEquipos(
   equipos: EquipoLigaDB[]
 ): Map<string, EquipoLigaDB> {
-
   return new Map(
     equipos.map(
       (equipo) => [
@@ -399,15 +375,11 @@ function construirRanking(
   RankingJugador,
   "posicion" | "movimiento"
 >[] {
-
   const equiposMap =
-    crearMapaEquipos(
-      equipos
-    );
+    crearMapaEquipos(equipos);
 
   return usuarios.map(
     (usuario) => {
-
       const equipo =
         equiposMap.get(
           usuario.usuario
@@ -446,7 +418,6 @@ function ordenarRanking(
   RankingJugador,
   "posicion" | "movimiento"
 >[] {
-
   return [...ranking].sort(
     (a, b) =>
       b.puntos - a.puntos
@@ -463,7 +434,6 @@ function calcularPosiciones(
     "posicion" | "movimiento"
   >[]
 ): RankingJugador[] {
-
   return ranking.map(
     (jugador, index) => ({
       ...jugador,
@@ -488,7 +458,6 @@ function calcularMovimiento(
   posicionActual: number,
   posicionAnterior: number
 ): MovimientoRanking {
-
   if (!posicionAnterior) {
     return "same";
   }
