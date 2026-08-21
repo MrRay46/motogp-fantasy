@@ -11,6 +11,7 @@ import {
 
 interface FantasyRankingRowProps {
   jugador: RankingJugador;
+  ligaId: number;
   esUsuarioActual: boolean;
   expanded: boolean;
   onToggle: () => void;
@@ -18,6 +19,7 @@ interface FantasyRankingRowProps {
 
 export default function FantasyRankingRow({
   jugador,
+  ligaId,
   esUsuarioActual,
   expanded,
   onToggle,
@@ -102,7 +104,10 @@ export default function FantasyRankingRow({
       </div>
 
       {expanded && (
-        <FantasyTeamCard jugadorId={jugador.id} />
+        <FantasyTeamCard
+          jugadorId={jugador.id}
+          ligaId={ligaId}
+        />
       )}
     </>
   );

@@ -7,28 +7,45 @@ import { EquipoFantasy } from "@/types/liga";
 
 interface Props {
   jugadorId: number;
+  ligaId: number;
 }
 
 export default function FantasyTeamCard({
   jugadorId,
+  ligaId,
 }: Props) {
-  const [equipo, setEquipo] = useState<EquipoFantasy | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [equipo, setEquipo] =
+    useState<EquipoFantasy | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     async function cargarEquipo() {
       try {
-        const datos = await obtenerEquipoFantasy(jugadorId);
+        setLoading(true);
+
+        const datos =
+          await obtenerEquipoFantasy(
+            jugadorId,
+            ligaId
+          );
+
         setEquipo(datos);
       } catch (error) {
-        console.error(error);
+        console.error(
+          "Error cargando equipo del jugador:",
+          error
+        );
+
+        setEquipo(null);
       } finally {
         setLoading(false);
       }
     }
 
     cargarEquipo();
-  }, [jugadorId]);
+  }, [jugadorId, ligaId]);
 
   if (loading) {
     return (
@@ -40,8 +57,8 @@ export default function FantasyTeamCard({
 
   if (!equipo) {
     return (
-      <div className="mt-2 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-red-300">
-        No se pudo cargar el equipo.
+      <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-zinc-400">
+        Este jugador todavía no tiene equipo en esta liga.
       </div>
     );
   }
@@ -49,39 +66,56 @@ export default function FantasyTeamCard({
   return (
     <div className="mt-2 rounded-xl border border-zinc-800 bg-zinc-950 p-4">
 
+      {/* TITULARES */}
+
       <h3 className="mb-3 font-semibold text-white">
         ⚪ TITULARES
       </h3>
 
-      <div className="space-y-1">
-        {equipo.titulares.map((piloto) => (
-          <p key={piloto} className="text-zinc-300">
-            {piloto}
-          </p>
-        ))}
-      </div>
+      {equipo.titulares.length > 0 ? (
+        <div className="space-y-1">
+          {equipo.titulares.map((piloto) => (
+            <p
+              key={piloto}
+              className="text-zinc-300"
+            >
+              {piloto}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <p className="text-zinc-500">
+          Sin pilotos seleccionados.
+        </p>
+      )}
 
       <div className="my-4 border-t border-zinc-800" />
+
+      {/* RESERVA */}
 
       <h3 className="mb-2 font-semibold text-orange-400">
         🟠 RESERVA
       </h3>
 
       <p className="text-zinc-300">
-        {equipo.reserva}
+        {equipo.reserva || "Sin reserva"}
       </p>
 
       <div className="my-4 border-t border-zinc-800" />
+
+      {/* MOTOR */}
 
       <h3 className="mb-2 font-semibold text-blue-400">
         🔵 MOTOR
       </h3>
 
       <p className="text-zinc-300">
-        {equipo.motor}
+        {equipo.motor || "Sin motor"}
       </p>
 
       <div className="my-4 border-t border-zinc-800" />
+
+      {/* PREDICCIONES */}
 
       <h3 className="mb-3 font-semibold text-white">
         🎯 PREDICCIONES
@@ -95,12 +129,15 @@ export default function FantasyTeamCard({
           </span>
 
           <span>
-            {equipo.pilotoModificada ? "🟡" : "🟢"}
+            {equipo.pilotoModificada
+              ? "🟡"
+              : "🟢"}
           </span>
         </div>
 
         <p className="text-zinc-300">
-          {equipo.prediccionPiloto}
+          {equipo.prediccionPiloto ||
+            "Sin predicción"}
         </p>
 
         <div className="flex items-center justify-between">
@@ -109,12 +146,15 @@ export default function FantasyTeamCard({
           </span>
 
           <span>
-            {equipo.motorModificada ? "🟡" : "🟢"}
+            {equipo.motorModificada
+              ? "🟡"
+              : "🟢"}
           </span>
         </div>
 
         <p className="text-zinc-300">
-          {equipo.prediccionMotor}
+          {equipo.prediccionMotor ||
+            "Sin predicción"}
         </p>
 
       </div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-
 import { getUsuarioActual } from "@/lib/session";
 import { obtenerRankingFantasy } from "@/services/liga";
 
@@ -14,10 +13,17 @@ export default function FantasyRanking() {
   const [ranking, setRanking] = useState<RankingJugador[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
+
+  const [expandedPlayer, setExpandedPlayer] =
+    useState<number | null>(null);
+
   const usuario = getUsuarioActual();
-  const ligaId = usuario?.liga_actual_id ?? null;
-  const usuarioId = usuario?.id ?? null;
+
+  const ligaId =
+    usuario?.liga_actual_id ?? null;
+
+  const usuarioId =
+    usuario?.id ?? null;
 
   useEffect(() => {
     async function cargarRanking() {
@@ -28,11 +34,16 @@ const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
       }
 
       try {
-        const datos = await obtenerRankingFantasy(ligaId);
+        const datos =
+          await obtenerRankingFantasy(ligaId);
+
         setRanking(datos);
       } catch (err) {
         console.error(err);
-        setError("No se pudo cargar la clasificación.");
+
+        setError(
+          "No se pudo cargar la clasificación."
+        );
       } finally {
         setLoading(false);
       }
@@ -43,9 +54,12 @@ const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
 
   return (
     <section className="rounded-2xl bg-zinc-900 p-5 shadow-lg">
+
       <h2 className="mb-5 text-xl font-bold text-white">
         🏆 Clasificación Fantasy
       </h2>
+
+      {/* CARGANDO */}
 
       {loading && (
         <div className="py-8 text-center text-zinc-400">
@@ -53,39 +67,57 @@ const [expandedPlayer, setExpandedPlayer] = useState<number | null>(null);
         </div>
       )}
 
+      {/* ERROR */}
+
       {!loading && error && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center text-red-300">
           {error}
         </div>
       )}
 
-      {!loading && !error && ranking.length === 0 && (
-        <div className="py-8 text-center text-zinc-400">
-          Todavía no hay jugadores en esta liga.
-        </div>
-      )}
+      {/* SIN JUGADORES */}
 
-      {!loading && !error && ranking.length > 0 && (
-        <>
-         <div className="space-y-3">
-  {ranking.map((jugador) => (
-    <FantasyRankingRow
-      key={jugador.id}
-      jugador={jugador}
-      esUsuarioActual={jugador.id === usuarioId}
-      expanded={expandedPlayer === jugador.id}
-      onToggle={() =>
-        setExpandedPlayer((prev) =>
-          prev === jugador.id ? null : jugador.id
-        )
-      }
-    />
-  ))}
-</div>
+      {!loading &&
+        !error &&
+        ranking.length === 0 && (
+          <div className="py-8 text-center text-zinc-400">
+            Todavía no hay jugadores en esta liga.
+          </div>
+        )}
 
-         
-        </>
-      )}
+      {/* CLASIFICACIÓN */}
+
+      {!loading &&
+        !error &&
+        ligaId !== null &&
+        ranking.length > 0 && (
+
+          <div className="space-y-3">
+
+            {ranking.map((jugador) => (
+              <FantasyRankingRow
+                key={jugador.id}
+                jugador={jugador}
+                ligaId={ligaId}
+                esUsuarioActual={
+                  jugador.id === usuarioId
+                }
+                expanded={
+                  expandedPlayer === jugador.id
+                }
+                onToggle={() =>
+                  setExpandedPlayer((prev) =>
+                    prev === jugador.id
+                      ? null
+                      : jugador.id
+                  )
+                }
+              />
+            ))}
+
+          </div>
+        )}
+
     </section>
   );
 }
