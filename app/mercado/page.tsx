@@ -164,7 +164,10 @@ export default function MercadoPage() {
 
         const estado =
           await obtenerEstadoMercado();
-
+console.log(
+  "ESTADO MERCADO:",
+  estado
+);
         if (!estado) {
           setEstadoMercado(null);
           setMercadoAbierto(false);
