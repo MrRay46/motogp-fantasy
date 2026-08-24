@@ -55,9 +55,7 @@ export async function obtenerEstadoCambiosVentana(
         usuario_id: usuarioId,
         liga_id: ligaId,
         ventana_id: ventanaId,
-
         cambios_pilotos: 0,
-
         constructor_modificado: false,
         reserva_modificada: false,
       })
@@ -78,20 +76,60 @@ export async function obtenerEstadoCambiosVentana(
 // ==================================================
 
 export async function registrarCambioPiloto(
-  estadoId: number
-) {
-  const { error } = await supabase
-    .from("equipos_ventanas")
-    .update({
-      cambios_pilotos: undefined,
-    })
-    .eq("id", estadoId);
+  estadoId: number,
+  limite: number
+): Promise<EstadoCambiosVentana> {
+  const { data: estado, error: lecturaError } =
+    await supabase
+      .from("equipos_ventanas")
+      .select("*")
+      .eq("id", estadoId)
+      .single();
 
-  if (error) {
+  if (lecturaError) {
     throw new Error(
-      `Error registrando cambio de piloto: ${error.message}`
+      `Error leyendo estado de cambios: ${lecturaError.message}`
     );
   }
+
+  // --------------------------------------------------
+  // COMPROBAR LÍMITE
+  // --------------------------------------------------
+
+  if (
+    estado.cambios_pilotos >= limite
+  ) {
+    throw new Error(
+      "Se ha alcanzado el límite de cambios de pilotos de esta ventana."
+    );
+  }
+
+  // --------------------------------------------------
+  // INCREMENTAR
+  // --------------------------------------------------
+
+  const nuevosCambios =
+    estado.cambios_pilotos + 1;
+
+  const {
+    data: actualizado,
+    error: updateError,
+  } = await supabase
+    .from("equipos_ventanas")
+    .update({
+      cambios_pilotos: nuevosCambios,
+    })
+    .eq("id", estadoId)
+    .select("*")
+    .single();
+
+  if (updateError) {
+    throw new Error(
+      `Error registrando cambio de piloto: ${updateError.message}`
+    );
+  }
+
+  return actualizado as EstadoCambiosVentana;
 }
 
 // ==================================================
@@ -100,19 +138,26 @@ export async function registrarCambioPiloto(
 
 export async function marcarConstructorModificado(
   estadoId: number
-) {
-  const { error } = await supabase
+): Promise<EstadoCambiosVentana> {
+  const {
+    data: actualizado,
+    error,
+  } = await supabase
     .from("equipos_ventanas")
     .update({
       constructor_modificado: true,
     })
-    .eq("id", estadoId);
+    .eq("id", estadoId)
+    .select("*")
+    .single();
 
   if (error) {
     throw new Error(
       `Error marcando constructor: ${error.message}`
     );
   }
+
+  return actualizado as EstadoCambiosVentana;
 }
 
 // ==================================================
@@ -121,17 +166,24 @@ export async function marcarConstructorModificado(
 
 export async function marcarReservaModificada(
   estadoId: number
-) {
-  const { error } = await supabase
+): Promise<EstadoCambiosVentana> {
+  const {
+    data: actualizado,
+    error,
+  } = await supabase
     .from("equipos_ventanas")
     .update({
       reserva_modificada: true,
     })
-    .eq("id", estadoId);
+    .eq("id", estadoId)
+    .select("*")
+    .single();
 
   if (error) {
     throw new Error(
       `Error marcando reserva: ${error.message}`
     );
   }
+
+  return actualizado as EstadoCambiosVentana;
 }

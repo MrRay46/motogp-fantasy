@@ -18,6 +18,16 @@ import { pilotos } from "@/data/pilotos";
 
 import { obtenerEstadoMercado } from "@/lib/mercado";
 
+import {
+  obtenerEstadoCambiosVentana,
+  registrarCambioPiloto,
+  marcarConstructorModificado,
+  marcarReservaModificada,
+  type EstadoCambiosVentana,
+} from "@/lib/mercadoCambios";
+
+import { getUsuarioActual } from "@/lib/session";
+
 import { useFantasy } from "@/context/FantasyContext";
 
 export default function MercadoPage() {
@@ -27,6 +37,22 @@ export default function MercadoPage() {
     jugadorActual,
     cargando,
   } = useFantasy();
+
+  // =====================================================
+  // USUARIO ACTUAL
+  // =====================================================
+
+  const usuario = getUsuarioActual();
+
+  const usuarioId =
+    usuario?.id ?? null;
+
+  const ligaId =
+    usuario?.liga_actual_id ?? null;
+
+  // =====================================================
+  // EQUIPO ACTUAL
+  // =====================================================
 
   const equipoActual = equipos[jugadorActual] || {
     fichados: [],
@@ -60,6 +86,10 @@ export default function MercadoPage() {
   const prediccionMotor =
     equipoActual.prediccionMotor;
 
+  // =====================================================
+  // ESTADO DEL MERCADO
+  // =====================================================
+
   const [mercadoAbierto, setMercadoAbierto] =
     useState(false);
 
@@ -69,25 +99,34 @@ export default function MercadoPage() {
   const [estadoMercado, setEstadoMercado] =
     useState<any>(null);
 
-  /*
-   * TRUE solamente mientras el usuario está
-   * creando su equipo por primera vez.
-   *
-   * IMPORTANTE:
-   * No usamos equipoInicialCompleto() para esto,
-   * porque durante una sustitución el equipo puede
-   * tener temporalmente 5 pilotos y sigue siendo
-   * un equipo ya creado.
-   */
+  // =====================================================
+  // ESTADO DE CAMBIOS DE LA VENTANA
+  // =====================================================
+
+  const [
+    estadoCambiosVentana,
+    setEstadoCambiosVentana,
+  ] =
+    useState<EstadoCambiosVentana | null>(null);
+
+  const [
+    cargandoEstadoCambios,
+    setCargandoEstadoCambios,
+  ] = useState(true);
+
+  // =====================================================
+  // CREACIÓN DEL EQUIPO INICIAL
+  // =====================================================
+
   const [
     creandoEquipoInicial,
     setCreandoEquipoInicial,
   ] = useState<boolean | null>(null);
 
-  /*
-   * Piloto eliminado que está pendiente
-   * de ser sustituido.
-   */
+  // =====================================================
+  // PILOTO PENDIENTE DE SUSTITUCIÓN
+  // =====================================================
+
   const [
     pilotoPendienteCambio,
     setPilotoPendienteCambio,
@@ -97,7 +136,7 @@ export default function MercadoPage() {
   } | null>(null);
 
   // =====================================================
-  // DETECTAR SI ESTAMOS CREANDO EL EQUIPO POR PRIMERA VEZ
+  // DETECTAR CREACIÓN INICIAL
   // =====================================================
 
   useEffect(() => {
@@ -105,15 +144,9 @@ export default function MercadoPage() {
       return;
     }
 
-    /*
-     * Si después de cargar Supabase no existe equipo
-     * para este usuario en esta liga, estamos creando
-     * el equipo inicial.
-     */
     setCreandoEquipoInicial(
       !equipos[jugadorActual]
     );
-
   }, [
     cargando,
     jugadorActual,
@@ -127,10 +160,18 @@ export default function MercadoPage() {
   useEffect(() => {
     async function cargarMercado() {
       try {
+        setCargandoEstadoCambios(true);
+
         const estado =
           await obtenerEstadoMercado();
 
-        if (!estado) return;
+        if (!estado) {
+          setEstadoMercado(null);
+          setMercadoAbierto(false);
+          setDiasRestantes(null);
+          setEstadoCambiosVentana(null);
+          return;
+        }
 
         setEstadoMercado(estado);
 
@@ -141,16 +182,56 @@ export default function MercadoPage() {
         setDiasRestantes(
           estado.diasRestantes
         );
+
+        // -------------------------------------------------
+        // MERCADO CERRADO
+        // -------------------------------------------------
+
+        if (
+          !estado.mercadoAbierto ||
+          !estado.id ||
+          !usuarioId ||
+          !ligaId
+        ) {
+          setEstadoCambiosVentana(null);
+          return;
+        }
+
+        // -------------------------------------------------
+        // OBTENER ESTADO DE ESTA VENTANA
+        // -------------------------------------------------
+
+        const estadoCambios =
+          await obtenerEstadoCambiosVentana(
+            usuarioId,
+            ligaId,
+            estado.id
+          );
+
+        setEstadoCambiosVentana(
+          estadoCambios
+        );
+
       } catch (error) {
         console.error(
           "Error cargando estado del mercado:",
           error
         );
+
+        setEstadoMercado(null);
+        setMercadoAbierto(false);
+        setEstadoCambiosVentana(null);
+
+      } finally {
+        setCargandoEstadoCambios(false);
       }
     }
 
     cargarMercado();
-  }, []);
+  }, [
+    usuarioId,
+    ligaId,
+  ]);
 
   // =====================================================
   // EQUIPO INICIAL COMPLETO
@@ -167,32 +248,35 @@ export default function MercadoPage() {
   };
 
   // =====================================================
-  // PERMISOS
+  // PERMISO CAMBIOS DE PILOTOS
   // =====================================================
 
   const puedeCambiarPilotos = () => {
-    /*
-     * Mientras todavía estamos determinando el estado
-     * del equipo, bloqueamos temporalmente.
-     */
     if (creandoEquipoInicial === null) {
       return false;
     }
 
-    /*
-     * CREACIÓN INICIAL
-     *
-     * Aquí no existe límite de cambios.
-     */
+    if (cargandoEstadoCambios) {
+      return false;
+    }
+
+    // -------------------------------------------------
+    // CREACIÓN INICIAL
+    // -------------------------------------------------
+
     if (creandoEquipoInicial) {
       return true;
     }
 
-    /*
-     * EQUIPO YA CREADO
-     */
+    // -------------------------------------------------
+    // EQUIPO YA CREADO
+    // -------------------------------------------------
 
     if (!mercadoAbierto) {
+      return false;
+    }
+
+    if (!estadoCambiosVentana) {
       return false;
     }
 
@@ -200,40 +284,55 @@ export default function MercadoPage() {
       estadoMercado?.cambiosPilotos ?? 0;
 
     const realizados =
-      equipoActual.cambiosPilotos ?? 0;
+      estadoCambiosVentana.cambios_pilotos;
 
     return realizados < limite;
   };
+
+  // =====================================================
+  // PERMISO CAMBIO DE RESERVA
+  // =====================================================
 
   const puedeCambiarReserva = () => {
     if (creandoEquipoInicial === null) {
       return false;
     }
 
-    /*
-     * CREACIÓN INICIAL
-     */
+    if (cargandoEstadoCambios) {
+      return false;
+    }
+
+    // -------------------------------------------------
+    // CREACIÓN INICIAL
+    // -------------------------------------------------
+
     if (creandoEquipoInicial) {
       return true;
     }
 
-    /*
-     * EQUIPO YA CREADO
-     */
+    // -------------------------------------------------
+    // EQUIPO YA CREADO
+    // -------------------------------------------------
 
     if (!mercadoAbierto) {
       return false;
     }
 
-    if (
-      !estadoMercado?.cambiarReserva
-    ) {
+    if (!estadoMercado?.cambiarReserva) {
       return false;
     }
 
+    if (!estadoCambiosVentana) {
+      return false;
+    }
+
+    // -------------------------------------------------
+    // RESERVA CONSUMIBLE
+    // -------------------------------------------------
+
     if (
-      equipoActual.reservaModificada &&
-      !estadoMercado?.reservaConsumible
+      estadoCambiosVentana.reserva_modificada &&
+      !estadoMercado.reservaConsumible
     ) {
       return false;
     }
@@ -241,21 +340,30 @@ export default function MercadoPage() {
     return true;
   };
 
+  // =====================================================
+  // PERMISO CAMBIO DE CONSTRUCTOR
+  // =====================================================
+
   const puedeCambiarConstructor = () => {
     if (creandoEquipoInicial === null) {
       return false;
     }
 
-    /*
-     * CREACIÓN INICIAL
-     */
+    if (cargandoEstadoCambios) {
+      return false;
+    }
+
+    // -------------------------------------------------
+    // CREACIÓN INICIAL
+    // -------------------------------------------------
+
     if (creandoEquipoInicial) {
       return true;
     }
 
-    /*
-     * EQUIPO YA CREADO
-     */
+    // -------------------------------------------------
+    // EQUIPO YA CREADO
+    // -------------------------------------------------
 
     if (!mercadoAbierto) {
       return false;
@@ -267,11 +375,12 @@ export default function MercadoPage() {
       return false;
     }
 
-    /*
-     * Una modificación de constructor por ventana.
-     */
+    if (!estadoCambiosVentana) {
+      return false;
+    }
+
     if (
-      equipoActual.constructorModificado
+      estadoCambiosVentana.constructor_modificado
     ) {
       return false;
     }
@@ -279,21 +388,26 @@ export default function MercadoPage() {
     return true;
   };
 
+  // =====================================================
+  // PERMISO PREDICCIONES
+  // =====================================================
+
   const puedeCambiarPredicciones = () => {
     if (creandoEquipoInicial === null) {
       return false;
     }
 
-    /*
-     * CREACIÓN INICIAL
-     */
+    // -------------------------------------------------
+    // CREACIÓN INICIAL
+    // -------------------------------------------------
+
     if (creandoEquipoInicial) {
       return true;
     }
 
-    /*
-     * EQUIPO YA CREADO
-     */
+    // -------------------------------------------------
+    // EQUIPO YA CREADO
+    // -------------------------------------------------
 
     if (!mercadoAbierto) {
       return false;
@@ -489,7 +603,7 @@ export default function MercadoPage() {
   // CAMBIO DE PILOTO
   // =====================================================
 
-  const manejarFichaje = (
+  const manejarFichaje = async (
     piloto: (typeof pilotos)[number]
   ) => {
     const fichado =
@@ -503,11 +617,10 @@ export default function MercadoPage() {
 
     if (fichado) {
 
-      /*
-       * CREACIÓN INICIAL
-       *
-       * Se puede reorganizar libremente.
-       */
+      // -----------------------------------------------
+      // CREACIÓN INICIAL
+      // -----------------------------------------------
+
       if (creandoEquipoInicial) {
         setFichados(
           fichados.filter(
@@ -527,11 +640,10 @@ export default function MercadoPage() {
         return;
       }
 
-      /*
-       * EQUIPO YA CREADO
-       *
-       * Quitar un piloto inicia una sustitución.
-       */
+      // -----------------------------------------------
+      // EQUIPO YA CREADO
+      // -----------------------------------------------
+
       if (!puedeCambiarPilotos()) {
         return;
       }
@@ -542,6 +654,7 @@ export default function MercadoPage() {
       setPilotoPendienteCambio({
         nombre:
           piloto.nombre,
+
         eraReserva,
       });
 
@@ -570,9 +683,10 @@ export default function MercadoPage() {
       return;
     }
 
-    /*
-     * Presupuesto.
-     */
+    // -------------------------------------------------
+    // PRESUPUESTO
+    // -------------------------------------------------
+
     if (
       presupuestoUsado +
         piloto.precio >
@@ -589,8 +703,11 @@ export default function MercadoPage() {
       !creandoEquipoInicial &&
       pilotoPendienteCambio
     ) {
-
       if (!mercadoAbierto) {
+        return;
+      }
+
+      if (!estadoCambiosVentana) {
         return;
       }
 
@@ -598,39 +715,58 @@ export default function MercadoPage() {
         return;
       }
 
-      const nuevosFichados = [
-        ...fichados,
-        piloto.nombre,
-      ];
+      // -----------------------------------------------
+      // REGISTRAR CAMBIO EN LA VENTANA
+      // -----------------------------------------------
 
-      setFichados(
-        nuevosFichados
-      );
+      try {
+        const nuevoEstado =
+          await registrarCambioPiloto(
+            estadoCambiosVentana.id,
+            estadoMercado?.cambiosPilotos ?? 0
+          );
 
-      if (
-        pilotoPendienteCambio.eraReserva
-      ) {
-        setReserva(
-          piloto.nombre
+        // ---------------------------------------------
+        // ACTUALIZAR ESTADO LOCAL DE LA VENTANA
+        // ---------------------------------------------
+
+        setEstadoCambiosVentana(
+          nuevoEstado
         );
+
+        // ---------------------------------------------
+        // ACTUALIZAR EQUIPO
+        // ---------------------------------------------
+
+        const nuevosFichados = [
+          ...fichados,
+          piloto.nombre,
+        ];
+
+        setFichados(
+          nuevosFichados
+        );
+
+        if (
+          pilotoPendienteCambio.eraReserva
+        ) {
+          setReserva(
+            piloto.nombre
+          );
+        }
+
+        setPilotoPendienteCambio(
+          null
+        );
+
+      } catch (error) {
+        console.error(
+          "Error registrando cambio de piloto:",
+          error
+        );
+
+        return;
       }
-
-      setEquipos((prev) => ({
-        ...prev,
-
-        [jugadorActual]: {
-          ...prev[jugadorActual],
-
-          cambiosPilotos:
-            (prev[jugadorActual]
-              ?.cambiosPilotos ?? 0) +
-            1,
-        },
-      }));
-
-      setPilotoPendienteCambio(
-        null
-      );
 
       return;
     }
@@ -649,7 +785,7 @@ export default function MercadoPage() {
   // RESERVA
   // =====================================================
 
-  const manejarReserva = (
+  const manejarReserva = async (
     piloto: (typeof pilotos)[number]
   ) => {
     if (!puedeCambiarReserva()) {
@@ -662,25 +798,56 @@ export default function MercadoPage() {
       return;
     }
 
+    // -------------------------------------------------
+    // CREACIÓN INICIAL
+    // -------------------------------------------------
+
+    if (creandoEquipoInicial) {
+      setReserva(
+        piloto.nombre
+      );
+
+      return;
+    }
+
+    // -------------------------------------------------
+    // COMPROBAR ESTADO
+    // -------------------------------------------------
+
+    if (!estadoCambiosVentana) {
+      return;
+    }
+
+    // -------------------------------------------------
+    // GUARDAR RESERVA
+    // -------------------------------------------------
+
     setReserva(
       piloto.nombre
     );
 
-    /*
-     * Solo afecta a la ventana cuando
-     * el equipo ya estaba creado.
-     */
-    if (!creandoEquipoInicial) {
-      setEquipos((prev) => ({
-        ...prev,
+    // -------------------------------------------------
+    // MARCAR CAMBIO DE RESERVA
+    // -------------------------------------------------
 
-        [jugadorActual]: {
-          ...prev[jugadorActual],
+    if (
+      !estadoCambiosVentana.reserva_modificada
+    ) {
+      try {
+        const nuevoEstado =
+          await marcarReservaModificada(
+            estadoCambiosVentana.id
+          );
 
-          reservaModificada:
-            true,
-        },
-      }));
+        setEstadoCambiosVentana(
+          nuevoEstado
+        );
+      } catch (error) {
+        console.error(
+          "Error marcando cambio de reserva:",
+          error
+        );
+      }
     }
   };
 
@@ -737,7 +904,7 @@ export default function MercadoPage() {
           mercadoAbierto={
             puedeCambiarConstructor()
           }
-          onSeleccionar={(
+          onSeleccionar={async (
             constructor
           ) => {
             if (
@@ -746,28 +913,45 @@ export default function MercadoPage() {
               return;
             }
 
-            /*
-             * Durante la creación inicial
-             * podemos seleccionar libremente.
-             *
-             * En una ventana posterior,
-             * solo permitimos una modificación.
-             */
-            setMotor(
-              constructor.nombre
-            );
+            // -------------------------------------------
+            // CREACIÓN INICIAL
+            // -------------------------------------------
 
-            if (!creandoEquipoInicial) {
-              setEquipos((prev) => ({
-                ...prev,
+            if (creandoEquipoInicial) {
+              setMotor(
+                constructor.nombre
+              );
 
-                [jugadorActual]: {
-                  ...prev[jugadorActual],
+              return;
+            }
 
-                  constructorModificado:
-                    true,
-                },
-              }));
+            // -------------------------------------------
+            // EQUIPO YA CREADO
+            // -------------------------------------------
+
+            if (!estadoCambiosVentana) {
+              return;
+            }
+
+            try {
+              const nuevoEstado =
+                await marcarConstructorModificado(
+                  estadoCambiosVentana.id
+                );
+
+              setEstadoCambiosVentana(
+                nuevoEstado
+              );
+
+              setMotor(
+                constructor.nombre
+              );
+
+            } catch (error) {
+              console.error(
+                "Error registrando cambio de constructor:",
+                error
+              );
             }
           }}
         />
