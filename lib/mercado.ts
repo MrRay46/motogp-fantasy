@@ -20,7 +20,9 @@ export async function obtenerEstadoMercado() {
       mercadoAbierto: false,
       diasRestantes: null,
 
+      id: null,
       nombre: null,
+
       cambiosPilotos: 0,
       cambiarConstructor: false,
       cambiarReserva: false,
@@ -29,13 +31,9 @@ export async function obtenerEstadoMercado() {
     };
   }
 
-  // --------------------------------------------------
+  // ==================================================
   // FECHA ACTUAL
-  // --------------------------------------------------
-  // Las columnas inicio/fin son DATE en Supabase.
-  // Trabajamos solamente con el día, evitando problemas
-  // de horas y zonas horarias.
-  // --------------------------------------------------
+  // ==================================================
 
   const ahora = new Date();
 
@@ -45,26 +43,28 @@ export async function obtenerEstadoMercado() {
     ahora.getDate()
   );
 
-  // --------------------------------------------------
+  // ==================================================
   // BUSCAR VENTANA ACTIVA
-  // --------------------------------------------------
+  // ==================================================
 
   const ventana = data.find((v) => {
     const inicio = convertirFecha(v.inicio);
-
     const fin = convertirFecha(v.fin);
 
     return hoy >= inicio && hoy <= fin;
   });
 
-  // --------------------------------------------------
+  // ==================================================
   // HAY UNA VENTANA ABIERTA
-  // --------------------------------------------------
+  // ==================================================
 
   if (ventana) {
     return {
       mercadoAbierto: true,
       diasRestantes: null,
+
+      // ID DE LA VENTANA ACTUAL
+      id: ventana.id,
 
       nombre: ventana.nombre,
 
@@ -85,13 +85,14 @@ export async function obtenerEstadoMercado() {
     };
   }
 
-  // --------------------------------------------------
+  // ==================================================
   // BUSCAR SIGUIENTE VENTANA
-  // --------------------------------------------------
+  // ==================================================
 
   const siguiente = data
     .map((v) => ({
       ...v,
+
       fechaInicio: convertirFecha(
         v.inicio
       ),
@@ -105,9 +106,9 @@ export async function obtenerEstadoMercado() {
         b.fechaInicio.getTime()
     )[0];
 
-  // --------------------------------------------------
+  // ==================================================
   // DÍAS HASTA LA SIGUIENTE VENTANA
-  // --------------------------------------------------
+  // ==================================================
 
   let diasRestantes: number | null =
     null;
@@ -123,15 +124,17 @@ export async function obtenerEstadoMercado() {
     );
   }
 
-  // --------------------------------------------------
+  // ==================================================
   // MERCADO CERRADO
-  // --------------------------------------------------
+  // ==================================================
 
   return {
     mercadoAbierto: false,
     diasRestantes,
 
+    id: null,
     nombre: null,
+
     cambiosPilotos: 0,
     cambiarConstructor: false,
     cambiarReserva: false,
