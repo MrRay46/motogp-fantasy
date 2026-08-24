@@ -1,39 +1,131 @@
 import { supabase } from "@/lib/supabase";
 
 export async function obtenerEstadoMercado() {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("ventanas_mercado")
     .select("*")
-    .order("inicio");
+    .order("inicio", { ascending: true });
 
-  if (!data) return null;
+  if (error) {
+    console.error(
+      "Error obteniendo ventanas de mercado:",
+      error
+    );
 
-  const hoy = new Date();
+    return null;
+  }
+
+  if (!data?.length) {
+    return {
+      mercadoAbierto: false,
+      diasRestantes: null,
+
+      nombre: null,
+      cambiosPilotos: 0,
+      cambiarConstructor: false,
+      cambiarReserva: false,
+      cambiarPredicciones: false,
+      reservaConsumible: false,
+    };
+  }
+
+  // --------------------------------------------------
+  // FECHA ACTUAL
+  // --------------------------------------------------
+  // Las columnas inicio/fin son DATE en Supabase.
+  // Trabajamos solamente con el día, evitando problemas
+  // de horas y zonas horarias.
+  // --------------------------------------------------
+
+  const ahora = new Date();
+
+  const hoy = new Date(
+    ahora.getFullYear(),
+    ahora.getMonth(),
+    ahora.getDate()
+  );
+
+  // --------------------------------------------------
+  // BUSCAR VENTANA ACTIVA
+  // --------------------------------------------------
 
   const ventana = data.find((v) => {
-    const inicio = new Date(v.inicio);
-    const fin = new Date(v.fin);
+    const inicio = convertirFecha(v.inicio);
+
+    const fin = convertirFecha(v.fin);
 
     return hoy >= inicio && hoy <= fin;
   });
 
- if (!ventana) {
+  // --------------------------------------------------
+  // HAY UNA VENTANA ABIERTA
+  // --------------------------------------------------
+
+  if (ventana) {
+    return {
+      mercadoAbierto: true,
+      diasRestantes: null,
+
+      nombre: ventana.nombre,
+
+      cambiosPilotos:
+        ventana.cambios_pilotos,
+
+      cambiarConstructor:
+        ventana.cambiar_constructor,
+
+      cambiarReserva:
+        ventana.cambiar_reserva,
+
+      cambiarPredicciones:
+        ventana.cambiar_predicciones,
+
+      reservaConsumible:
+        ventana.reserva_consumible,
+    };
+  }
+
+  // --------------------------------------------------
+  // BUSCAR SIGUIENTE VENTANA
+  // --------------------------------------------------
+
   const siguiente = data
-    .filter((v) => new Date(v.inicio) > hoy)
+    .map((v) => ({
+      ...v,
+      fechaInicio: convertirFecha(
+        v.inicio
+      ),
+    }))
+    .filter(
+      (v) => v.fechaInicio > hoy
+    )
     .sort(
       (a, b) =>
-        new Date(a.inicio).getTime() -
-        new Date(b.inicio).getTime()
+        a.fechaInicio.getTime() -
+        b.fechaInicio.getTime()
     )[0];
 
-  let diasRestantes = null;
+  // --------------------------------------------------
+  // DÍAS HASTA LA SIGUIENTE VENTANA
+  // --------------------------------------------------
+
+  let diasRestantes: number | null =
+    null;
 
   if (siguiente) {
+    const diferencia =
+      siguiente.fechaInicio.getTime() -
+      hoy.getTime();
+
     diasRestantes = Math.ceil(
-      (new Date(siguiente.inicio).getTime() - hoy.getTime()) /
-      (1000 * 60 * 60 * 24)
+      diferencia /
+        (1000 * 60 * 60 * 24)
     );
   }
+
+  // --------------------------------------------------
+  // MERCADO CERRADO
+  // --------------------------------------------------
 
   return {
     mercadoAbierto: false,
@@ -48,15 +140,19 @@ export async function obtenerEstadoMercado() {
   };
 }
 
-return {
-  mercadoAbierto: true,
-  diasRestantes: null,
+// ==================================================
+// CONVERTIR DATE DE SUPABASE A FECHA LOCAL
+// ==================================================
 
-  nombre: ventana.nombre,
-  cambiosPilotos: ventana.cambios_pilotos,
-  cambiarConstructor: ventana.cambiar_constructor,
-  cambiarReserva: ventana.cambiar_reserva,
-  cambiarPredicciones: ventana.cambiar_predicciones,
-  reservaConsumible: ventana.reserva_consumible,
-};
+function convertirFecha(
+  fecha: string
+): Date {
+  const [anio, mes, dia] =
+    fecha.split("-").map(Number);
+
+  return new Date(
+    anio,
+    mes - 1,
+    dia
+  );
 }
