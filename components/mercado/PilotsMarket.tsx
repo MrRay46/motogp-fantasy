@@ -26,14 +26,19 @@ export default function PilotsMarket({
   onReserva,
 }: PilotsMarketProps) {
   return (
-    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+    <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
       {pilotos.map((piloto) => {
-        const fichado = fichados.includes(
-          piloto.nombre
-        );
+        const fichado = fichados.includes(piloto.nombre);
+        const esReserva = reserva === piloto.nombre;
 
-        const esReserva =
-          reserva === piloto.nombre;
+        const puedeModificarPiloto = fichado
+          ? puedeQuitar
+          : puedeFichar;
+
+        const puedeConvertirEnReserva =
+          fichado &&
+          !esReserva &&
+          puedeElegirReserva;
 
         return (
           <PilotCard
@@ -42,22 +47,12 @@ export default function PilotsMarket({
             estado={{
               fichado,
               reserva: esReserva,
-
-              puedeFichar: fichado
-                ? puedeQuitar
-                : puedeFichar,
-
-              puedeReserva:
-                fichado &&
-                !esReserva &&
-                puedeElegirReserva,
+              puedeFichar: puedeModificarPiloto,
+              puedeReserva: puedeConvertirEnReserva,
             }}
             acciones={{
-              fichar: () =>
-                onFichar(piloto),
-
-              reserva: () =>
-                onReserva(piloto),
+              fichar: () => onFichar(piloto),
+              reserva: () => onReserva(piloto),
             }}
           />
         );
