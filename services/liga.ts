@@ -19,9 +19,8 @@ import type { ConstructorDB } from "@/types/liga";
 /**
  * Obtiene la clasificación Fantasy de una liga concreta.
  *
- * IMPORTANTE:
- * Los equipos se buscan siempre utilizando el ligaId recibido.
- * Esto evita mezclar los puntos de un mismo usuario entre diferentes ligas.
+ * El equipo se identifica mediante usuario_id + liga_id,
+ * evitando mezclar datos entre diferentes ligas.
  */
 export async function obtenerRankingFantasy(
   ligaId: number
@@ -60,7 +59,6 @@ export async function obtenerDestacadosGP(): Promise<
   DestacadosGP | null
 > {
   try {
-    // Último GP finalizado
     const {
       data: gp,
       error: gpError,
@@ -74,11 +72,14 @@ export async function obtenerDestacadosGP(): Promise<
       .limit(1)
       .maybeSingle();
 
-    if (gpError) throw gpError;
+    if (gpError) {
+      throw gpError;
+    }
 
-    if (!gp) return null;
+    if (!gp) {
+      return null;
+    }
 
-    // Ganador Sprint
     const {
       data: sprintWinner,
       error: sprintError,
@@ -91,9 +92,10 @@ export async function obtenerDestacadosGP(): Promise<
       )
       .maybeSingle();
 
-    if (sprintError) throw sprintError;
+    if (sprintError) {
+      throw sprintError;
+    }
 
-    // Ganador Carrera
     const {
       data: raceWinner,
       error: raceError,
@@ -106,9 +108,10 @@ export async function obtenerDestacadosGP(): Promise<
       )
       .maybeSingle();
 
-    if (raceError) throw raceError;
+    if (raceError) {
+      throw raceError;
+    }
 
-    // Líder del Mundial
     const {
       data: riderInForm,
       error: leaderError,
@@ -121,7 +124,9 @@ export async function obtenerDestacadosGP(): Promise<
       .limit(1)
       .maybeSingle();
 
-    if (leaderError) throw leaderError;
+    if (leaderError) {
+      throw leaderError;
+    }
 
     return {
       granPremio: {
@@ -132,9 +137,14 @@ export async function obtenerDestacadosGP(): Promise<
         fechaFin: gp.fecha_fin,
       },
 
-      sprintWinner: sprintWinner ?? null,
-      raceWinner: raceWinner ?? null,
-      riderInForm: riderInForm ?? null,
+      sprintWinner:
+        sprintWinner ?? null,
+
+      raceWinner:
+        raceWinner ?? null,
+
+      riderInForm:
+        riderInForm ?? null,
     };
   } catch (error) {
     console.error(
@@ -164,7 +174,9 @@ export async function obtenerRankingPilotos(): Promise<
       ascending: false,
     });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data ?? [];
 }
@@ -187,7 +199,9 @@ export async function obtenerRankingConstructores(): Promise<
       ascending: false,
     });
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   return data ?? [];
 }
@@ -199,9 +213,8 @@ export async function obtenerRankingConstructores(): Promise<
 /**
  * Obtiene el equipo de un usuario dentro de una liga concreta.
  *
- * IMPORTANTE:
- * Se utilizan usuario_id + liga_id.
- * Nunca se busca solamente por usuario_id.
+ * Se utilizan usuario_id + liga_id para identificar
+ * correctamente el equipo.
  */
 export async function obtenerEquipoFantasy(
   usuarioId: number,
@@ -259,10 +272,6 @@ export async function obtenerEquipoFantasy(
 }
 
 /* -------------------------------------------------------------------------- */
-/*                              FUNCIONES PRIVADAS                            */
-/* -------------------------------------------------------------------------- */
-
-/* -------------------------------------------------------------------------- */
 /*                             USUARIOS DE LIGA                               */
 /* -------------------------------------------------------------------------- */
 
@@ -277,7 +286,9 @@ async function obtenerUsuariosLiga(
     .select("usuario_id")
     .eq("liga_id", ligaId);
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
 
   if (!relaciones?.length) {
     return [];
@@ -312,7 +323,8 @@ async function obtenerUsuariosLiga(
 /* -------------------------------------------------------------------------- */
 
 /**
- * Obtiene exclusivamente los equipos pertenecientes a la liga indicada.
+ * Obtiene exclusivamente los equipos de la liga indicada
+ * utilizando el ID real del usuario.
  */
 async function obtenerEquiposLiga(
   ligaId: number,
@@ -322,9 +334,9 @@ async function obtenerEquiposLiga(
     return [];
   }
 
-  const nombres = usuarios.map(
+  const ids = usuarios.map(
     (usuario) =>
-      usuario.usuario
+      usuario.id
   );
 
   const {
@@ -333,10 +345,10 @@ async function obtenerEquiposLiga(
   } = await supabase
     .from("equipos")
     .select(
-      "usuario,puntos,posicion_anterior"
+      "usuario_id,puntos,posicion_anterior"
     )
     .eq("liga_id", ligaId)
-    .in("usuario", nombres);
+    .in("usuario_id", ids);
 
   if (error) {
     throw error;
@@ -353,11 +365,11 @@ async function obtenerEquiposLiga(
 
 function crearMapaEquipos(
   equipos: EquipoLigaDB[]
-): Map<string, EquipoLigaDB> {
+): Map<number, EquipoLigaDB> {
   return new Map(
     equipos.map(
       (equipo) => [
-        equipo.usuario,
+        equipo.usuario_id,
         equipo,
       ]
     )
@@ -382,7 +394,7 @@ function construirRanking(
     (usuario) => {
       const equipo =
         equiposMap.get(
-          usuario.usuario
+          usuario.id
         );
 
       return {

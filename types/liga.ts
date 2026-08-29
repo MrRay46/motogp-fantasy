@@ -18,7 +18,7 @@ export interface UsuarioLigaDB {
 }
 
 export interface EquipoLigaDB {
-  usuario: string;
+  usuario_id: number;
   puntos: number;
   posicion_anterior: number;
 }
