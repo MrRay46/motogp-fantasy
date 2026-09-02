@@ -37,9 +37,9 @@ export function calcularPuntosEquipos(
   return datos.equipos.map((equipo) => {
     let puntosGP = 0;
 
-    // -----------------------------------------
+    // =================================================
     // PILOTOS TITULARES
-    // -----------------------------------------
+    // =================================================
 
     const titulares = equipo.fichados.filter(
       (nombrePiloto) =>
@@ -64,9 +64,12 @@ export function calcularPuntosEquipos(
       }
     }
 
-    // -----------------------------------------
+    // =================================================
     // RESERVA
-    // -----------------------------------------
+    // =================================================
+    // Si algún piloto titular consigue 0 puntos,
+    // entra la reserva y suma sus puntos.
+    // =================================================
 
     if (hayTitularConCero && equipo.reserva) {
       const pilotoReserva = datos.pilotos.find(
@@ -78,9 +81,9 @@ export function calcularPuntosEquipos(
       }
     }
 
-    // -----------------------------------------
-    // MOTOR
-    // -----------------------------------------
+    // =================================================
+    // CONSTRUCTOR
+    // =================================================
 
     if (equipo.motor) {
       const constructor =
@@ -93,12 +96,22 @@ export function calcularPuntosEquipos(
       }
     }
 
+    // =================================================
+    // BONUS DEL GP
+    // =================================================
+    // Actualmente no hay bonus durante la temporada.
+    // Las bonificaciones de predicciones se aplican
+    // únicamente al finalizar la temporada.
+    // =================================================
+
+    const bonusGP = 0;
+
     return {
       equipoId: equipo.id,
       usuario: equipo.usuario,
       ligaId: equipo.liga_id,
       puntosGP,
-      bonusGP: 0,
+      bonusGP,
     };
   });
 }

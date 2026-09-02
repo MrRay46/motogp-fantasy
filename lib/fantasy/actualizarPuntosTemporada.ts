@@ -2,9 +2,8 @@ import { supabase } from "@/lib/supabase";
 
 type Equipo = {
   id: number;
-  puntos: number;
-  puntos_gp_actual: number;
-  bonus_gp: number;
+  puntos: number | null;
+  puntos_gp_actual: number | null;
 };
 
 export async function actualizarPuntosTemporada() {
@@ -13,8 +12,7 @@ export async function actualizarPuntosTemporada() {
     .select(`
       id,
       puntos,
-      puntos_gp_actual,
-      bonus_gp
+      puntos_gp_actual
     `);
 
   if (error) {
@@ -26,8 +24,7 @@ export async function actualizarPuntosTemporada() {
   for (const equipo of equipos as Equipo[]) {
     const nuevosPuntos =
       (equipo.puntos ?? 0) +
-      (equipo.puntos_gp_actual ?? 0) +
-      (equipo.bonus_gp ?? 0);
+      (equipo.puntos_gp_actual ?? 0);
 
     const { error: updateError } =
       await supabase
