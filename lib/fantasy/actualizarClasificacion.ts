@@ -2,15 +2,15 @@ import { supabase } from "@/lib/supabase";
 
 type Equipo = {
   id: number;
-  liga_id: number;
+  liga_id: number | null;
 
-  puntos: number;
+  puntos: number | null;
 
-  posicion_actual: number;
-  posicion_anterior: number;
+  posicion_actual: number | null;
+  posicion_anterior: number | null;
 
-  diferencia_lider: number;
-  diferencia_lider_anterior: number;
+  diferencia_lider: number | null;
+  diferencia_lider_anterior: number | null;
 };
 
 export async function actualizarClasificacion() {
@@ -61,20 +61,23 @@ export async function actualizarClasificacion() {
       )
       .sort((a, b) => {
         // 1. Más puntos primero
-        if (b.puntos !== a.puntos) {
-          return b.puntos - a.puntos;
+        const puntosA = a.puntos ?? 0;
+        const puntosB = b.puntos ?? 0;
+
+        if (puntosB !== puntosA) {
+          return puntosB - puntosA;
         }
 
         // 2. En caso de empate,
         // mantener la posición anterior
-        if (
-          a.posicion_actual !==
-          b.posicion_actual
-        ) {
-          return (
-            (a.posicion_actual || Infinity) -
-            (b.posicion_actual || Infinity)
-          );
+        const posicionA =
+          a.posicion_actual ?? Infinity;
+
+        const posicionB =
+          b.posicion_actual ?? Infinity;
+
+        if (posicionA !== posicionB) {
+          return posicionA - posicionB;
         }
 
         // 3. Último desempate estable
@@ -103,11 +106,11 @@ export async function actualizarClasificacion() {
         await supabase
           .from("equipos")
           .update({
-            // La posición que tenía ANTES
-            // de esta actualización
+            // Posición anterior
             posicion_anterior:
               equipo.posicion_actual,
 
+            // Diferencia anterior
             diferencia_lider_anterior:
               equipo.diferencia_lider,
 
@@ -118,7 +121,7 @@ export async function actualizarClasificacion() {
             // Diferencia respecto al líder
             diferencia_lider:
               puntosLider -
-              equipo.puntos,
+              (equipo.puntos ?? 0),
           })
           .eq("id", equipo.id)
           .eq("liga_id", ligaId);
