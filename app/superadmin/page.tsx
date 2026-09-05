@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-
+import PaddockNews from "@/components/superadmin/PaddockNews";
 import AppLayout from "@/components/layout/AppLayout";
 
 import PilotsResults from "@/components/superadmin/PilotsResults";
@@ -396,7 +396,13 @@ Equipos procesados: ${resultado.equiposProcesados}`
           )}
 
         </div>
+        {/* ---------------------------------- */}
+        {/* NOTICIAS DEL PADDOCK */}
+        {/* ---------------------------------- */}
 
+        <div className="mt-8">
+          <PaddockNews />
+        </div>
       </section>
     </AppLayout>
   );
