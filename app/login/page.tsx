@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
@@ -12,34 +11,41 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const iniciarSesion = async () => {
-    const {
-      data,
-      error,
-    } = await supabase
-      .from("usuarios")
-      .select("*")
-      .eq("usuario", usuario)
-      .eq("password", password)
-      .eq("activo", true)
-      .single();
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          usuario,
+          password,
+        }),
+      });
 
-    if (error || !data) {
-      alert("Usuario o contraseña incorrectos");
-      return;
+      const resultado = await response.json();
+
+      if (!response.ok) {
+        alert(
+          resultado.error ||
+            "Error al iniciar sesión"
+        );
+        return;
+      }
+
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(resultado.usuario)
+      );
+
+      window.location.href = "/dashboard";
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+
+      alert(
+        "No se ha podido iniciar sesión. Inténtalo de nuevo."
+      );
     }
-
-    localStorage.setItem(
-      "usuario",
-      JSON.stringify({
-        id: data.id,
-        usuario: data.usuario,
-        avatar: data.avatar,
-        liga_actual_id: data.liga_actual_id,
-        super_admin: data.super_admin,
-      })
-    );
-
-    window.location.href = "/dashboard";
   };
 
   return (
