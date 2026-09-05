@@ -242,15 +242,27 @@ export default function PaddockNews() {
       // ---------------------------------------
 
       if (editandoId !== null) {
-        const { error } =
-          await supabase
-            .from("noticias")
-            .update(datos)
-            .eq("id", editandoId);
+        const response = await fetch(
+          "/api/superadmin/noticias",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: editandoId,
+              ...datos,
+            }),
+          }
+        );
 
-        if (error) {
+        const resultado =
+          await response.json();
+
+        if (!response.ok) {
           throw new Error(
-            `Error actualizando noticia: ${error.message}`
+            resultado.error ||
+              "Error actualizando noticia."
           );
         }
 
@@ -268,14 +280,24 @@ export default function PaddockNews() {
       // CREAR
       // ---------------------------------------
 
-      const { error } =
-        await supabase
-          .from("noticias")
-          .insert(datos);
+      const response = await fetch(
+        "/api/superadmin/noticias",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(datos),
+        }
+      );
 
-      if (error) {
+      const resultado =
+        await response.json();
+
+      if (!response.ok) {
         throw new Error(
-          `Error creando noticia: ${error.message}`
+          resultado.error ||
+            "Error creando noticia."
         );
       }
 
@@ -337,42 +359,61 @@ export default function PaddockNews() {
     const nuevaVisibilidad =
       !(noticia.visible ?? false);
 
-    const { error } =
-      await supabase
-        .from("noticias")
-        .update({
-          visible:
-            nuevaVisibilidad,
-        })
-        .eq("id", noticia.id);
+    try {
+      const response = await fetch(
+        "/api/superadmin/noticias",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: noticia.id,
+            visible: nuevaVisibilidad,
+          }),
+        }
+      );
 
-    if (error) {
+      const resultado =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error cambiando visibilidad."
+        );
+      }
+
+      setNoticias((prev) =>
+        prev.map((item) =>
+          item.id === noticia.id
+            ? {
+                ...item,
+                visible:
+                  nuevaVisibilidad,
+              }
+            : item
+        )
+      );
+
+      setMensaje(
+        nuevaVisibilidad
+          ? "✅ Noticia publicada."
+          : "✅ Noticia ocultada."
+      );
+
+    } catch (error) {
+      const mensajeError =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido.";
+
       console.error(error);
 
       setMensaje(
-        `❌ Error cambiando visibilidad: ${error.message}`
+        `❌ ${mensajeError}`
       );
-
-      return;
     }
-
-    setNoticias((prev) =>
-      prev.map((item) =>
-        item.id === noticia.id
-          ? {
-              ...item,
-              visible:
-                nuevaVisibilidad,
-            }
-          : item
-      )
-    );
-
-    setMensaje(
-      nuevaVisibilidad
-        ? "✅ Noticia publicada."
-        : "✅ Noticia ocultada."
-    );
   }
 
   // -----------------------------------------
@@ -391,38 +432,59 @@ export default function PaddockNews() {
       return;
     }
 
-    const { error } =
-      await supabase
-        .from("noticias")
-        .delete()
-        .eq("id", noticia.id);
+    try {
+      const response = await fetch(
+        "/api/superadmin/noticias",
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: noticia.id,
+          }),
+        }
+      );
 
-    if (error) {
+      const resultado =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error eliminando noticia."
+        );
+      }
+
+      setNoticias((prev) =>
+        prev.filter(
+          (item) =>
+            item.id !== noticia.id
+        )
+      );
+
+      if (
+        editandoId === noticia.id
+      ) {
+        limpiarFormulario();
+      }
+
+      setMensaje(
+        "✅ Noticia eliminada correctamente."
+      );
+
+    } catch (error) {
+      const mensajeError =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido.";
+
       console.error(error);
 
       setMensaje(
-        `❌ Error eliminando noticia: ${error.message}`
+        `❌ ${mensajeError}`
       );
-
-      return;
     }
-
-    setNoticias((prev) =>
-      prev.filter(
-        (item) =>
-          item.id !== noticia.id
-      )
-    );
-
-    if (
-      editandoId === noticia.id
-    ) {
-      limpiarFormulario();
-    }
-
-    setMensaje(
-      "✅ Noticia eliminada correctamente."
-    );
   }
 
   // -----------------------------------------
