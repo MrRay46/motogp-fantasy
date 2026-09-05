@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { crearSesion } from "@/lib/auth";
+import { crearSesion } from "@/lib/auth/auth";
 
 const supabaseUrl =
   "https://edlpwbhgxixiyivvljtk.supabase.co";
