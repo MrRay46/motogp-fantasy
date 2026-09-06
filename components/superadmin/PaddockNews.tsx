@@ -204,6 +204,7 @@ export default function PaddockNews() {
     setContenido("");
     setVisible(true);
     setEditandoId(null);
+    setMensaje("");
   }
 
   // -----------------------------------------
@@ -247,7 +248,8 @@ export default function PaddockNews() {
           {
             method: "PATCH",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               id: editandoId,
@@ -271,6 +273,7 @@ export default function PaddockNews() {
         );
 
         limpiarFormulario();
+
         await cargarDatos();
 
         return;
@@ -285,7 +288,8 @@ export default function PaddockNews() {
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify(datos),
         }
@@ -306,9 +310,12 @@ export default function PaddockNews() {
       );
 
       limpiarFormulario();
+
       await cargarDatos();
 
     } catch (error) {
+      console.error(error);
+
       const mensajeError =
         error instanceof Error
           ? error.message
@@ -343,9 +350,17 @@ export default function PaddockNews() {
 
     setMensaje("");
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+    // Esperamos a que React actualice
+    // el estado antes de desplazarnos.
+    requestAnimationFrame(() => {
+      document
+        .getElementById(
+          "paddock-news-form"
+        )
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
     });
   }
 
@@ -360,16 +375,20 @@ export default function PaddockNews() {
       !(noticia.visible ?? false);
 
     try {
+      setMensaje("");
+
       const response = await fetch(
         "/api/superadmin/noticias",
         {
           method: "PATCH",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             id: noticia.id,
-            visible: nuevaVisibilidad,
+            visible:
+              nuevaVisibilidad,
           }),
         }
       );
@@ -403,12 +422,12 @@ export default function PaddockNews() {
       );
 
     } catch (error) {
+      console.error(error);
+
       const mensajeError =
         error instanceof Error
           ? error.message
           : "Error desconocido.";
-
-      console.error(error);
 
       setMensaje(
         `❌ ${mensajeError}`
@@ -433,12 +452,15 @@ export default function PaddockNews() {
     }
 
     try {
+      setMensaje("");
+
       const response = await fetch(
         "/api/superadmin/noticias",
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
           },
           body: JSON.stringify({
             id: noticia.id,
@@ -474,12 +496,12 @@ export default function PaddockNews() {
       );
 
     } catch (error) {
+      console.error(error);
+
       const mensajeError =
         error instanceof Error
           ? error.message
           : "Error desconocido.";
-
-      console.error(error);
 
       setMensaje(
         `❌ ${mensajeError}`
@@ -574,7 +596,9 @@ export default function PaddockNews() {
       <div className="p-8">
 
         <div
+          id="paddock-news-form"
           className="
+            scroll-mt-24
             bg-zinc-950
             border
             border-zinc-800
@@ -615,7 +639,9 @@ export default function PaddockNews() {
               <select
                 value={tipo}
                 onChange={(e) =>
-                  setTipo(e.target.value)
+                  setTipo(
+                    e.target.value
+                  )
                 }
                 className="
                   w-full
@@ -721,7 +747,9 @@ export default function PaddockNews() {
               type="text"
               value={titulo}
               onChange={(e) =>
-                setTitulo(e.target.value)
+                setTitulo(
+                  e.target.value
+                )
               }
               placeholder="Ej: Fermín Aldeguer ficha por VR46"
               className="
@@ -819,12 +847,14 @@ export default function PaddockNews() {
 
           {/* BOTONES */}
 
-          <div className="
-            mt-8
-            flex
-            flex-wrap
-            gap-3
-          ">
+          <div
+            className="
+              mt-8
+              flex
+              flex-wrap
+              gap-3
+            "
+          >
 
             <button
               type="button"
@@ -957,12 +987,14 @@ export default function PaddockNews() {
 
                     <div className="flex-1">
 
-                      <div className="
-                        flex
-                        flex-wrap
-                        items-center
-                        gap-3
-                      ">
+                      <div
+                        className="
+                          flex
+                          flex-wrap
+                          items-center
+                          gap-3
+                        "
+                      >
 
                         <span
                           className="
@@ -998,15 +1030,17 @@ export default function PaddockNews() {
                         </span>
 
                         {noticia.piloto && (
-                          <span className="
-                            px-3
-                            py-1
-                            rounded-full
-                            bg-orange-500/10
-                            text-orange-300
-                            text-sm
-                            font-semibold
-                          ">
+                          <span
+                            className="
+                              px-3
+                              py-1
+                              rounded-full
+                              bg-orange-500/10
+                              text-orange-300
+                              text-sm
+                              font-semibold
+                            "
+                          >
                             🏍️{" "}
                             {noticia.piloto.nombre}
                           </span>
@@ -1014,28 +1048,34 @@ export default function PaddockNews() {
 
                       </div>
 
-                      <h4 className="
-                        text-lg
-                        font-bold
-                        text-white
-                        mt-4
-                      ">
+                      <h4
+                        className="
+                          text-lg
+                          font-bold
+                          text-white
+                          mt-4
+                        "
+                      >
                         {noticia.titulo}
                       </h4>
 
-                      <p className="
-                        text-zinc-400
-                        mt-2
-                        line-clamp-2
-                      ">
+                      <p
+                        className="
+                          text-zinc-400
+                          mt-2
+                          line-clamp-2
+                        "
+                      >
                         {noticia.contenido || ""}
                       </p>
 
-                      <p className="
-                        text-zinc-600
-                        text-sm
-                        mt-3
-                      ">
+                      <p
+                        className="
+                          text-zinc-600
+                          text-sm
+                          mt-3
+                        "
+                      >
                         {formatearFecha(
                           noticia.fecha
                         )}
@@ -1045,11 +1085,13 @@ export default function PaddockNews() {
 
                     {/* ACCIONES */}
 
-                    <div className="
-                      flex
-                      flex-wrap
-                      gap-2
-                    ">
+                    <div
+                      className="
+                        flex
+                        flex-wrap
+                        gap-2
+                      "
+                    >
 
                       <button
                         type="button"
