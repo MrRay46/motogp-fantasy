@@ -369,101 +369,41 @@ export default function ConstructorsResults() {
       setGuardando(true);
       setMensaje("");
 
-      // ---------------------------------------
-      // 1. GUARDAR HISTÓRICO DEL GP
-      // ---------------------------------------
-
-      for (
-        const constructor of constructores
-      ) {
-        const {
-          error,
-        } = await supabase
-          .from(
-            "resultados_constructores_gp"
-          )
-          .upsert(
-            {
-              gran_premio_id:
-                granPremioId,
-
-              constructor_id:
-                constructor.id,
-
-              // Fantasy conseguido
-              // en este GP.
-              puntos_fantasy:
-                constructor.puntos_gp,
-
-              // Puntos oficiales conseguidos
-              // en este GP.
-              puntos_oficiales:
-                constructor.puntos,
-            },
-            {
-              onConflict:
-                "gran_premio_id,constructor_id",
-            }
-          );
-
-        if (error) {
-          throw new Error(
-            `Error guardando histórico de ${constructor.nombre}: ${error.message}`
-          );
+      const respuesta = await fetch(
+        "/api/superadmin/resultados-constructores",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            gran_premio_id: granPremioId,
+            constructores: constructores.map(
+              (constructor) => ({
+                id: constructor.id,
+                puntos_gp:
+                  constructor.puntos_gp,
+                puntos:
+                  constructor.puntos,
+              })
+            ),
+          }),
         }
-      }
+      );
 
-      // ---------------------------------------
-      // 2. ACTUALIZAR SOLO PUNTOS FANTASY
-      //    DE LA TABLA PRINCIPAL
-      // ---------------------------------------
+      const resultado =
+        await respuesta.json();
 
-      /*
-        IMPORTANTE:
-
-        NO actualizamos:
-
-          constructores.puntos
-
-        porque esa columna contiene los
-        puntos oficiales ACUMULADOS de
-        toda la temporada.
-
-        Solo actualizamos:
-
-          constructores.puntos_gp
-
-        porque el procesador necesita saber
-        los puntos Fantasy del GP seleccionado.
-      */
-
-      for (
-        const constructor of constructores
-      ) {
-        const {
-          error,
-        } = await supabase
-          .from("constructores")
-          .update({
-            puntos_gp:
-              constructor.puntos_gp,
-          })
-          .eq(
-            "id",
-            constructor.id
-          );
-
-        if (error) {
-          throw new Error(
-            `Error actualizando puntos Fantasy de ${constructor.nombre}: ${error.message}`
-          );
-        }
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error guardando resultados."
+        );
       }
 
       setMensaje(
         "✅ Resultados de constructores guardados correctamente."
       );
-
     } catch (error) {
       const mensajeError =
         error instanceof Error
@@ -473,7 +413,6 @@ export default function ConstructorsResults() {
       setMensaje(
         `❌ ${mensajeError}`
       );
-
     } finally {
       setGuardando(false);
     }
