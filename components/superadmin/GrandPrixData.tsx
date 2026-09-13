@@ -165,9 +165,11 @@ export default function GrandPrixData() {
     const gps = gpResponse.data || [];
 
     setGranPremios(gps);
+
     setPilotos(
       pilotosResponse.data || []
     );
+
     setConstructores(
       constructoresResponse.data || []
     );
@@ -284,10 +286,45 @@ export default function GrandPrixData() {
             p.id === pilotoForma
         );
 
-      const { error } =
-        await supabase
-          .from("grandes_premios")
-          .update({
+      // ---------------------------------------
+      // OBTENER SESIÓN SUPABASE AUTH
+      // ---------------------------------------
+
+      const {
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (
+        sessionError ||
+        !sessionData.session
+      ) {
+        throw new Error(
+          "No hay una sesión válida de Supabase Auth."
+        );
+      }
+
+      const accessToken =
+        sessionData.session.access_token;
+
+      // ---------------------------------------
+      // GUARDAR MEDIANTE API
+      // ---------------------------------------
+
+      const respuesta = await fetch(
+        "/api/superadmin/gran-premio",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            gran_premio_id:
+              granPremioId,
+
             piloto_ganador_sprint_id:
               ganadorSprint,
 
@@ -316,17 +353,23 @@ export default function GrandPrixData() {
             constructor_forma:
               constructorForma ||
               null,
-          })
-          .eq(
-            "id",
-            granPremioId
-          );
+          }),
+        }
+      );
 
-      if (error) {
+      const resultado =
+        await respuesta.json();
+
+      if (!respuesta.ok) {
         throw new Error(
-          error.message
+          resultado?.error ||
+            "Error guardando los datos del GP."
         );
       }
+
+      // ---------------------------------------
+      // ACTUALIZAR ESTADO LOCAL
+      // ---------------------------------------
 
       setGranPremios((prev) =>
         prev.map((gp) =>
