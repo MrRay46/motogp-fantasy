@@ -23,31 +23,101 @@ const supabase = createClient(
 async function comprobarSuperAdmin() {
   const cookieStore = await cookies();
 
+  // -----------------------------------------
+  // 1. Intentar sesión antigua
+  // -----------------------------------------
+
   const token =
     cookieStore.get("rayongrid_session")?.value;
 
   const sesion = verificarSesion(token);
 
-  if (!sesion) {
+  if (sesion) {
+    const { data: usuario, error } =
+      await supabase
+        .from("usuarios")
+        .select("id, super_admin, activo")
+        .eq("id", sesion.usuarioId)
+        .single();
+
+    if (
+      !error &&
+      usuario &&
+      usuario.activo === true &&
+      usuario.super_admin === true
+    ) {
+      return usuario;
+    }
+  }
+
+  // -----------------------------------------
+  // 2. Intentar sesión de Supabase Auth
+  // -----------------------------------------
+
+  const authorization =
+    cookieStore.get(
+      "sb-edlpwbhgxixiyivvljtk-auth-token"
+    )?.value;
+
+  if (!authorization) {
     return null;
   }
 
-  const { data: usuario, error } = await supabase
-    .from("usuarios")
-    .select("id, super_admin, activo")
-    .eq("id", sesion.usuarioId)
-    .single();
+  try {
+    const parsed =
+      JSON.parse(authorization);
 
-  if (
-    error ||
-    !usuario ||
-    usuario.activo !== true ||
-    usuario.super_admin !== true
-  ) {
+    const accessToken =
+      parsed?.access_token;
+
+    if (!accessToken) {
+      return null;
+    }
+
+    const {
+      data: authData,
+      error: authError,
+    } = await supabase.auth.getUser(
+      accessToken
+    );
+
+    if (
+      authError ||
+      !authData.user
+    ) {
+      return null;
+    }
+
+    const {
+      data: usuario,
+      error,
+    } = await supabase
+      .from("usuarios")
+      .select("id, super_admin, activo")
+      .eq(
+        "auth_user_id",
+        authData.user.id
+      )
+      .single();
+
+    if (
+      error ||
+      !usuario ||
+      usuario.activo !== true ||
+      usuario.super_admin !== true
+    ) {
+      return null;
+    }
+
+    return usuario;
+  } catch (error) {
+    console.error(
+      "Error comprobando sesión de Supabase Auth:",
+      error
+    );
+
     return null;
   }
-
-  return usuario;
 }
 
 export async function POST(request: Request) {
