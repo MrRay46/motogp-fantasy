@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
-import { verificarSesion } from "@/lib/auth/auth";
 
 const supabaseUrl =
   "https://edlpwbhgxixiyivvljtk.supabase.co";
@@ -20,167 +18,190 @@ const supabase = createClient(
   supabaseServiceRoleKey
 );
 
-async function comprobarSuperAdmin() {
-  const cookieStore = await cookies();
-
+async function comprobarSuperAdmin(
+  request: Request
+) {
   // -----------------------------------------
-  // 1. Intentar sesión antigua
-  // -----------------------------------------
-
-  const token =
-    cookieStore.get("rayongrid_session")?.value;
-
-  const sesion = verificarSesion(token);
-
-  if (sesion) {
-    const { data: usuario, error } =
-      await supabase
-        .from("usuarios")
-        .select("id, super_admin, activo")
-        .eq("id", sesion.usuarioId)
-        .single();
-
-    if (
-      !error &&
-      usuario &&
-      usuario.activo === true &&
-      usuario.super_admin === true
-    ) {
-      return usuario;
-    }
-  }
-
-  // -----------------------------------------
-  // 2. Intentar sesión de Supabase Auth
+  // 1. Obtener token de Supabase Auth
   // -----------------------------------------
 
   const authorization =
-    cookieStore.get(
-      "sb-edlpwbhgxixiyivvljtk-auth-token"
-    )?.value;
+    request.headers.get("authorization");
 
   if (!authorization) {
     return null;
   }
 
-  try {
-    const parsed =
-      JSON.parse(authorization);
+  if (
+    !authorization.toLowerCase().startsWith(
+      "bearer "
+    )
+  ) {
+    return null;
+  }
 
-    const accessToken =
-      parsed?.access_token;
+  const accessToken =
+    authorization.slice(7).trim();
 
-    if (!accessToken) {
-      return null;
-    }
+  if (!accessToken) {
+    return null;
+  }
 
-    const {
-      data: authData,
-      error: authError,
-    } = await supabase.auth.getUser(
+  // -----------------------------------------
+  // 2. Verificar usuario en Supabase Auth
+  // -----------------------------------------
+
+  const {
+    data: authData,
+    error: authError,
+  } =
+    await supabase.auth.getUser(
       accessToken
     );
 
-    if (
-      authError ||
-      !authData.user
-    ) {
-      return null;
-    }
-
-    const {
-      data: usuario,
-      error,
-    } = await supabase
-      .from("usuarios")
-      .select("id, super_admin, activo")
-      .eq(
-        "auth_user_id",
-        authData.user.id
-      )
-      .single();
-
-    if (
-      error ||
-      !usuario ||
-      usuario.activo !== true ||
-      usuario.super_admin !== true
-    ) {
-      return null;
-    }
-
-    return usuario;
-  } catch (error) {
-    console.error(
-      "Error comprobando sesión de Supabase Auth:",
-      error
-    );
-
+  if (
+    authError ||
+    !authData.user
+  ) {
     return null;
   }
+
+  // -----------------------------------------
+  // 3. Comprobar usuario Rayongrid
+  // -----------------------------------------
+
+  const {
+    data: usuario,
+    error,
+  } = await supabase
+    .from("usuarios")
+    .select(
+      "id, super_admin, activo"
+    )
+    .eq(
+      "auth_user_id",
+      authData.user.id
+    )
+    .single();
+
+  if (
+    error ||
+    !usuario ||
+    usuario.activo !== true ||
+    usuario.super_admin !== true
+  ) {
+    return null;
+  }
+
+  return usuario;
 }
 
-export async function POST(request: Request) {
+export async function POST(
+  request: Request
+) {
   try {
-    const usuario = await comprobarSuperAdmin();
+    // -----------------------------------------
+    // 1. Comprobar autenticación y SuperAdmin
+    // -----------------------------------------
+
+    const usuario =
+      await comprobarSuperAdmin(
+        request
+      );
 
     if (!usuario) {
       return NextResponse.json(
         {
-          error: "No autorizado.",
+          error:
+            "No autorizado.",
         },
         { status: 403 }
       );
     }
 
-    const body = await request.json();
+    // -----------------------------------------
+    // 2. Leer datos recibidos
+    // -----------------------------------------
 
-    const granPremioId = Number(
-      body.gran_premio_id
-    );
+    const body =
+      await request.json();
 
-    const constructores = Array.isArray(
-      body.constructores
-    )
-      ? body.constructores
-      : null;
+    const granPremioId =
+      Number(
+        body.gran_premio_id
+      );
+
+    const constructores =
+      Array.isArray(
+        body.constructores
+      )
+        ? body.constructores
+        : null;
+
+    // -----------------------------------------
+    // 3. Validar Gran Premio
+    // -----------------------------------------
 
     if (
-      !Number.isInteger(granPremioId) ||
+      !Number.isInteger(
+        granPremioId
+      ) ||
       granPremioId <= 0
     ) {
       return NextResponse.json(
         {
-          error: "Gran Premio no válido.",
+          error:
+            "Gran Premio no válido.",
         },
         { status: 400 }
       );
     }
+
+    // -----------------------------------------
+    // 4. Validar constructores
+    // -----------------------------------------
 
     if (!constructores) {
       return NextResponse.json(
         {
-          error: "Datos de constructores no válidos.",
+          error:
+            "Datos de constructores no válidos.",
         },
         { status: 400 }
       );
     }
 
-    for (const constructor of constructores) {
-      const constructorId = Number(
-        constructor.id
-      );
+    // -----------------------------------------
+    // 5. Guardar resultados
+    // -----------------------------------------
 
-      const puntosFantasy = Number(
-        constructor.puntos_gp
-      );
+    for (
+      const constructor
+      of constructores
+    ) {
+      const constructorId =
+        Number(
+          constructor.id
+        );
 
-      const puntosOficiales = Number(
-        constructor.puntos
-      );
+      const puntosFantasy =
+        Number(
+          constructor.puntos_gp
+        );
+
+      const puntosOficiales =
+        Number(
+          constructor.puntos
+        );
+
+      // -----------------------------------------
+      // Validar ID
+      // -----------------------------------------
 
       if (
-        !Number.isInteger(constructorId) ||
+        !Number.isInteger(
+          constructorId
+        ) ||
         constructorId <= 0
       ) {
         return NextResponse.json(
@@ -192,8 +213,14 @@ export async function POST(request: Request) {
         );
       }
 
+      // -----------------------------------------
+      // Validar puntos Fantasy
+      // -----------------------------------------
+
       if (
-        !Number.isFinite(puntosFantasy) ||
+        !Number.isFinite(
+          puntosFantasy
+        ) ||
         puntosFantasy < 0
       ) {
         return NextResponse.json(
@@ -205,8 +232,14 @@ export async function POST(request: Request) {
         );
       }
 
+      // -----------------------------------------
+      // Validar puntos oficiales
+      // -----------------------------------------
+
       if (
-        !Number.isFinite(puntosOficiales) ||
+        !Number.isFinite(
+          puntosOficiales
+        ) ||
         puntosOficiales < 0
       ) {
         return NextResponse.json(
@@ -218,30 +251,35 @@ export async function POST(request: Request) {
         );
       }
 
-      const { error: errorHistorico } =
-        await supabase
-          .from(
-            "resultados_constructores_gp"
-          )
-          .upsert(
-            {
-              gran_premio_id:
-                granPremioId,
+      // -----------------------------------------
+      // Guardar histórico del GP
+      // -----------------------------------------
 
-              constructor_id:
-                constructorId,
+      const {
+        error: errorHistorico,
+      } = await supabase
+        .from(
+          "resultados_constructores_gp"
+        )
+        .upsert(
+          {
+            gran_premio_id:
+              granPremioId,
 
-              puntos_fantasy:
-                puntosFantasy,
+            constructor_id:
+              constructorId,
 
-              puntos_oficiales:
-                puntosOficiales,
-            },
-            {
-              onConflict:
-                "gran_premio_id,constructor_id",
-            }
-          );
+            puntos_fantasy:
+              puntosFantasy,
+
+            puntos_oficiales:
+              puntosOficiales,
+          },
+          {
+            onConflict:
+              "gran_premio_id,constructor_id",
+          }
+        );
 
       if (errorHistorico) {
         console.error(
@@ -258,6 +296,10 @@ export async function POST(request: Request) {
         );
       }
 
+      // -----------------------------------------
+      // Actualizar puntos Fantasy actuales
+      // -----------------------------------------
+
       const {
         error: errorConstructor,
       } = await supabase
@@ -266,7 +308,10 @@ export async function POST(request: Request) {
           puntos_gp:
             puntosFantasy,
         })
-        .eq("id", constructorId);
+        .eq(
+          "id",
+          constructorId
+        );
 
       if (errorConstructor) {
         console.error(
@@ -283,6 +328,10 @@ export async function POST(request: Request) {
         );
       }
     }
+
+    // -----------------------------------------
+    // 6. Respuesta correcta
+    // -----------------------------------------
 
     return NextResponse.json({
       ok: true,

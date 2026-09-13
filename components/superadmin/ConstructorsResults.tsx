@@ -369,12 +369,42 @@ export default function ConstructorsResults() {
       setGuardando(true);
       setMensaje("");
 
+      // ---------------------------------------
+      // OBTENER SESIÓN DE SUPABASE AUTH
+      // ---------------------------------------
+
+      const {
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (
+        sessionError ||
+        !sessionData.session
+      ) {
+        setMensaje(
+          "❌ No hay una sesión válida de Supabase Auth."
+        );
+
+        return;
+      }
+
+      const accessToken =
+        sessionData.session.access_token;
+
+      // ---------------------------------------
+      // ENVIAR RESULTADOS A LA API SEGURA
+      // ---------------------------------------
+
       const respuesta = await fetch(
         "/api/superadmin/resultados-constructores",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             gran_premio_id: granPremioId,
@@ -409,6 +439,11 @@ export default function ConstructorsResults() {
         error instanceof Error
           ? error.message
           : "Error desconocido.";
+
+      console.error(
+        "Error guardando resultados de constructores:",
+        error
+      );
 
       setMensaje(
         `❌ ${mensajeError}`
