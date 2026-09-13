@@ -163,111 +163,147 @@ export default function PilotsResults() {
     );
 
     // ---------------------------------------
-    // CARGAR HISTÓRICO DEL GP
+    // OBTENER SESIÓN DE SUPABASE AUTH
     // ---------------------------------------
 
     const {
-      data,
-      error,
-    } = await supabase
-      .from("resultados_pilotos_gp")
-      .select(`
-        piloto_id,
-        puntos_fantasy,
-        puntos_oficiales
-      `)
-      .eq(
-        "gran_premio_id",
-        gpId
-      );
+      data: sessionData,
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error(error);
-
+    if (
+      sessionError ||
+      !sessionData.session
+    ) {
       setMensaje(
-        `❌ Error cargando resultados del GP: ${error.message}`
+        "❌ No hay una sesión válida de Supabase Auth."
       );
 
       return;
     }
 
-    const resultados =
-      (data || []) as ResultadoPilotoGP[];
+    const accessToken =
+      sessionData.session.access_token;
 
     // ---------------------------------------
-    // EXISTE HISTÓRICO
+    // CARGAR HISTÓRICO DEL GP
+    // MEDIANTE API SEGURA
     // ---------------------------------------
 
-    if (
-      resultados.length > 0
-    ) {
-      setPilotos(
-        pilotosBase.map(
-          (piloto) => {
-            const resultado =
-              resultados.find(
-                (item) =>
-                  item.piloto_id ===
-                  piloto.id
-              );
+    try {
+      const respuesta = await fetch(
+        `/api/superadmin/resultados-pilotos?gran_premio_id=${gpId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-            if (!resultado) {
+      const resultado =
+        await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error cargando resultados del GP."
+        );
+      }
+
+      const resultados =
+        (resultado.resultados || []) as ResultadoPilotoGP[];
+
+      // ---------------------------------------
+      // EXISTE HISTÓRICO
+      // ---------------------------------------
+
+      if (
+        resultados.length > 0
+      ) {
+        setPilotos(
+          pilotosBase.map(
+            (piloto) => {
+              const resultado =
+                resultados.find(
+                  (item) =>
+                    item.piloto_id ===
+                    piloto.id
+                );
+
+              if (!resultado) {
+                return {
+                  ...piloto,
+                  puntos_gp: 0,
+                  puntos_totales: 0,
+                };
+              }
+
               return {
                 ...piloto,
-                puntos_gp: 0,
-                puntos_totales: 0,
+
+                puntos_gp:
+                  resultado.puntos_fantasy,
+
+                puntos_totales:
+                  resultado.puntos_oficiales,
               };
             }
+          )
+        );
 
-            return {
-              ...piloto,
+        return;
+      }
 
-              puntos_gp:
-                resultado.puntos_fantasy,
+      // ---------------------------------------
+      // NO EXISTE HISTÓRICO
+      // ---------------------------------------
 
-              puntos_totales:
-                resultado.puntos_oficiales,
-            };
-          }
+      /*
+        Si el GP está en curso y todavía no
+        tiene histórico, utilizamos los valores
+        actuales de la tabla principal.
+
+        Si es un GP finalizado sin histórico,
+        mostramos 0 para evitar reutilizar por
+        error los puntos de otro GP.
+      */
+
+      if (
+        gpData.estado === "en_curso"
+      ) {
+        setPilotos(
+          pilotosBase
+        );
+
+        return;
+      }
+
+      setPilotos(
+        pilotosBase.map(
+          (piloto) => ({
+            ...piloto,
+            puntos_gp: 0,
+            puntos_totales: 0,
+          })
         )
       );
+    } catch (error) {
+      const mensajeError =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido.";
 
-      return;
-    }
-
-    // ---------------------------------------
-    // NO EXISTE HISTÓRICO
-    // ---------------------------------------
-
-    /*
-      Si el GP está en curso y todavía no
-      tiene histórico, utilizamos los valores
-      actuales de la tabla principal.
-
-      Si es un GP finalizado sin histórico,
-      mostramos 0 para evitar reutilizar por
-      error los puntos de otro GP.
-    */
-
-    if (
-      gpData.estado === "en_curso"
-    ) {
-      setPilotos(
-        pilotosBase
+      console.error(
+        "Error cargando resultados de pilotos:",
+        error
       );
 
-      return;
+      setMensaje(
+        `❌ ${mensajeError}`
+      );
     }
-
-    setPilotos(
-      pilotosBase.map(
-        (piloto) => ({
-          ...piloto,
-          puntos_gp: 0,
-          puntos_totales: 0,
-        })
-      )
-    );
   }
 
   // -----------------------------------------
@@ -358,73 +394,70 @@ export default function PilotsResults() {
       setMensaje("");
 
       // ---------------------------------------
-      // 1. GUARDAR HISTÓRICO DEL GP
+      // OBTENER SESIÓN DE SUPABASE AUTH
       // ---------------------------------------
 
-      for (
-        const piloto of pilotos
+      const {
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (
+        sessionError ||
+        !sessionData.session
       ) {
-        const {
-          error,
-        } = await supabase
-          .from(
-            "resultados_pilotos_gp"
-          )
-          .upsert(
-            {
-              gran_premio_id:
-                granPremioId,
+        setMensaje(
+          "❌ No hay una sesión válida de Supabase Auth."
+        );
 
-              piloto_id:
-                piloto.id,
-
-              puntos_fantasy:
-                piloto.puntos_gp,
-
-              puntos_oficiales:
-                piloto.puntos_totales,
-            },
-            {
-              onConflict:
-                "gran_premio_id,piloto_id",
-            }
-          );
-
-        if (error) {
-          throw new Error(
-            `Error guardando histórico de ${piloto.nombre}: ${error.message}`
-          );
-        }
+        return;
       }
 
+      const accessToken =
+        sessionData.session.access_token;
+
       // ---------------------------------------
-      // 2. ACTUALIZAR TABLA PRINCIPAL
+      // ENVIAR RESULTADOS A LA API SEGURA
       // ---------------------------------------
 
-      for (
-        const piloto of pilotos
-      ) {
-        const {
-          error,
-        } = await supabase
-          .from("pilotos")
-          .update({
-            puntos_gp:
-              piloto.puntos_gp,
+      const respuesta = await fetch(
+        "/api/superadmin/resultados-pilotos",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            gran_premio_id:
+              granPremioId,
 
-            puntos_totales:
-              piloto.puntos_totales,
-          })
-          .eq(
-            "id",
-            piloto.id
-          );
+            pilotos:
+              pilotos.map(
+                (piloto) => ({
+                  id: piloto.id,
 
-        if (error) {
-          throw new Error(
-            `Error actualizando ${piloto.nombre}: ${error.message}`
-          );
+                  puntos_gp:
+                    piloto.puntos_gp,
+
+                  puntos_totales:
+                    piloto.puntos_totales,
+                })
+              ),
+          }),
         }
+      );
+
+      const resultado =
+        await respuesta.json();
+
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error guardando resultados."
+        );
       }
 
       setMensaje(
@@ -435,6 +468,11 @@ export default function PilotsResults() {
         error instanceof Error
           ? error.message
           : "Error desconocido.";
+
+      console.error(
+        "Error guardando resultados de pilotos:",
+        error
+      );
 
       setMensaje(
         `❌ ${mensajeError}`
@@ -497,7 +535,6 @@ export default function PilotsResults() {
         overflow-hidden
       "
     >
-
       {/* ---------------------------------- */}
       {/* CABECERA */}
       {/* ---------------------------------- */}
@@ -515,9 +552,7 @@ export default function PilotsResults() {
           gap-4
         "
       >
-
         <div>
-
           <h2 className="text-2xl font-bold">
             🏍️ Puntos de pilotos
           </h2>
@@ -532,7 +567,6 @@ export default function PilotsResults() {
             Introduce los puntos Fantasy
             y los puntos oficiales.
           </p>
-
         </div>
 
         <button
@@ -560,7 +594,6 @@ export default function PilotsResults() {
             ? "Guardando..."
             : "💾 Guardar puntos"}
         </button>
-
       </div>
 
       {/* ---------------------------------- */}
@@ -568,13 +601,9 @@ export default function PilotsResults() {
       {/* ---------------------------------- */}
 
       <div className="overflow-x-auto">
-
         <table className="w-full">
-
           <thead className="bg-zinc-950">
-
             <tr className="text-left text-zinc-400">
-
               <th className="px-6 py-4">
                 Piloto
               </th>
@@ -590,13 +619,10 @@ export default function PilotsResults() {
               <th className="px-6 py-4 text-center">
                 Puntos temporada
               </th>
-
             </tr>
-
           </thead>
 
           <tbody>
-
             {pilotos.map(
               (piloto) => (
                 <tr
@@ -608,11 +634,8 @@ export default function PilotsResults() {
                     transition
                   "
                 >
-
                   <td className="px-6 py-4">
-
                     <div className="flex items-center gap-3">
-
                       {piloto.foto && (
                         <img
                           src={
@@ -632,9 +655,7 @@ export default function PilotsResults() {
                       <span className="font-bold">
                         {piloto.nombre}
                       </span>
-
                     </div>
-
                   </td>
 
                   <td
@@ -650,7 +671,6 @@ export default function PilotsResults() {
                   {/* PUNTOS FANTASY */}
 
                   <td className="px-6 py-4">
-
                     <input
                       type="number"
                       min="0"
@@ -679,13 +699,11 @@ export default function PilotsResults() {
                         focus:border-red-500
                       "
                     />
-
                   </td>
 
                   {/* PUNTOS OFICIALES */}
 
                   <td className="px-6 py-4">
-
                     <input
                       type="number"
                       min="0"
@@ -715,17 +733,12 @@ export default function PilotsResults() {
                         focus:border-red-500
                       "
                     />
-
                   </td>
-
                 </tr>
               )
             )}
-
           </tbody>
-
         </table>
-
       </div>
 
       {/* ---------------------------------- */}
@@ -747,7 +760,6 @@ export default function PilotsResults() {
           {mensaje}
         </div>
       )}
-
     </section>
   );
 }

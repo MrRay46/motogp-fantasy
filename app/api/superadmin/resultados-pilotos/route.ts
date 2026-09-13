@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
-import { verificarSesion } from "@/lib/auth/auth";
 
 const supabaseUrl =
   "https://edlpwbhgxixiyivvljtk.supabase.co";
@@ -20,22 +18,37 @@ const supabase = createClient(
   supabaseServiceRoleKey
 );
 
-async function comprobarSuperAdmin() {
-  const cookieStore = await cookies();
+async function comprobarSuperAdmin(request: Request) {
+  const authorization =
+    request.headers.get("authorization");
 
-  const token =
-    cookieStore.get("rayongrid_session")?.value;
-
-  const sesion = verificarSesion(token);
-
-  if (!sesion) {
+  if (!authorization?.startsWith("Bearer ")) {
     return null;
   }
 
-  const { data: usuario, error } = await supabase
+  const accessToken =
+    authorization.substring(7);
+
+  if (!accessToken) {
+    return null;
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(accessToken);
+
+  if (authError || !user) {
+    return null;
+  }
+
+  const {
+    data: usuario,
+    error,
+  } = await supabase
     .from("usuarios")
     .select("id, super_admin, activo")
-    .eq("id", sesion.usuarioId)
+    .eq("auth_user_id", user.id)
     .single();
 
   if (
@@ -57,13 +70,146 @@ type PilotoResultado = {
   puntos_totales: number;
 };
 
+// =====================================================
+// GET — RECUPERAR HISTÓRICO DE UN GP
+// =====================================================
+
+export async function GET(request: Request) {
+  try {
+    // -----------------------------------------
+    // 1. COMPROBAR SUPERADMIN
+    // -----------------------------------------
+
+    const usuario =
+      await comprobarSuperAdmin(request);
+
+    if (!usuario) {
+      return NextResponse.json(
+        {
+          error: "No autorizado.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // -----------------------------------------
+    // 2. LEER ID DEL GP
+    // -----------------------------------------
+
+    const { searchParams } =
+      new URL(request.url);
+
+    const granPremioId = Number(
+      searchParams.get("gran_premio_id")
+    );
+
+    if (
+      !Number.isInteger(granPremioId) ||
+      granPremioId <= 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "ID de Gran Premio no válido.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // -----------------------------------------
+    // 3. COMPROBAR QUE EL GP EXISTE
+    // -----------------------------------------
+
+    const {
+      data: granPremio,
+      error: granPremioError,
+    } = await supabase
+      .from("grandes_premios")
+      .select("id, nombre")
+      .eq("id", granPremioId)
+      .single();
+
+    if (
+      granPremioError ||
+      !granPremio
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "El Gran Premio seleccionado no existe.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // -----------------------------------------
+    // 4. RECUPERAR HISTÓRICO
+    // -----------------------------------------
+
+    const {
+      data: resultados,
+      error: resultadosError,
+    } = await supabase
+      .from("resultados_pilotos_gp")
+      .select(
+        "piloto_id, puntos_fantasy, puntos_oficiales"
+      )
+      .eq(
+        "gran_premio_id",
+        granPremioId
+      );
+
+    if (resultadosError) {
+      console.error(
+        "Error recuperando histórico de pilotos:",
+        resultadosError
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            "Error recuperando el histórico de pilotos.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // -----------------------------------------
+    // 5. RESPUESTA
+    // -----------------------------------------
+
+    return NextResponse.json({
+      gran_premio: granPremio,
+      resultados: resultados || [],
+    });
+  } catch (error) {
+    console.error(
+      "Error en GET de resultados de pilotos:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Error interno del servidor.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// =====================================================
+// POST — GUARDAR RESULTADOS DE PILOTOS
+// =====================================================
+
 export async function POST(request: Request) {
   try {
     // -----------------------------------------
     // 1. COMPROBAR SUPERADMIN
     // -----------------------------------------
 
-    const usuario = await comprobarSuperAdmin();
+    const usuario =
+      await comprobarSuperAdmin(request);
 
     if (!usuario) {
       return NextResponse.json(
@@ -96,7 +242,8 @@ export async function POST(request: Request) {
     ) {
       return NextResponse.json(
         {
-          error: "ID de Gran Premio no válido.",
+          error:
+            "ID de Gran Premio no válido.",
         },
         { status: 400 }
       );
@@ -109,14 +256,15 @@ export async function POST(request: Request) {
     if (!Array.isArray(pilotos)) {
       return NextResponse.json(
         {
-          error: "Los datos de pilotos no son válidos.",
+          error:
+            "Los datos de pilotos no son válidos.",
         },
         { status: 400 }
       );
     }
 
-    const pilotosValidados: PilotoResultado[] =
-      [];
+    const pilotosValidados:
+      PilotoResultado[] = [];
 
     for (const piloto of pilotos) {
       const id = Number(piloto?.id);
@@ -140,7 +288,8 @@ export async function POST(request: Request) {
       ) {
         return NextResponse.json(
           {
-            error: `ID de piloto no válido: ${id}.`,
+            error:
+              `ID de piloto no válido: ${id}.`,
           },
           { status: 400 }
         );
@@ -152,7 +301,8 @@ export async function POST(request: Request) {
       ) {
         return NextResponse.json(
           {
-            error: `Puntos no válidos para ${nombre}.`,
+            error:
+              `Puntos no válidos para ${nombre}.`,
           },
           { status: 400 }
         );
@@ -162,14 +312,18 @@ export async function POST(request: Request) {
         id,
         nombre,
         puntos_gp: puntosGp,
-        puntos_totales: puntosTotales,
+        puntos_totales:
+          puntosTotales,
       });
     }
 
-    if (pilotosValidados.length === 0) {
+    if (
+      pilotosValidados.length === 0
+    ) {
       return NextResponse.json(
         {
-          error: "No hay pilotos para guardar.",
+          error:
+            "No hay pilotos para guardar.",
         },
         { status: 400 }
       );
@@ -210,7 +364,9 @@ export async function POST(request: Request) {
     // 6. GUARDAR HISTÓRICO DEL GP
     // -----------------------------------------
 
-    for (const piloto of pilotosValidados) {
+    for (
+      const piloto of pilotosValidados
+    ) {
       const {
         error,
       } = await supabase
@@ -243,7 +399,8 @@ export async function POST(request: Request) {
 
         return NextResponse.json(
           {
-            error: `Error guardando histórico de ${piloto.nombre}: ${error.message}`,
+            error:
+              `Error guardando histórico de ${piloto.nombre}: ${error.message}`,
           },
           { status: 500 }
         );
@@ -254,7 +411,9 @@ export async function POST(request: Request) {
     // 7. ACTUALIZAR TABLA PRINCIPAL DE PILOTOS
     // -----------------------------------------
 
-    for (const piloto of pilotosValidados) {
+    for (
+      const piloto of pilotosValidados
+    ) {
       const {
         error,
       } = await supabase
@@ -279,7 +438,8 @@ export async function POST(request: Request) {
 
         return NextResponse.json(
           {
-            error: `Error actualizando ${piloto.nombre}: ${error.message}`,
+            error:
+              `Error actualizando ${piloto.nombre}: ${error.message}`,
           },
           { status: 500 }
         );
@@ -292,7 +452,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      gran_premio: granPremio,
+      gran_premio:
+        granPremio,
       pilotos_actualizados:
         pilotosValidados.length,
     });
