@@ -158,128 +158,164 @@ export default function ConstructorsResults() {
     );
 
     // ---------------------------------------
-    // CARGAR HISTÓRICO DEL GP
+    // OBTENER SESIÓN DE SUPABASE AUTH
     // ---------------------------------------
 
     const {
-      data,
-      error,
-    } = await supabase
-      .from("resultados_constructores_gp")
-      .select(`
-        constructor_id,
-        puntos_fantasy,
-        puntos_oficiales
-      `)
-      .eq(
-        "gran_premio_id",
-        gpId
-      );
-
-    if (error) {
-      console.error(error);
-
-      setMensaje(
-        `❌ Error cargando resultados del GP: ${error.message}`
-      );
-
-      return;
-    }
-
-    const resultados =
-      (data || []) as ResultadoConstructorGP[];
-
-    // ---------------------------------------
-    // EXISTE HISTÓRICO
-    // ---------------------------------------
+      data: sessionData,
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
     if (
-      resultados.length > 0
+      sessionError ||
+      !sessionData.session
     ) {
-      setConstructores(
-        constructoresBase.map(
-          (constructor) => {
-            const resultado =
-              resultados.find(
-                (item) =>
-                  item.constructor_id ===
-                  constructor.id
-              );
-
-            if (!resultado) {
-              return {
-                ...constructor,
-                puntos_gp: 0,
-
-                // IMPORTANTE:
-                // No utilizamos aquí
-                // constructor.puntos.
-                //
-                // Este campo representa
-                // los puntos oficiales
-                // DEL GP seleccionado.
-                puntos: 0,
-              };
-            }
-
-            return {
-              ...constructor,
-
-              // Fantasy conseguido
-              // en ESTE GP.
-              puntos_gp:
-                resultado.puntos_fantasy,
-
-              // Puntos oficiales conseguidos
-              // en ESTE GP.
-              //
-              // NO son los puntos acumulados
-              // de la temporada.
-              puntos:
-                resultado.puntos_oficiales,
-            };
-          }
-        )
+      setMensaje(
+        "❌ No hay una sesión válida de Supabase Auth."
       );
 
       return;
     }
 
+    const accessToken =
+      sessionData.session.access_token;
+
     // ---------------------------------------
-    // NO EXISTE HISTÓRICO
+    // CARGAR HISTÓRICO DEL GP
+    // MEDIANTE API SEGURA
     // ---------------------------------------
 
-    /*
-      Si todavía no existe un resultado para
-      este GP, empezamos los valores del GP
-      desde 0.
+    try {
+      const respuesta = await fetch(
+        `/api/superadmin/resultados-constructores?gran_premio_id=${gpId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization:
+              `Bearer ${accessToken}`,
+          },
+        }
+      );
 
-      MUY IMPORTANTE:
+      const resultado =
+        await respuesta.json();
 
-      NO copiamos constructor.puntos aquí.
+      if (!respuesta.ok) {
+        throw new Error(
+          resultado.error ||
+            "Error cargando resultados del GP."
+        );
+      }
 
-      constructor.puntos contiene los puntos
-      oficiales ACUMULADOS de la temporada.
+      const resultados =
+        (resultado.resultados || []) as ResultadoConstructorGP[];
 
-      Los puntos oficiales que introducimos
-      aquí pertenecen únicamente al GP actual
-      y se guardarán en:
+      // ---------------------------------------
+      // EXISTE HISTÓRICO
+      // ---------------------------------------
 
-        resultados_constructores_gp
-          .puntos_oficiales
-    */
+      if (
+        resultados.length > 0
+      ) {
+        setConstructores(
+          constructoresBase.map(
+            (constructor) => {
+              const resultado =
+                resultados.find(
+                  (item) =>
+                    item.constructor_id ===
+                    constructor.id
+                );
 
-    setConstructores(
-      constructoresBase.map(
-        (constructor) => ({
-          ...constructor,
+              if (!resultado) {
+                return {
+                  ...constructor,
+                  puntos_gp: 0,
 
-          puntos_gp: 0,
+                  // IMPORTANTE:
+                  // No utilizamos aquí
+                  // constructor.puntos.
+                  //
+                  // Este campo representa
+                  // los puntos oficiales
+                  // DEL GP seleccionado.
+                  puntos: 0,
+                };
+              }
 
-          puntos: 0,
-        })
-      )
-    );
+              return {
+                ...constructor,
+
+                // Fantasy conseguido
+                // en ESTE GP.
+                puntos_gp:
+                  resultado.puntos_fantasy,
+
+                // Puntos oficiales conseguidos
+                // en ESTE GP.
+                //
+                // NO son los puntos acumulados
+                // de la temporada.
+                puntos:
+                  resultado.puntos_oficiales,
+              };
+            }
+          )
+        );
+
+        return;
+      }
+
+      // ---------------------------------------
+      // NO EXISTE HISTÓRICO
+      // ---------------------------------------
+
+      /*
+        Si todavía no existe un resultado para
+        este GP, empezamos los valores del GP
+        desde 0.
+
+        MUY IMPORTANTE:
+
+        NO copiamos constructor.puntos aquí.
+
+        constructor.puntos contiene los puntos
+        oficiales ACUMULADOS de la temporada.
+
+        Los puntos oficiales que introducimos
+        aquí pertenecen únicamente al GP actual
+        y se guardarán en:
+
+          resultados_constructores_gp
+            .puntos_oficiales
+      */
+
+      setConstructores(
+        constructoresBase.map(
+          (constructor) => ({
+            ...constructor,
+
+            puntos_gp: 0,
+
+            puntos: 0,
+          })
+        )
+      );
+    } catch (error) {
+      const mensajeError =
+        error instanceof Error
+          ? error.message
+          : "Error desconocido.";
+
+      console.error(
+        "Error cargando resultados de constructores:",
+        error
+      );
+
+      setMensaje(
+        `❌ ${mensajeError}`
+      );
+    }
   }
 
   // -----------------------------------------
@@ -407,16 +443,21 @@ export default function ConstructorsResults() {
               `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
-            gran_premio_id: granPremioId,
-            constructores: constructores.map(
-              (constructor) => ({
-                id: constructor.id,
-                puntos_gp:
-                  constructor.puntos_gp,
-                puntos:
-                  constructor.puntos,
-              })
-            ),
+            gran_premio_id:
+              granPremioId,
+
+            constructores:
+              constructores.map(
+                (constructor) => ({
+                  id: constructor.id,
+
+                  puntos_gp:
+                    constructor.puntos_gp,
+
+                  puntos:
+                    constructor.puntos,
+                })
+              ),
           }),
         }
       );
@@ -506,7 +547,6 @@ export default function ConstructorsResults() {
         overflow-hidden
       "
     >
-
       {/* ---------------------------------- */}
       {/* CABECERA */}
       {/* ---------------------------------- */}
@@ -524,9 +564,7 @@ export default function ConstructorsResults() {
           gap-4
         "
       >
-
         <div>
-
           <h2 className="text-2xl font-bold">
             🏎️ Puntos de constructores
           </h2>
@@ -541,7 +579,6 @@ export default function ConstructorsResults() {
             Introduce los puntos Fantasy
             y los puntos oficiales del GP.
           </p>
-
         </div>
 
         <button
@@ -569,7 +606,6 @@ export default function ConstructorsResults() {
             ? "Guardando..."
             : "💾 Guardar puntos"}
         </button>
-
       </div>
 
       {/* ---------------------------------- */}
@@ -577,13 +613,9 @@ export default function ConstructorsResults() {
       {/* ---------------------------------- */}
 
       <div className="overflow-x-auto">
-
         <table className="w-full">
-
           <thead className="bg-zinc-950">
-
             <tr className="text-left text-zinc-400">
-
               <th className="px-6 py-4">
                 Constructor
               </th>
@@ -595,13 +627,10 @@ export default function ConstructorsResults() {
               <th className="px-6 py-4 text-center">
                 Puntos oficiales GP
               </th>
-
             </tr>
-
           </thead>
 
           <tbody>
-
             {constructores.map(
               (constructor) => (
                 <tr
@@ -613,7 +642,6 @@ export default function ConstructorsResults() {
                     transition
                   "
                 >
-
                   <td
                     className="
                       px-6
@@ -627,7 +655,6 @@ export default function ConstructorsResults() {
                   {/* FANTASY GP */}
 
                   <td className="px-6 py-4">
-
                     <input
                       type="number"
                       min="0"
@@ -656,13 +683,11 @@ export default function ConstructorsResults() {
                         focus:border-red-500
                       "
                     />
-
                   </td>
 
                   {/* OFICIALES GP */}
 
                   <td className="px-6 py-4">
-
                     <input
                       type="number"
                       min="0"
@@ -691,17 +716,12 @@ export default function ConstructorsResults() {
                         focus:border-red-500
                       "
                     />
-
                   </td>
-
                 </tr>
               )
             )}
-
           </tbody>
-
         </table>
-
       </div>
 
       {/* ---------------------------------- */}
@@ -723,7 +743,6 @@ export default function ConstructorsResults() {
           {mensaje}
         </div>
       )}
-
     </section>
   );
 }

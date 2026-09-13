@@ -33,9 +33,9 @@ async function comprobarSuperAdmin(
   }
 
   if (
-    !authorization.toLowerCase().startsWith(
-      "bearer "
-    )
+    !authorization
+      .toLowerCase()
+      .startsWith("bearer ")
   ) {
     return null;
   }
@@ -95,6 +95,131 @@ async function comprobarSuperAdmin(
 
   return usuario;
 }
+
+// =========================================
+// GET
+// CARGAR RESULTADOS DE CONSTRUCTORES
+// =========================================
+
+export async function GET(
+  request: Request
+) {
+  try {
+    // -----------------------------------------
+    // 1. Comprobar autenticación y SuperAdmin
+    // -----------------------------------------
+
+    const usuario =
+      await comprobarSuperAdmin(
+        request
+      );
+
+    if (!usuario) {
+      return NextResponse.json(
+        {
+          error:
+            "No autorizado.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // -----------------------------------------
+    // 2. Obtener ID del Gran Premio
+    // -----------------------------------------
+
+    const url =
+      new URL(
+        request.url
+      );
+
+    const granPremioId =
+      Number(
+        url.searchParams.get(
+          "gran_premio_id"
+        )
+      );
+
+    if (
+      !Number.isInteger(
+        granPremioId
+      ) ||
+      granPremioId <= 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Gran Premio no válido.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // -----------------------------------------
+    // 3. Cargar histórico mediante
+    //    Service Role
+    // -----------------------------------------
+
+    const {
+      data: resultados,
+      error,
+    } = await supabase
+      .from(
+        "resultados_constructores_gp"
+      )
+      .select(`
+        constructor_id,
+        puntos_fantasy,
+        puntos_oficiales
+      `)
+      .eq(
+        "gran_premio_id",
+        granPremioId
+      );
+
+    if (error) {
+      console.error(
+        "Error cargando resultados de constructores:",
+        error
+      );
+
+      return NextResponse.json(
+        {
+          error:
+            error.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    // -----------------------------------------
+    // 4. Devolver resultados
+    // -----------------------------------------
+
+    return NextResponse.json({
+      resultados:
+        resultados || [],
+    });
+  } catch (error) {
+    console.error(
+      "Error en GET de resultados de constructores:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Error interno del servidor.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// =========================================
+// POST
+// GUARDAR RESULTADOS DE CONSTRUCTORES
+// =========================================
 
 export async function POST(
   request: Request
