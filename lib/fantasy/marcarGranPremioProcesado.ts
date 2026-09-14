@@ -1,6 +1,7 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function marcarGranPremioProcesado(
+  supabase: SupabaseClient,
   gpId: number,
   usuarioId: number
 ) {
@@ -8,7 +9,8 @@ export async function marcarGranPremioProcesado(
     .from("grandes_premios")
     .update({
       fantasy_procesado: true,
-      fantasy_procesado_at: new Date().toISOString(),
+      fantasy_procesado_at:
+        new Date().toISOString(),
       fantasy_procesado_por: usuarioId,
     })
     .eq("id", gpId);

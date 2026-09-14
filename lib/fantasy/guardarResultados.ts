@@ -1,7 +1,8 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { ResultadoEquipoGP } from "./calcularPuntosEquipos";
 
 export async function guardarResultados(
+  supabase: SupabaseClient,
   resultados: ResultadoEquipoGP[]
 ) {
   for (const resultado of resultados) {

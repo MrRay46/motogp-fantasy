@@ -118,10 +118,11 @@ export async function POST(request: Request) {
     // -----------------------------------------
 
     const resultado =
-      await procesarGranPremio(
-        granPremioId,
-        usuario.id
-      );
+  await procesarGranPremio(
+    supabaseAdmin,
+    granPremioId,
+    usuario.id
+  );
 
     // -----------------------------------------
     // RESPUESTA

@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type Equipo = {
   id: number;
@@ -6,7 +6,9 @@ type Equipo = {
   puntos_gp_actual: number | null;
 };
 
-export async function actualizarPuntosTemporada() {
+export async function actualizarPuntosTemporada(
+  supabase: SupabaseClient
+) {
   const { data: equipos, error } = await supabase
     .from("equipos")
     .select(`

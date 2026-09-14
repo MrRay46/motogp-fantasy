@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 type Equipo = {
   id: number;
@@ -13,7 +13,9 @@ type Equipo = {
   diferencia_lider_anterior: number | null;
 };
 
-export async function actualizarClasificacion() {
+export async function actualizarClasificacion(
+  supabase: SupabaseClient
+) {
   const { data: equipos, error } = await supabase
     .from("equipos")
     .select(`

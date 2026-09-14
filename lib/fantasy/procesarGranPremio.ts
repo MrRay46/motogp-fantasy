@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { validarGranPremio } from "./validarGranPremio";
 import { leerDatosFantasy } from "./leerDatosFantasy";
 import { calcularPuntosEquipos } from "./calcularPuntosEquipos";
@@ -8,63 +10,43 @@ import { guardarGanadorGranPremio } from "./guardarGanadorGranPremio";
 import { marcarGranPremioProcesado } from "./marcarGranPremioProcesado";
 
 export async function procesarGranPremio(
+  supabase: SupabaseClient,
   granPremioId: number,
   usuarioId: number
 ) {
-
-  //-------------------------------------------------
-  // Validar GP seleccionado
-  //-------------------------------------------------
-
   const granPremio =
-    await validarGranPremio(granPremioId);
-
-  //-------------------------------------------------
-  // Leer datos Fantasy
-  //-------------------------------------------------
+    await validarGranPremio(
+      supabase,
+      granPremioId
+    );
 
   const datos =
-    await leerDatosFantasy();
-
-  //-------------------------------------------------
-  // Calcular puntos del GP
-  //-------------------------------------------------
+    await leerDatosFantasy(supabase);
 
   const resultados =
     calcularPuntosEquipos(datos);
 
-  //-------------------------------------------------
-  // Guardar puntos GP
-  //-------------------------------------------------
+  await guardarResultados(
+    supabase,
+    resultados
+  );
 
-  await guardarResultados(resultados);
+  await actualizarPuntosTemporada(
+    supabase
+  );
 
-  //-------------------------------------------------
-  // Actualizar temporada
-  //-------------------------------------------------
-
-  await actualizarPuntosTemporada();
-
-  //-------------------------------------------------
-  // Recalcular clasificación
-  //-------------------------------------------------
-
-  await actualizarClasificacion();
-
-  //-------------------------------------------------
-  // Guardar ganador Fantasy del GP
-  //-------------------------------------------------
+  await actualizarClasificacion(
+    supabase
+  );
 
   await guardarGanadorGranPremio(
+    supabase,
     granPremio.id,
     resultados
   );
 
-  //-------------------------------------------------
-  // Marcar GP procesado
-  //-------------------------------------------------
-
   await marcarGranPremioProcesado(
+    supabase,
     granPremio.id,
     usuarioId
   );

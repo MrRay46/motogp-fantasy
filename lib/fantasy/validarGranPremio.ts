@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type GranPremioProcesable = {
   id: number;
@@ -8,9 +8,9 @@ export type GranPremioProcesable = {
 };
 
 export async function validarGranPremio(
+  supabase: SupabaseClient,
   granPremioId: number
 ): Promise<GranPremioProcesable> {
-
   const { data, error } = await supabase
     .from("grandes_premios")
     .select(`

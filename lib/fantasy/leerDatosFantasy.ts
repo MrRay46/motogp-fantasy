@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type DatosFantasy = {
   equipos: any[];
@@ -6,7 +6,9 @@ export type DatosFantasy = {
   constructores: any[];
 };
 
-export async function leerDatosFantasy(): Promise<DatosFantasy> {
+export async function leerDatosFantasy(
+  supabase: SupabaseClient
+): Promise<DatosFantasy> {
   const [
     equiposResult,
     pilotosResult,
