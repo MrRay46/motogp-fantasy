@@ -15,7 +15,6 @@ import {
   useSuperAdminGP,
 } from "@/context/SuperAdminGPContext";
 
-import { procesarGranPremio } from "@/lib/fantasy/procesarGranPremio";
 import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
 
 type GranPremio = {
@@ -149,28 +148,60 @@ function SuperAdminContenido() {
       setMensaje("");
 
       // ---------------------------------------
-      // OBTENER USUARIO REAL
+      // OBTENER ACCESS TOKEN DE SUPABASE AUTH
       // ---------------------------------------
 
-      const sesion = JSON.parse(
-        localStorage.getItem("usuario") || "{}"
-      );
+      const {
+        data: sessionData,
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (!sesion.id) {
+      if (sessionError) {
         throw new Error(
-          "No se ha encontrado la sesión del usuario."
+          `Error obteniendo la sesión: ${sessionError.message}`
+        );
+      }
+
+      const accessToken =
+        sessionData.session?.access_token;
+
+      if (!accessToken) {
+        throw new Error(
+          "No se ha encontrado una sesión válida de Supabase."
         );
       }
 
       // ---------------------------------------
-      // PROCESAR GP SELECCIONADO
+      // PROCESAR GP A TRAVÉS DE LA API
       // ---------------------------------------
 
+      const response = await fetch(
+        "/api/superadmin/procesar-gp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            granPremioId,
+          }),
+        }
+      );
+
       const resultado =
-        await procesarGranPremio(
-          granPremioId,
-          sesion.id
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          resultado?.error ??
+            "No se ha podido procesar el Gran Premio."
         );
+      }
+
+      // ---------------------------------------
+      // RESULTADO
+      // ---------------------------------------
 
       setMensaje(
         `✅ ${resultado.granPremio.nombre} procesado correctamente.
@@ -396,6 +427,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
           )}
 
         </div>
+
         {/* ---------------------------------- */}
         {/* NOTICIAS DEL PADDOCK */}
         {/* ---------------------------------- */}
@@ -403,6 +435,7 @@ Equipos procesados: ${resultado.equiposProcesados}`
         <div className="mt-8">
           <PaddockNews />
         </div>
+
       </section>
     </AppLayout>
   );
