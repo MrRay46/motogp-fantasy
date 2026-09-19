@@ -23,9 +23,12 @@ export default function RegisterForm() {
 
     if (loading) return;
 
+    const usuarioLimpio = usuario.trim();
+    const emailLimpio = email.trim().toLowerCase();
+
     if (
-      !usuario.trim() ||
-      !email.trim() ||
+      !usuarioLimpio ||
+      !emailLimpio ||
       !password ||
       !password2
     ) {
@@ -47,111 +50,103 @@ export default function RegisterForm() {
 
     setLoading(true);
 
-    // Comprobar usuario repetido
+    try {
+      // -----------------------------------------
+      // Crear cuenta mediante API
+      // -----------------------------------------
 
-    const {
-      data: existeUsuario,
-      error: errorUsuario,
-    } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("usuario", usuario)
-      .maybeSingle();
-
-    if (errorUsuario) {
-      console.error(errorUsuario);
-
-      setLoading(false);
-
-      setError("Error comprobando usuario.");
-
-      return;
-    }
-
-    if (existeUsuario) {
-      setLoading(false);
-
-      setError("Ese nombre de usuario ya existe.");
-
-      return;
-    }
-
-    // Comprobar email repetido
-
-    const {
-      data: existeEmail,
-      error: errorEmail,
-    } = await supabase
-      .from("usuarios")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (errorEmail) {
-      console.error(errorEmail);
-
-      setLoading(false);
-
-      setError("Error comprobando email.");
-
-      return;
-    }
-
-    if (existeEmail) {
-      setLoading(false);
-
-      setError("Ese correo ya está registrado.");
-
-      return;
-    }
-
-      // Crear usuario
-
-    const {
-      data: nuevoUsuario,
-      error: errorInsert,
-    } = await supabase
-      .from("usuarios")
-      .insert([
+      const response = await fetch(
+        "/api/auth/register",
         {
-          usuario,
-          email,
-          password,
-          avatar,
-          activo: true,
-          super_admin: false,
-          liga_actual_id: null,
-        },
-      ])
-      .select()
-      .single();
-
-    if (errorInsert || !nuevoUsuario) {
-      console.error(errorInsert);
-
-      setLoading(false);
-
-      setError(
-        errorInsert?.message ??
-          "No se pudo crear la cuenta."
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuario: usuarioLimpio,
+            email: emailLimpio,
+            password,
+            avatar,
+          }),
+        }
       );
 
-      return;
+      const resultado =
+        await response.json();
+
+      if (!response.ok) {
+        setError(
+          resultado?.error ??
+            "No se pudo crear la cuenta."
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      // -----------------------------------------
+      // Iniciar sesión automáticamente
+      // -----------------------------------------
+
+      const {
+        data: loginData,
+        error: loginError,
+      } = await supabase.auth.signInWithPassword({
+        email: emailLimpio,
+        password,
+      });
+
+      if (
+        loginError ||
+        !loginData.user
+      ) {
+        console.error(loginError);
+
+        setError(
+          "La cuenta se creó correctamente, pero no se pudo iniciar sesión automáticamente. Puedes iniciar sesión desde la pantalla de acceso."
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      // -----------------------------------------
+      // Guardar datos básicos de Rayongrid
+      // -----------------------------------------
+
+      const usuarioRayongrid =
+        resultado.usuario;
+
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(
+          usuarioRayongrid
+        )
+      );
+
+      // -----------------------------------------
+      // Ir a bienvenida
+      // -----------------------------------------
+
+      router.push("/bienvenida");
+    } catch (error) {
+      console.error(
+        "Error registrando usuario:",
+        error
+      );
+
+      setError(
+        "No se pudo crear la cuenta. Inténtalo de nuevo."
+      );
+
+      setLoading(false);
     }
-
-    // Guardar sesión temporal
-
-    localStorage.setItem(
-      "usuario",
-      JSON.stringify(nuevoUsuario)
-    );
-
-    router.push("/bienvenida");
   }
 
   return (
     <div className="w-full max-w-md bg-zinc-900 rounded-3xl p-8 border border-zinc-800">
-
       <h1 className="text-5xl font-black text-center mb-3">
         RayonGrid
       </h1>
@@ -161,7 +156,6 @@ export default function RegisterForm() {
       </p>
 
       <div className="space-y-4">
-
         <input
           type="text"
           placeholder="Usuario"
@@ -202,10 +196,10 @@ export default function RegisterForm() {
           className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
 
-       <AvatarPicker
-  value={avatar}
-  onChange={setAvatar}
-/>
+        <AvatarPicker
+          value={avatar}
+          onChange={setAvatar}
+        />
 
         {error && (
           <div className="bg-red-900/30 border border-red-700 text-red-400 rounded-xl p-4">
@@ -222,7 +216,6 @@ export default function RegisterForm() {
             ? "Creando cuenta..."
             : "Crear cuenta"}
         </button>
-
       </div>
     </div>
   );
