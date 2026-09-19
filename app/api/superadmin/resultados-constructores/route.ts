@@ -422,7 +422,11 @@ export async function POST(
       }
 
       // -----------------------------------------
-      // Actualizar puntos Fantasy actuales
+      // Actualizar puntos actuales del constructor
+      //
+      // puntos_gp = Fantasy del GP actual
+      // puntos = clasificación oficial acumulada
+      // después de este GP
       // -----------------------------------------
 
       const {
@@ -432,6 +436,9 @@ export async function POST(
         .update({
           puntos_gp:
             puntosFantasy,
+
+          puntos:
+            puntosOficiales,
         })
         .eq(
           "id",
