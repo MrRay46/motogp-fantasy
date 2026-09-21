@@ -4,7 +4,7 @@ type MarketHeaderProps = {
 };
 export default function MarketHeader({
   titulo = "Mercado",
-  descripcion = "Gestiona tu equipo, realiza fichajes, cambia el constructor y actualiza tus predicciones cuando el mercado esté abierto.",
+  descripcion = "Gestiona tu equipo, realiza fichajes, cambia el constructor o actualiza tus predicciones cuando el mercado esté abierto.",
 }: MarketHeaderProps) {
   return (
     <header className="mb-10">

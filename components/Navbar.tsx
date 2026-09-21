@@ -100,8 +100,24 @@ export default function Navbar() {
     comprobarSesion();
   }, []);
 
-  function cerrarSesion() {
+  async function cerrarSesion() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error(
+        "Error cerrando sesión:",
+        error
+      );
+
+      alert(
+        "No se pudo cerrar la sesión correctamente."
+      );
+
+      return;
+    }
+
     localStorage.removeItem("usuario");
+
     window.location.href = "/";
   }
 
