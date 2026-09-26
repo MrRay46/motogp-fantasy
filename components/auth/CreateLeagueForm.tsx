@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -19,182 +20,120 @@ interface Props {
 export default function CreateLeagueForm({
   usuario,
 }: Props) {
-
   const router = useRouter();
 
   const [nombreLiga, setNombreLiga] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
 
-  function generarCodigoLiga() {
-
-    const letras = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-    const numeros = "23456789";
-
-    let codigo = "RG-";
-
-    for (let i = 0; i < 6; i++) {
-
-      if (Math.random() > 0.5) {
-
-        codigo += letras[
-          Math.floor(Math.random() * letras.length)
-        ];
-
-      } else {
-
-        codigo += numeros[
-          Math.floor(Math.random() * numeros.length)
-        ];
-
-      }
-
-    }
-
-    return codigo;
-
-  }
-
   async function crearLiga() {
-
     setError("");
 
     if (loading) return;
 
-    if (!nombreLiga.trim()) {
+    const nombre = nombreLiga.trim();
 
+    if (!nombre) {
       setError("Introduce un nombre para la liga.");
-
       return;
+    }
 
+    if (nombre.length > 60) {
+      setError("El nombre no puede superar 60 caracteres.");
+      return;
     }
 
     setLoading(true);
 
-    const codigo = generarCodigoLiga();
+    try {
+      //----------------------------------------
+      // 1. OBTENER SESIÓN DE SUPABASE AUTH
+      //----------------------------------------
 
-    //----------------------------------------
-    // CREAR LIGA
-    //----------------------------------------
+      const {
+        data: { session },
+        error: errorSesion,
+      } = await supabase.auth.getSession();
 
-    const {
-      data: nuevaLiga,
-      error: errorLiga,
-    } = await supabase
-      .from("ligas")
-      .insert([
-        {
-          nombre: nombreLiga,
-          codigo,
-          activa: true,
-          creador_id: usuario.id,
-        },
-      ])
-      .select()
-      .single();
+      if (errorSesion || !session?.access_token) {
+        setError(
+          "Tu sesión ha caducado. Inicia sesión de nuevo."
+        );
 
-    if (errorLiga || !nuevaLiga) {
-
-      console.error(errorLiga);
-
-      setLoading(false);
-
-      setError(
-        errorLiga?.message ??
-          "No se pudo crear la liga."
-      );
-
-      return;
-
-    }
-
-    //----------------------------------------
-    // CREAR RELACIÓN USUARIO-LIGA
-    //----------------------------------------
-
-    const {
-      error: errorRelacion,
-    } = await supabase
-      .from("usuarios_ligas")
-      .insert([
-        {
-          usuario_id: usuario.id,
-          liga_id: nuevaLiga.id,
-          admin_liga: true,
-          codigo,
-        },
-      ]);
-
-    if (errorRelacion) {
-
-      console.error(errorRelacion);
-
-      setLoading(false);
-
-      setError(
-        errorRelacion.message ??
-          "No se pudo crear la relación."
-      );
-
-      return;
-
-    }
-
-    //----------------------------------------
-    // ACTUALIZAR LIGA ACTUAL
-    //----------------------------------------
-
-    const {
-      error: errorUpdate,
-    } = await supabase
-      .from("usuarios")
-      .update({
-        liga_actual_id: nuevaLiga.id,
-      })
-      .eq("id", usuario.id);
-
-    if (errorUpdate) {
-
-      console.error(errorUpdate);
-
-      setLoading(false);
-
-      setError(
-        errorUpdate.message ??
-          "No se pudo actualizar el usuario."
-      );
-
-      return;
-
-    }
+        router.push("/login");
+        return;
+      }
 
       //----------------------------------------
-    // ACTUALIZAR LOCALSTORAGE
-    //----------------------------------------
+      // 2. LLAMAR A LA API SEGURA
+      //----------------------------------------
 
-    const usuarioActualizado = {
-      ...usuario,
-      liga_actual_id: nuevaLiga.id,
-    };
+      const respuesta = await fetch("/api/ligas/crear", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          nombre,
+        }),
+      });
 
-    localStorage.setItem(
-      "usuario",
-      JSON.stringify(usuarioActualizado)
-    );
+      const resultado = await respuesta.json();
 
-    setLoading(false);
+      if (!respuesta.ok) {
+        setError(
+          resultado?.error ??
+            "No se pudo crear la liga."
+        );
 
-    router.push("/dashboard");
+        return;
+      }
 
+      //----------------------------------------
+      // 3. ACTUALIZAR LOCALSTORAGE
+      //----------------------------------------
+
+      const nuevaLiga = resultado.liga;
+
+      if (!nuevaLiga?.id) {
+        setError(
+          "La liga se ha creado, pero no se recibió su información."
+        );
+
+        return;
+      }
+
+      const usuarioActualizado = {
+        ...usuario,
+        liga_actual_id: nuevaLiga.id,
+      };
+
+      localStorage.setItem(
+        "usuario",
+        JSON.stringify(usuarioActualizado)
+      );
+
+      //----------------------------------------
+      // 4. REDIRIGIR AL DASHBOARD
+      //----------------------------------------
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      console.error("Error creando liga:", err);
+
+      setError(
+        "No se pudo conectar con el servidor. Inténtalo de nuevo."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="space-y-6">
-
       <div>
-
         <label className="block text-sm text-zinc-400 mb-2">
           Nombre de la liga
         </label>
@@ -206,13 +145,13 @@ export default function CreateLeagueForm({
           onChange={(e) =>
             setNombreLiga(e.target.value)
           }
+          maxLength={60}
+          disabled={loading}
           className="w-full rounded-xl bg-zinc-900 border border-zinc-700 px-4 py-3 text-white placeholder:text-zinc-400 focus:outline-none focus:border-orange-500"
         />
-
       </div>
 
       {error && (
-
         <div
           className="
             bg-red-900/30
@@ -225,7 +164,6 @@ export default function CreateLeagueForm({
         >
           {error}
         </div>
-
       )}
 
       <button
@@ -239,6 +177,8 @@ export default function CreateLeagueForm({
           rounded-xl
           py-4
           font-bold
+          disabled:opacity-50
+          disabled:cursor-not-allowed
         "
       >
         {loading
@@ -248,6 +188,7 @@ export default function CreateLeagueForm({
 
       <button
         onClick={() => router.push("/registro")}
+        disabled={loading}
         className="
           w-full
           bg-zinc-700
@@ -257,12 +198,12 @@ export default function CreateLeagueForm({
           rounded-xl
           py-4
           font-bold
+          disabled:opacity-50
+          disabled:cursor-not-allowed
         "
       >
         ← Volver
       </button>
-
     </div>
   );
-
 }
