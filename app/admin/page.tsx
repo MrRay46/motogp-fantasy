@@ -4,7 +4,6 @@
 import AppLayout from "@/components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { campeonTemporada } from "@/data/prediccionesTemporada";
 
 interface Participante {
   id: number;
@@ -17,6 +16,8 @@ export default function AdminPage() {
   const [participantes, setParticipantes] = useState<Participante[]>([]);
   const [codigoLiga, setCodigoLiga] = useState("");
   const [loading, setLoading] = useState(true);
+  const [procesandoBonificaciones, setProcesandoBonificaciones] =
+    useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -104,80 +105,102 @@ export default function AdminPage() {
     alert(`Código de la liga: ${codigoLiga}`);
   }
 
+  // Aplicar bonificaciones mediante la API segura
   async function generarBonificaciones() {
-    let equiposProcesados = 0;
-
     const confirmar = window.confirm(
-      "¿Aplicar las bonificaciones finales de la temporada?\n\nEsta acción solo debería ejecutarse una vez."
+      "¿Aplicar las bonificaciones finales de la temporada?\n\n" +
+        "Esta acción solo debería ejecutarse una vez para esta liga."
     );
 
     if (!confirmar) return;
 
-    const {
-      data: equipos,
-      error,
-    } = await supabase
-      .from("equipos")
-      .select("*");
+    try {
+      setProcesandoBonificaciones(true);
 
-    if (error) {
-      console.error(error);
-      alert("No se pudieron leer los equipos.");
-      return;
-    }
+      // Comprobar la sesión de Supabase Auth
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-    for (const equipo of equipos) {
-      if (equipo.bonus_temporada_aplicado) {
-        continue;
+      if (sessionError || !session) {
+        alert(
+          "Tu sesión ha caducado. Inicia sesión de nuevo."
+        );
+
+        window.location.href = "/login";
+        return;
       }
 
-      let bonus = 0;
+      // Obtener la liga activa
+      const sesion = JSON.parse(
+        localStorage.getItem("usuario") || "{}"
+      );
 
-      if (
-        equipo.prediccion_piloto === campeonTemporada.piloto
-      ) {
-        bonus += equipo.prediccion_piloto_modificada
-          ? 18.5
-          : 37;
+      if (!sesion.liga_actual_id) {
+        alert("No se ha encontrado la liga activa.");
+        return;
       }
 
-      if (
-        equipo.prediccion_motor === campeonTemporada.constructor
-      ) {
-        bonus += equipo.prediccion_motor_modificada
-          ? 5
-          : 10;
+      // Enviar la solicitud al servidor
+      const response = await fetch(
+        "/api/admin/bonificaciones",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            liga_id: sesion.liga_actual_id,
+          }),
+        }
+      );
+
+      const resultado = await response.json();
+
+      if (!response.ok) {
+        alert(
+          resultado.error ||
+            "No se pudieron aplicar las bonificaciones."
+        );
+        return;
       }
 
-      const { error: errorUpdate } = await supabase
-        .from("equipos")
-        .update({
-          puntos: (equipo.puntos ?? 0) + bonus,
-          bonus_temporada: bonus,
-          bonus_temporada_aplicado: true,
-        })
-        .eq("id", equipo.id);
-
-      if (errorUpdate) {
-        console.error(
-          `Error actualizando ${equipo.usuario}`,
-          errorUpdate
+      // Mostrar el resultado del proceso
+      if (resultado.equiposProcesados === 0) {
+        alert(
+          resultado.mensaje ||
+            "No había equipos pendientes de bonificación."
         );
       } else {
-        equiposProcesados++;
+        let mensaje =
+          "Proceso de bonificaciones finalizado.\n\n" +
+          `Equipos procesados: ${resultado.equiposProcesados}\n` +
+          `Equipos omitidos: ${resultado.equiposOmitidos}`;
 
-        console.log(
-          `${equipo.usuario}: +${bonus} puntos`
-        );
+        if (
+          resultado.errores &&
+          resultado.errores.length > 0
+        ) {
+          mensaje +=
+            "\n\nNo se pudieron actualizar los siguientes equipos: " +
+            resultado.errores.join(", ");
+        }
+
+        alert(mensaje);
       }
-    }
-
-    if (equiposProcesados === 0) {
-      alert("Las bonificaciones ya habían sido aplicadas.");
-    } else {
-      alert(
-        `Bonificaciones aplicadas correctamente.\n\nEquipos procesados: ${equiposProcesados}`
+    } catch (error) {
+      console.error(
+        "Error aplicando las bonificaciones:",
+        error
       );
+
+      alert(
+        "Error de conexión al aplicar las bonificaciones."
+      );
+    } finally {
+      setProcesandoBonificaciones(false);
     }
   }
 
@@ -383,9 +406,12 @@ export default function AdminPage() {
 
           <button
             onClick={generarBonificaciones}
-            className="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-bold transition"
+            disabled={procesandoBonificaciones}
+            className="bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-600 disabled:cursor-not-allowed px-6 py-3 rounded-xl font-bold transition"
           >
-            Generar bonificaciones
+            {procesandoBonificaciones
+              ? "Aplicando bonificaciones..."
+              : "Generar bonificaciones"}
           </button>
         </div>
 
