@@ -1,8 +1,11 @@
+
 "use client";
+
 import AppLayout from "@/components/layout/AppLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { campeonTemporada } from "@/data/prediccionesTemporada";
+
 interface Participante {
   id: number;
   usuario: string;
@@ -23,18 +26,18 @@ export default function AdminPage() {
     setLoading(true);
 
     const sesion = JSON.parse(
-  localStorage.getItem("usuario") || "{}"
-);
+      localStorage.getItem("usuario") || "{}"
+    );
 
-if (!sesion.id) {
-  window.location.href = "/login";
-  return;
-}
+    if (!sesion.id) {
+      window.location.href = "/login";
+      return;
+    }
 
-if (!sesion.liga_actual_id) {
-  setLoading(false);
-  return;
-}
+    if (!sesion.liga_actual_id) {
+      setLoading(false);
+      return;
+    }
 
     // Buscar liga
     const {
@@ -77,6 +80,7 @@ if (!sesion.liga_actual_id) {
       return;
     }
 
+    // Buscar datos de los participantes
     const {
       data: usuarios,
       error: errorUsuarios,
@@ -95,78 +99,89 @@ if (!sesion.liga_actual_id) {
     setParticipantes(usuarios || []);
     setLoading(false);
   }
-    async function generarInvitacion() {
+
+  async function generarInvitacion() {
     alert(`Código de la liga: ${codigoLiga}`);
   }
-async function generarBonificaciones() {
-let equiposProcesados = 0;
-  const confirmar = window.confirm(
-    "¿Aplicar las bonificaciones finales de la temporada?\n\nEsta acción solo debería ejecutarse una vez."
-  );
 
-  if (!confirmar) return;
+  async function generarBonificaciones() {
+    let equiposProcesados = 0;
 
-  const { data: equipos, error } = await supabase
-    .from("equipos")
-    .select("*");
+    const confirmar = window.confirm(
+      "¿Aplicar las bonificaciones finales de la temporada?\n\nEsta acción solo debería ejecutarse una vez."
+    );
 
-  if (error) {
-    console.error(error);
-    alert("No se pudieron leer los equipos.");
-    return;
+    if (!confirmar) return;
+
+    const {
+      data: equipos,
+      error,
+    } = await supabase
+      .from("equipos")
+      .select("*");
+
+    if (error) {
+      console.error(error);
+      alert("No se pudieron leer los equipos.");
+      return;
+    }
+
+    for (const equipo of equipos) {
+      if (equipo.bonus_temporada_aplicado) {
+        continue;
+      }
+
+      let bonus = 0;
+
+      if (
+        equipo.prediccion_piloto === campeonTemporada.piloto
+      ) {
+        bonus += equipo.prediccion_piloto_modificada
+          ? 18.5
+          : 37;
+      }
+
+      if (
+        equipo.prediccion_motor === campeonTemporada.constructor
+      ) {
+        bonus += equipo.prediccion_motor_modificada
+          ? 5
+          : 10;
+      }
+
+      const { error: errorUpdate } = await supabase
+        .from("equipos")
+        .update({
+          puntos: (equipo.puntos ?? 0) + bonus,
+          bonus_temporada: bonus,
+          bonus_temporada_aplicado: true,
+        })
+        .eq("id", equipo.id);
+
+      if (errorUpdate) {
+        console.error(
+          `Error actualizando ${equipo.usuario}`,
+          errorUpdate
+        );
+      } else {
+        equiposProcesados++;
+
+        console.log(
+          `${equipo.usuario}: +${bonus} puntos`
+        );
+      }
+    }
+
+    if (equiposProcesados === 0) {
+      alert("Las bonificaciones ya habían sido aplicadas.");
+    } else {
+      alert(
+        `Bonificaciones aplicadas correctamente.\n\nEquipos procesados: ${equiposProcesados}`
+      );
+    }
   }
 
-  for (const equipo of equipos) {
-if (equipo.bonus_temporada_aplicado) {
-  continue;
-}
-  let bonus = 0;
-
-  if (
-    equipo.prediccion_piloto === campeonTemporada.piloto
-  ) {
-    bonus += equipo.prediccion_piloto_modificada
-      ? 18.5
-      : 37;
-  }
-
-  if (
-    equipo.prediccion_motor === campeonTemporada.constructor
-  ) {
-    bonus += equipo.prediccion_motor_modificada
-      ? 5
-      : 10;
-  }
-
-const { error: errorUpdate } = await supabase
-  .from("equipos")
-  .update({
-  puntos: (equipo.puntos ?? 0) + bonus,
-  bonus_temporada: bonus,
-  bonus_temporada_aplicado: true,
-})
-  .eq("id", equipo.id);
-
-if (errorUpdate) {
-  console.error(
-    `Error actualizando ${equipo.usuario}`,
-    errorUpdate
-  );
-} else {
-  equiposProcesados++;
-  console.log(
-    `${equipo.usuario}: +${bonus} puntos`
-  );
-}
-}
-if (equiposProcesados === 0) {
-  alert("Las bonificaciones ya habían sido aplicadas.");
-} else {
-  alert(
-    `Bonificaciones aplicadas correctamente.\n\nEquipos procesados: ${equiposProcesados}`
-  );
-}
-}
+  // Activar o desactivar un participante mediante la API segura
   async function cambiarEstado(
     id: number,
     activo: boolean
@@ -179,20 +194,71 @@ if (equiposProcesados === 0) {
 
     if (!confirmar) return;
 
-    const { error } = await supabase
-      .from("usuarios")
-      .update({
-        activo: !activo,
-      })
-      .eq("id", id);
+    try {
+      // Comprobar la sesión de Supabase Auth
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-    if (error) {
-      console.error(error);
-      alert("No se pudo actualizar el usuario.");
-      return;
+      if (sessionError || !session) {
+        alert(
+          "Tu sesión ha caducado. Inicia sesión de nuevo."
+        );
+
+        window.location.href = "/login";
+        return;
+      }
+
+      // Obtener la liga activa
+      const sesion = JSON.parse(
+        localStorage.getItem("usuario") || "{}"
+      );
+
+      if (!sesion.liga_actual_id) {
+        alert("No se ha encontrado la liga activa.");
+        return;
+      }
+
+      // Enviar la solicitud al servidor
+      const response = await fetch(
+        "/api/admin/participantes",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            usuario_id: id,
+            liga_id: sesion.liga_actual_id,
+            activo: !activo,
+          }),
+        }
+      );
+
+      const resultado = await response.json();
+
+      if (!response.ok) {
+        alert(
+          resultado.error ||
+            "No se pudo actualizar el usuario."
+        );
+        return;
+      }
+
+      // Recargar los participantes tras la actualización
+      await cargarDatos();
+    } catch (error) {
+      console.error(
+        "Error cambiando el estado del participante:",
+        error
+      );
+
+      alert(
+        "Error de conexión al actualizar el participante."
+      );
     }
-
-    cargarDatos();
   }
 
   if (loading) {
@@ -206,13 +272,11 @@ if (equiposProcesados === 0) {
   }
 
   return (
-    
-  <AppLayout>
-
+    <AppLayout>
       <div className="max-w-5xl mx-auto space-y-8">
 
+        {/* Cabecera */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
-
           <h1 className="text-4xl font-black mb-3">
             ⚙️ Panel de Administración
           </h1>
@@ -220,11 +284,10 @@ if (equiposProcesados === 0) {
           <p className="text-zinc-400">
             Gestiona los participantes de tu liga.
           </p>
-
         </div>
 
+        {/* Añadir participante */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
-
           <h2 className="text-3xl font-bold mb-6">
             ➕ Añadir participante
           </h2>
@@ -237,7 +300,6 @@ if (equiposProcesados === 0) {
           </button>
 
           <div className="mt-6 bg-zinc-800 rounded-xl p-4">
-
             <p className="text-zinc-400 text-sm">
               Código de la liga
             </p>
@@ -245,28 +307,22 @@ if (equiposProcesados === 0) {
             <p className="text-3xl font-black tracking-widest text-orange-400">
               {codigoLiga}
             </p>
-
           </div>
-
         </div>
 
+        {/* Gestionar participantes */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
-
           <h2 className="text-3xl font-bold mb-6">
             🚫 Gestionar participantes
           </h2>
 
           <div className="space-y-4">
-
             {participantes.map((usuario) => (
-
               <div
                 key={usuario.id}
                 className="bg-zinc-800 rounded-2xl p-4 flex items-center justify-between"
               >
-
                 <div className="flex items-center gap-4">
-
                   <img
                     src={`/avatars/${usuario.avatar}`}
                     alt={usuario.usuario}
@@ -274,7 +330,6 @@ if (equiposProcesados === 0) {
                   />
 
                   <div>
-
                     <h3 className="font-bold text-lg">
                       {usuario.usuario}
                     </h3>
@@ -290,9 +345,7 @@ if (equiposProcesados === 0) {
                         ? "Activo"
                         : "Desactivado"}
                     </p>
-
                   </div>
-
                 </div>
 
                 <button
@@ -312,37 +365,31 @@ if (equiposProcesados === 0) {
                     ? "Desactivar"
                     : "Activar"}
                 </button>
-
               </div>
-
             ))}
-
           </div>
-
         </div>
-<div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
 
-  <h2 className="text-3xl font-bold mb-6">
-    🎯 Bonificaciones de temporada
-  </h2>
+        {/* Bonificaciones de temporada */}
+        <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
+          <h2 className="text-3xl font-bold mb-6">
+            🎯 Bonificaciones de temporada
+          </h2>
 
-  <p className="text-zinc-400 mb-6">
-    Aplica automáticamente las bonificaciones de las predicciones
-    acertadas al finalizar el campeonato.
-  </p>
+          <p className="text-zinc-400 mb-6">
+            Aplica automáticamente las bonificaciones de las predicciones
+            acertadas al finalizar el campeonato.
+          </p>
 
-  <button
-  onClick={generarBonificaciones}
-  className="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-bold transition"
->
-    Generar bonificaciones
-  </button>
+          <button
+            onClick={generarBonificaciones}
+            className="bg-orange-600 hover:bg-orange-500 px-6 py-3 rounded-xl font-bold transition"
+          >
+            Generar bonificaciones
+          </button>
+        </div>
 
-</div>
       </div>
-
-        </AppLayout>
-  
-
+    </AppLayout>
   );
 }
