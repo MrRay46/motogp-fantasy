@@ -3,16 +3,21 @@
 import { useEffect, useState } from "react";
 
 import { getUsuarioActual } from "@/lib/session";
-import { obtenerRankingFantasy } from "@/services/liga";
+import { supabase } from "@/lib/supabase";
 
 import { RankingJugador } from "@/types/liga";
 
 import FantasyRankingRow from "./FantasyRankingRow";
 
 export default function FantasyRanking() {
-  const [ranking, setRanking] = useState<RankingJugador[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [ranking, setRanking] =
+    useState<RankingJugador[]>([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
 
   const [expandedPlayer, setExpandedPlayer] =
     useState<number | null>(null);
@@ -28,22 +33,81 @@ export default function FantasyRanking() {
   useEffect(() => {
     async function cargarRanking() {
       if (ligaId === null) {
-        setError("No hay una liga seleccionada.");
+        setError(
+          "No hay una liga seleccionada."
+        );
+
         setLoading(false);
+
         return;
       }
 
       try {
-        const datos =
-          await obtenerRankingFantasy(ligaId);
+        setLoading(true);
+        setError(null);
 
-        setRanking(datos);
+        // --------------------------------------------------
+        // OBTENER SESIÓN AUTENTICADA
+        // --------------------------------------------------
+
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (
+          sessionError ||
+          !session?.access_token
+        ) {
+          throw new Error(
+            "No hay una sesión autenticada."
+          );
+        }
+
+        // --------------------------------------------------
+        // CARGAR CLASIFICACIÓN MEDIANTE API
+        // --------------------------------------------------
+
+        const respuesta = await fetch(
+          `/api/ligas/clasificacion?liga_id=${encodeURIComponent(
+            ligaId
+          )}`,
+          {
+            method: "GET",
+
+            headers: {
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+          }
+        );
+
+        const resultado =
+          await respuesta
+            .json()
+            .catch(() => null);
+
+        if (!respuesta.ok) {
+          throw new Error(
+            resultado?.error ??
+              "No se pudo cargar la clasificación."
+          );
+        }
+
+        setRanking(
+          resultado?.ranking ?? []
+        );
       } catch (err) {
-        console.error(err);
+        console.error(
+          "Error cargando clasificación:",
+          err
+        );
 
         setError(
           "No se pudo cargar la clasificación."
         );
+
+        setRanking([]);
       } finally {
         setLoading(false);
       }
@@ -91,7 +155,6 @@ export default function FantasyRanking() {
         !error &&
         ligaId !== null &&
         ranking.length > 0 && (
-
           <div className="space-y-3">
 
             {ranking.map((jugador) => (
@@ -103,7 +166,8 @@ export default function FantasyRanking() {
                   jugador.id === usuarioId
                 }
                 expanded={
-                  expandedPlayer === jugador.id
+                  expandedPlayer ===
+                  jugador.id
                 }
                 onToggle={() =>
                   setExpandedPlayer((prev) =>
@@ -117,7 +181,6 @@ export default function FantasyRanking() {
 
           </div>
         )}
-
     </section>
   );
 }

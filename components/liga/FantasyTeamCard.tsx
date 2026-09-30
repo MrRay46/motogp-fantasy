@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { obtenerEquipoFantasy } from "@/services/liga";
+import { supabase } from "@/lib/supabase";
+
 import { EquipoFantasy } from "@/types/liga";
 
 interface Props {
@@ -25,13 +26,66 @@ export default function FantasyTeamCard({
       try {
         setLoading(true);
 
-        const datos =
-          await obtenerEquipoFantasy(
-            jugadorId,
-            ligaId
+        // --------------------------------------------------
+        // OBTENER SESIÓN AUTENTICADA
+        // --------------------------------------------------
+
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (
+          sessionError ||
+          !session?.access_token
+        ) {
+          console.error(
+            "No hay una sesión autenticada para cargar el equipo.",
+            sessionError
           );
 
-        setEquipo(datos);
+          setEquipo(null);
+          return;
+        }
+
+        // --------------------------------------------------
+        // CARGAR EQUIPO MEDIANTE API SEGURA
+        // --------------------------------------------------
+
+        const respuesta = await fetch(
+          `/api/equipo/miembro?jugador_id=${encodeURIComponent(
+            jugadorId
+          )}&liga_id=${encodeURIComponent(
+            ligaId
+          )}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization:
+                `Bearer ${session.access_token}`,
+            },
+          }
+        );
+
+        const resultado =
+          await respuesta
+            .json()
+            .catch(() => null);
+
+        if (!respuesta.ok) {
+          console.error(
+            "Error cargando equipo del jugador:",
+            resultado?.error ??
+              respuesta.statusText
+          );
+
+          setEquipo(null);
+          return;
+        }
+
+        setEquipo(
+          resultado?.equipo ?? null
+        );
       } catch (error) {
         console.error(
           "Error cargando equipo del jugador:",
