@@ -7,8 +7,6 @@ import UserCard from "./sidemenu/UserCard";
 import LeagueCard from "./sidemenu/LeagueCard";
 import HelpCard from "./sidemenu/HelpCard";
 
-import { esSuperAdmin } from "@/lib/auth/esSuperAdmin";
-
 type SideMenuProps = {
   abierto: boolean;
   onClose: () => void;
@@ -22,64 +20,47 @@ export default function SideMenu({
   const [esSuper, setEsSuper] = useState(false);
 
   useEffect(() => {
-    async function comprobarPermisos() {
-      const sesion = JSON.parse(
-        localStorage.getItem("usuario") || "{}"
-      );
+    async function cargarContexto() {
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-      if (!sesion.id) {
-        return;
-      }
+        if (sessionError || !session?.access_token) {
+          setEsAdmin(false);
+          setEsSuper(false);
+          return;
+        }
 
-      // -----------------------------------------
-      // SUPERADMIN
-      // -----------------------------------------
+        const respuesta = await fetch("/api/usuario/contexto", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-      setEsSuper(esSuperAdmin());
+        const resultado = await respuesta.json().catch(() => null);
 
-      // -----------------------------------------
-      // ADMINISTRADOR DE LA LIGA ACTUAL
-      // -----------------------------------------
+        if (!respuesta.ok) {
+          setEsAdmin(false);
+          setEsSuper(false);
+          return;
+        }
 
-      if (!sesion.liga_actual_id) {
+        setEsAdmin(Boolean(resultado.ligaActual?.admin_liga));
+        setEsSuper(resultado.usuario?.super_admin === true);
+      } catch (error) {
+        console.error("Error obteniendo permisos del menú:", error);
         setEsAdmin(false);
-        return;
+        setEsSuper(false);
       }
-
-      const {
-        data: relacion,
-        error: errorRelacion,
-      } = await supabase
-        .from("usuarios_ligas")
-        .select("admin_liga")
-        .eq("usuario_id", sesion.id)
-        .eq(
-          "liga_id",
-          sesion.liga_actual_id
-        )
-        .single();
-
-      if (errorRelacion) {
-        console.error(
-          "Error comprobando administrador de liga:",
-          errorRelacion
-        );
-
-        setEsAdmin(false);
-        return;
-      }
-
-      setEsAdmin(
-        relacion?.admin_liga ?? false
-      );
     }
 
-    comprobarPermisos();
+    void cargarContexto();
   }, []);
 
   return (
     <>
-      {/* Overlay */}
       <div
         onClick={onClose}
         className={`
@@ -94,30 +75,20 @@ export default function SideMenu({
         `}
       />
 
-      {/* Drawer */}
       <aside
         className={`
           fixed top-0 left-0 z-50
           h-screen w-[75%] max-w-[360px]
           bg-zinc-950 border-r border-zinc-800
           transition-transform duration-300
-          ${
-            abierto
-              ? "translate-x-0"
-              : "-translate-x-full"
-          }
+          ${abierto ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         <div className="h-full overflow-y-auto p-6">
           <div className="space-y-6">
-
             <UserCard />
 
             <LeagueCard />
-
-            {/* -------------------------------- */}
-            {/* MIS LIGAS */}
-            {/* -------------------------------- */}
 
             <a
               href="/ligas"
@@ -142,10 +113,6 @@ export default function SideMenu({
               🏁 Mis ligas
             </a>
 
-            {/* -------------------------------- */}
-            {/* ADMINISTRACIÓN DE LIGA */}
-            {/* -------------------------------- */}
-
             {esAdmin && (
               <a
                 href="/admin"
@@ -167,10 +134,6 @@ export default function SideMenu({
                 ⚙️ Administración
               </a>
             )}
-
-            {/* -------------------------------- */}
-            {/* SUPERADMIN */}
-            {/* -------------------------------- */}
 
             {esSuper && (
               <a
@@ -195,7 +158,6 @@ export default function SideMenu({
             )}
 
             <HelpCard />
-
           </div>
         </div>
       </aside>

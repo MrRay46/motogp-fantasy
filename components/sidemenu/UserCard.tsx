@@ -5,8 +5,12 @@ import { supabase } from "@/lib/supabase";
 import AvatarSelectorModal from "@/components/modals/AvatarSelectorModal";
 
 type Usuario = {
+  id: number;
   usuario: string;
   avatar: string;
+  email: string;
+  liga_actual_id: number | null;
+  super_admin: boolean;
 };
 
 export default function UserCard() {
@@ -18,59 +22,105 @@ export default function UserCard() {
   useEffect(() => {
     async function cargarUsuario() {
       try {
-        const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-        if (!sesion.id) {
-          setCargando(false);
+        if (sessionError || !session?.access_token) {
           return;
         }
 
-        const { data, error } = await supabase
-          .from("usuarios")
-          .select("usuario, avatar")
-          .eq("id", sesion.id)
-          .single();
+        const respuesta = await fetch("/api/usuario/contexto", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-        if (error) {
-          console.error(error);
+        const resultado = await respuesta.json().catch(() => null);
+
+        if (!respuesta.ok || !resultado?.usuario) {
+          console.error(
+            "Error cargando usuario:",
+            resultado?.error ?? respuesta.statusText
+          );
           return;
         }
 
-        setUsuario(data);
+        setUsuario(resultado.usuario);
+      } catch (error) {
+        console.error("Error cargando usuario:", error);
       } finally {
         setCargando(false);
       }
     }
 
-    cargarUsuario();
+    void cargarUsuario();
   }, []);
 
   async function guardarAvatar(nuevoAvatar: string) {
-    if (!usuario) return;
+    if (!usuario || guardando) return;
 
     setGuardando(true);
 
     try {
-      const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      const { error } = await supabase
-        .from("usuarios")
-        .update({
-          avatar: nuevoAvatar,
-        })
-        .eq("id", sesion.id);
-
-      if (error) {
-        console.error(error);
+      if (sessionError || !session?.access_token) {
+        console.error("No hay una sesión autenticada.", sessionError);
         return;
       }
 
-      setUsuario({
-        ...usuario,
-        avatar: nuevoAvatar,
+      const respuesta = await fetch("/api/perfil/avatar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ avatar: nuevoAvatar }),
       });
 
+      const resultado = await respuesta.json().catch(() => null);
+
+      if (!respuesta.ok) {
+        console.error(
+          "Error guardando avatar:",
+          resultado?.error ?? respuesta.statusText
+        );
+        return;
+      }
+
+      const usuarioActualizado = {
+        ...usuario,
+        avatar: resultado.avatar ?? nuevoAvatar,
+      };
+
+      setUsuario(usuarioActualizado);
       setModalAbierto(false);
+
+      try {
+        const sesionLocal = JSON.parse(
+          localStorage.getItem("usuario") || "{}"
+        );
+
+        localStorage.setItem(
+          "usuario",
+          JSON.stringify({
+            ...sesionLocal,
+            avatar: usuarioActualizado.avatar,
+          })
+        );
+      } catch (error) {
+        console.error(
+          "Error actualizando el avatar local:",
+          error
+        );
+      }
+    } catch (error) {
+      console.error("Error guardando avatar:", error);
     } finally {
       setGuardando(false);
     }
@@ -100,6 +150,7 @@ export default function UserCard() {
           <button
             onClick={() => setModalAbierto(true)}
             className="group"
+            disabled={guardando}
           >
             <img
               src={`/avatars/${usuario.avatar}`}
@@ -119,12 +170,12 @@ export default function UserCard() {
       </div>
 
       <AvatarSelectorModal
-    open={modalAbierto}
-    avatarActual={usuario.avatar}
-    saving={guardando}
-    onClose={() => setModalAbierto(false)}
-    onSave={guardarAvatar}
-/>
+        open={modalAbierto}
+        avatarActual={usuario.avatar}
+        saving={guardando}
+        onClose={() => setModalAbierto(false)}
+        onSave={guardarAvatar}
+      />
     </>
   );
 }

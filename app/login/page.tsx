@@ -26,68 +26,47 @@ export default function LoginPage() {
 
       if (error) {
         console.error("Error de Supabase Auth:", error);
-
-        alert(
-          "Email o contraseña incorrectos."
-        );
-
+        alert("Email o contraseña incorrectos.");
         return;
       }
 
-      if (!data.user) {
-        alert(
-          "No se ha podido obtener el usuario autenticado."
-        );
-
+      if (!data.session?.access_token) {
+        alert("No se ha podido obtener la sesión autenticada.");
         return;
       }
 
-      // Buscamos el usuario Rayongrid asociado
-      // al usuario de Supabase Auth.
-      const { data: usuarioRayongrid, error: errorUsuario } =
-        await supabase
-          .from("usuarios")
-          .select(
-            "id, usuario, avatar, liga_actual_id, super_admin"
-          )
-          .eq("auth_user_id", data.user.id)
-          .eq("activo", true)
-          .single();
+      const respuesta = await fetch("/api/usuario/contexto", {
+        headers: {
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+      });
 
-      if (errorUsuario || !usuarioRayongrid) {
+      const resultado = await respuesta.json().catch(() => null);
+
+      if (!respuesta.ok || !resultado?.usuario) {
         console.error(
-          "Error obteniendo usuario Rayongrid:",
-          errorUsuario
+          "Error obteniendo el perfil Rayongrid:",
+          resultado
         );
 
-        // Cerramos la sesión Auth porque no existe
-        // un perfil Rayongrid asociado.
         await supabase.auth.signOut();
 
         alert(
-          "La cuenta está autenticada, pero no está vinculada a un usuario de Rayongrid."
+          resultado?.error ??
+            "La cuenta no está vinculada a un usuario de Rayongrid."
         );
-
         return;
       }
 
-      // Mantenemos temporalmente este dato porque
-      // el resto de Rayongrid todavía lo utiliza.
       localStorage.setItem(
         "usuario",
-        JSON.stringify(usuarioRayongrid)
+        JSON.stringify(resultado.usuario)
       );
 
       window.location.href = "/dashboard";
     } catch (error) {
-      console.error(
-        "Error al iniciar sesión:",
-        error
-      );
-
-      alert(
-        "No se ha podido iniciar sesión. Inténtalo de nuevo."
-      );
+      console.error("Error al iniciar sesión:", error);
+      alert("No se ha podido iniciar sesión. Inténtalo de nuevo.");
     }
   };
 
@@ -100,7 +79,7 @@ export default function LoginPage() {
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
           className="
             w-full
             p-4
@@ -118,7 +97,7 @@ export default function LoginPage() {
           type="password"
           placeholder="Contraseña"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(event) => setPassword(event.target.value)}
           className="
             w-full
             p-4
@@ -140,9 +119,7 @@ export default function LoginPage() {
       <Divider />
 
       <div className="text-center">
-        <p className="text-zinc-500">
-          ¿No tienes cuenta?
-        </p>
+        <p className="text-zinc-500">¿No tienes cuenta?</p>
 
         <button
           onClick={() => (window.location.href = "/registro")}
@@ -158,9 +135,7 @@ export default function LoginPage() {
         </button>
       </div>
 
-      <p className="mt-10 text-xs text-zinc-600">
-        v0.9 Alpha
-      </p>
+      <p className="mt-10 text-xs text-zinc-600">v0.9 Alpha</p>
     </main>
   );
 }

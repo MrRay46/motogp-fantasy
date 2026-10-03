@@ -16,57 +16,39 @@ export default function LeagueCard() {
   useEffect(() => {
     async function cargarLiga() {
       try {
-        const sesion = JSON.parse(localStorage.getItem("usuario") || "{}");
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-        if (!sesion.id) {
-          setCargando(false);
+        if (sessionError || !session?.access_token) {
           return;
         }
 
-        // Obtener liga activa
-        const { data: usuario, error: errorUsuario } = await supabase
-          .from("usuarios")
-          .select("liga_actual_id")
-          .eq("id", sesion.id)
-          .single();
+        const respuesta = await fetch("/api/usuario/contexto", {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
-        if (errorUsuario || !usuario?.liga_actual_id) {
-          setCargando(false);
-          return;
-        }
+        const resultado = await respuesta.json().catch(() => null);
 
-        // Ejecutar ambas consultas en paralelo
-        const [ligaRes, relacionRes] = await Promise.all([
-          supabase
-            .from("ligas")
-            .select("nombre")
-            .eq("id", usuario.liga_actual_id)
-            .single(),
-
-          supabase
-            .from("usuarios_ligas")
-            .select("admin_liga")
-            .eq("usuario_id", sesion.id)
-            .eq("liga_id", usuario.liga_actual_id)
-            .single(),
-        ]);
-
-        if (ligaRes.error || relacionRes.error) {
-          console.error(ligaRes.error || relacionRes.error);
-          setCargando(false);
+        if (!respuesta.ok || !resultado?.ligaActual) {
           return;
         }
 
         setLiga({
-          nombre: ligaRes.data.nombre,
-          admin: relacionRes.data.admin_liga,
+          nombre: resultado.ligaActual.nombre,
+          admin: resultado.ligaActual.admin_liga,
         });
+      } catch (error) {
+        console.error("Error cargando la liga activa:", error);
       } finally {
         setCargando(false);
       }
     }
 
-    cargarLiga();
+    void cargarLiga();
   }, []);
 
   if (cargando) {
@@ -88,19 +70,11 @@ export default function LeagueCard() {
 
   return (
     <div className="bg-zinc-900 rounded-2xl p-5 shadow-lg">
-
-      <p className="text-sm text-zinc-500 mb-4">
-        Liga activa
-      </p>
+      <p className="text-sm text-zinc-500 mb-4">Liga activa</p>
 
       <div className="flex items-center gap-3 mb-4">
-
         <Flag className="text-orange-500" size={20} />
-
-        <span className="font-semibold text-lg">
-          {liga.nombre}
-        </span>
-
+        <span className="font-semibold text-lg">{liga.nombre}</span>
       </div>
 
       <span
@@ -112,7 +86,6 @@ export default function LeagueCard() {
       >
         {liga.admin ? "Administrador" : "Jugador"}
       </span>
-
     </div>
   );
 }

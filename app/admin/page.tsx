@@ -1,4 +1,3 @@
-
 "use client";
 
 import AppLayout from "@/components/layout/AppLayout";
@@ -13,99 +12,64 @@ interface Participante {
 }
 
 export default function AdminPage() {
-  const [participantes, setParticipantes] = useState<Participante[]>([]);
+  const [participantes, setParticipantes] =
+    useState<Participante[]>([]);
   const [codigoLiga, setCodigoLiga] = useState("");
   const [loading, setLoading] = useState(true);
   const [procesandoBonificaciones, setProcesandoBonificaciones] =
     useState(false);
 
   useEffect(() => {
-    cargarDatos();
+    void cargarDatos();
   }, []);
 
   async function cargarDatos() {
     setLoading(true);
 
-    const sesion = JSON.parse(
-      localStorage.getItem("usuario") || "{}"
-    );
+    try {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-    if (!sesion.id) {
-      window.location.href = "/login";
-      return;
-    }
+      if (sessionError || !session?.access_token) {
+        window.location.href = "/login";
+        return;
+      }
 
-    if (!sesion.liga_actual_id) {
-      setLoading(false);
-      return;
-    }
+      const respuesta = await fetch("/api/admin/participantes", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-    // Buscar liga
-    const {
-      data: liga,
-      error: errorLiga,
-    } = await supabase
-      .from("ligas")
-      .select("id,codigo")
-      .eq("id", sesion.liga_actual_id)
-      .single();
+      const resultado = await respuesta.json().catch(() => null);
 
-    if (errorLiga || !liga) {
-      console.error(errorLiga);
-      setLoading(false);
-      return;
-    }
+      if (!respuesta.ok) {
+        console.error(
+          "Error cargando participantes:",
+          resultado?.error ?? respuesta.statusText
+        );
+        setParticipantes([]);
+        setCodigoLiga("");
+        return;
+      }
 
-    setCodigoLiga(liga.codigo);
-
-    // Buscar miembros de esa liga
-    const {
-      data: relaciones,
-      error: errorRelaciones,
-    } = await supabase
-      .from("usuarios_ligas")
-      .select("usuario_id")
-      .eq("liga_id", liga.id);
-
-    if (errorRelaciones) {
-      console.error(errorRelaciones);
-      setLoading(false);
-      return;
-    }
-
-    const ids = relaciones.map((r) => r.usuario_id);
-
-    if (ids.length === 0) {
+      setCodigoLiga(resultado.codigo ?? "");
+      setParticipantes(resultado.participantes ?? []);
+    } catch (error) {
+      console.error("Error cargando datos de administración:", error);
       setParticipantes([]);
+      setCodigoLiga("");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Buscar datos de los participantes
-    const {
-      data: usuarios,
-      error: errorUsuarios,
-    } = await supabase
-      .from("usuarios")
-      .select("id,usuario,avatar,activo")
-      .in("id", ids)
-      .order("usuario");
-
-    if (errorUsuarios) {
-      console.error(errorUsuarios);
-      setLoading(false);
-      return;
-    }
-
-    setParticipantes(usuarios || []);
-    setLoading(false);
   }
 
-  async function generarInvitacion() {
+  function generarInvitacion() {
     alert(`Código de la liga: ${codigoLiga}`);
   }
 
-  // Aplicar bonificaciones mediante la API segura
   async function generarBonificaciones() {
     const confirmar = window.confirm(
       "¿Aplicar las bonificaciones finales de la temporada?\n\n" +
@@ -117,22 +81,17 @@ export default function AdminPage() {
     try {
       setProcesandoBonificaciones(true);
 
-      // Comprobar la sesión de Supabase Auth
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        alert(
-          "Tu sesión ha caducado. Inicia sesión de nuevo."
-        );
-
+        alert("Tu sesión ha caducado. Inicia sesión de nuevo.");
         window.location.href = "/login";
         return;
       }
 
-      // Obtener la liga activa
       const sesion = JSON.parse(
         localStorage.getItem("usuario") || "{}"
       );
@@ -142,8 +101,7 @@ export default function AdminPage() {
         return;
       }
 
-      // Enviar la solicitud al servidor
-      const response = await fetch(
+      const respuesta = await fetch(
         "/api/admin/bonificaciones",
         {
           method: "POST",
@@ -157,20 +115,19 @@ export default function AdminPage() {
         }
       );
 
-      const resultado = await response.json();
+      const resultado = await respuesta.json().catch(() => null);
 
-      if (!response.ok) {
+      if (!respuesta.ok) {
         alert(
-          resultado.error ||
+          resultado?.error ??
             "No se pudieron aplicar las bonificaciones."
         );
         return;
       }
 
-      // Mostrar el resultado del proceso
       if (resultado.equiposProcesados === 0) {
         alert(
-          resultado.mensaje ||
+          resultado.mensaje ??
             "No había equipos pendientes de bonificación."
         );
       } else {
@@ -179,10 +136,7 @@ export default function AdminPage() {
           `Equipos procesados: ${resultado.equiposProcesados}\n` +
           `Equipos omitidos: ${resultado.equiposOmitidos}`;
 
-        if (
-          resultado.errores &&
-          resultado.errores.length > 0
-        ) {
+        if (resultado.errores?.length > 0) {
           mensaje +=
             "\n\nNo se pudieron actualizar los siguientes equipos: " +
             resultado.errores.join(", ");
@@ -191,20 +145,13 @@ export default function AdminPage() {
         alert(mensaje);
       }
     } catch (error) {
-      console.error(
-        "Error aplicando las bonificaciones:",
-        error
-      );
-
-      alert(
-        "Error de conexión al aplicar las bonificaciones."
-      );
+      console.error("Error aplicando las bonificaciones:", error);
+      alert("Error de conexión al aplicar las bonificaciones.");
     } finally {
       setProcesandoBonificaciones(false);
     }
   }
 
-  // Activar o desactivar un participante mediante la API segura
   async function cambiarEstado(
     id: number,
     activo: boolean
@@ -218,22 +165,17 @@ export default function AdminPage() {
     if (!confirmar) return;
 
     try {
-      // Comprobar la sesión de Supabase Auth
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
 
       if (sessionError || !session) {
-        alert(
-          "Tu sesión ha caducado. Inicia sesión de nuevo."
-        );
-
+        alert("Tu sesión ha caducado. Inicia sesión de nuevo.");
         window.location.href = "/login";
         return;
       }
 
-      // Obtener la liga activa
       const sesion = JSON.parse(
         localStorage.getItem("usuario") || "{}"
       );
@@ -243,8 +185,7 @@ export default function AdminPage() {
         return;
       }
 
-      // Enviar la solicitud al servidor
-      const response = await fetch(
+      const respuesta = await fetch(
         "/api/admin/participantes",
         {
           method: "POST",
@@ -260,27 +201,20 @@ export default function AdminPage() {
         }
       );
 
-      const resultado = await response.json();
+      const resultado = await respuesta.json().catch(() => null);
 
-      if (!response.ok) {
+      if (!respuesta.ok) {
         alert(
-          resultado.error ||
+          resultado?.error ??
             "No se pudo actualizar el usuario."
         );
         return;
       }
 
-      // Recargar los participantes tras la actualización
       await cargarDatos();
     } catch (error) {
-      console.error(
-        "Error cambiando el estado del participante:",
-        error
-      );
-
-      alert(
-        "Error de conexión al actualizar el participante."
-      );
+      console.error("Error cambiando el estado del participante:", error);
+      alert("Error de conexión al actualizar el participante.");
     }
   }
 
@@ -297,19 +231,15 @@ export default function AdminPage() {
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-8">
-
-        {/* Cabecera */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
           <h1 className="text-4xl font-black mb-3">
             ⚙️ Panel de Administración
           </h1>
-
           <p className="text-zinc-400">
             Gestiona los participantes de tu liga.
           </p>
         </div>
 
-        {/* Añadir participante */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
           <h2 className="text-3xl font-bold mb-6">
             ➕ Añadir participante
@@ -326,45 +256,42 @@ export default function AdminPage() {
             <p className="text-zinc-400 text-sm">
               Código de la liga
             </p>
-
             <p className="text-3xl font-black tracking-widest text-orange-400">
               {codigoLiga}
             </p>
           </div>
         </div>
 
-        {/* Gestionar participantes */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
           <h2 className="text-3xl font-bold mb-6">
             🚫 Gestionar participantes
           </h2>
 
           <div className="space-y-4">
-            {participantes.map((usuario) => (
+            {participantes.map((participante) => (
               <div
-                key={usuario.id}
+                key={participante.id}
                 className="bg-zinc-800 rounded-2xl p-4 flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
                   <img
-                    src={`/avatars/${usuario.avatar}`}
-                    alt={usuario.usuario}
+                    src={`/avatars/${participante.avatar}`}
+                    alt={participante.usuario}
                     className="w-14 h-14 rounded-full border border-zinc-700"
                   />
 
                   <div>
                     <h3 className="font-bold text-lg">
-                      {usuario.usuario}
+                      {participante.usuario}
                     </h3>
-
                     <p
                       className={
-                        usuario.activo
+                        participante.activo
                           ? "text-green-400"
                           : "text-red-400"
                       }
                     >
-                      {usuario.activo
+                      {participante.activo
                         ? "Activo"
                         : "Desactivado"}
                     </p>
@@ -374,26 +301,23 @@ export default function AdminPage() {
                 <button
                   onClick={() =>
                     cambiarEstado(
-                      usuario.id,
-                      usuario.activo
+                      participante.id,
+                      participante.activo
                     )
                   }
                   className={
-                    usuario.activo
+                    participante.activo
                       ? "bg-red-600 hover:bg-red-500 px-5 py-2 rounded-xl font-bold transition"
                       : "bg-green-600 hover:bg-green-500 px-5 py-2 rounded-xl font-bold transition"
                   }
                 >
-                  {usuario.activo
-                    ? "Desactivar"
-                    : "Activar"}
+                  {participante.activo ? "Desactivar" : "Activar"}
                 </button>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Bonificaciones de temporada */}
         <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-8">
           <h2 className="text-3xl font-bold mb-6">
             🎯 Bonificaciones de temporada
@@ -414,7 +338,6 @@ export default function AdminPage() {
               : "Generar bonificaciones"}
           </button>
         </div>
-
       </div>
     </AppLayout>
   );
