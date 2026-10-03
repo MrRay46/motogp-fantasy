@@ -1,315 +1,429 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
-import { verificarSesion } from "@/lib/auth/auth";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-const supabaseUrl =
-  "https://edlpwbhgxixiyivvljtk.supabase.co";
+const TIPOS_NOTICIA = [
+  "motogp",
+  "mercado",
+  "fantasy",
+  "lesión",
+  "calendario",
+  "rumor",
+] as const;
 
-const supabaseServiceRoleKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY;
+type ResultadoAutenticacion =
+  | {
+      ok: true;
+      usuario: {
+        id: number;
+      };
+    }
+  | {
+      ok: false;
+      respuesta: NextResponse;
+    };
 
-if (!supabaseServiceRoleKey) {
-  throw new Error(
-    "Falta SUPABASE_SERVICE_ROLE_KEY en .env.local"
+function errorJson(mensaje: string, estado: number) {
+  return NextResponse.json({ error: mensaje }, { status: estado });
+}
+
+async function comprobarSuperAdmin(
+  request: Request
+): Promise<ResultadoAutenticacion> {
+  const authorization = request.headers.get("authorization");
+
+  if (!authorization?.startsWith("Bearer ")) {
+    return {
+      ok: false,
+      respuesta: errorJson("No autenticado.", 401),
+    };
+  }
+
+  const token = authorization.slice(7).trim();
+
+  if (!token) {
+    return {
+      ok: false,
+      respuesta: errorJson("Sesión no válida.", 401),
+    };
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseAdmin.auth.getUser(token);
+
+  if (authError || !user) {
+    return {
+      ok: false,
+      respuesta: errorJson("Sesión no válida.", 401),
+    };
+  }
+
+  const { data: usuario, error: usuarioError } = await supabaseAdmin
+    .from("usuarios")
+    .select("id, activo, super_admin")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  if (usuarioError) {
+    console.error("Error comprobando superadmin:", usuarioError);
+
+    return {
+      ok: false,
+      respuesta: errorJson("No se ha podido comprobar el usuario.", 500),
+    };
+  }
+
+  if (!usuario || usuario.activo !== true || usuario.super_admin !== true) {
+    return {
+      ok: false,
+      respuesta: errorJson("No autorizado.", 403),
+    };
+  }
+
+  return {
+    ok: true,
+    usuario: {
+      id: usuario.id,
+    },
+  };
+}
+
+function esObjeto(
+  valor: unknown
+): valor is Record<string, unknown> {
+  return (
+    typeof valor === "object" &&
+    valor !== null &&
+    !Array.isArray(valor)
   );
 }
 
-const supabase = createClient(
-  supabaseUrl,
-  supabaseServiceRoleKey
-);
-
-async function comprobarSuperAdmin() {
-  const cookieStore = await cookies();
-
-  const token =
-    cookieStore.get("rayongrid_session")?.value;
-
-  const sesion = verificarSesion(token);
-
-  if (!sesion) {
-    return null;
-  }
-
-  const { data: usuario, error } = await supabase
-    .from("usuarios")
-    .select("id, super_admin, activo")
-    .eq("id", sesion.usuarioId)
-    .single();
-
+function validarTipo(valor: unknown): string | null {
   if (
-    error ||
-    !usuario ||
-    usuario.activo !== true ||
-    usuario.super_admin !== true
+    typeof valor !== "string" ||
+    !TIPOS_NOTICIA.includes(
+      valor as (typeof TIPOS_NOTICIA)[number]
+    )
   ) {
     return null;
   }
 
-  return usuario;
+  return valor;
+}
+
+function validarPilotoId(
+  valor: unknown
+): { valido: true; id: number | null } | { valido: false } {
+  if (
+    valor === null ||
+    valor === undefined ||
+    valor === ""
+  ) {
+    return { valido: true, id: null };
+  }
+
+  const id = Number(valor);
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return { valido: false };
+  }
+
+  return { valido: true, id };
+}
+
+export async function GET(request: Request) {
+  try {
+    const autenticacion = await comprobarSuperAdmin(request);
+
+    if (!autenticacion.ok) {
+      return autenticacion.respuesta;
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("noticias")
+      .select(`
+        id,
+        tipo,
+        titulo,
+        contenido,
+        fecha,
+        visible,
+        piloto_id,
+        piloto:pilotos (
+          id,
+          nombre,
+          miniatura
+        )
+      `)
+      .order("fecha", { ascending: false });
+
+    if (error) {
+      console.error("Error cargando noticias para administración:", error);
+      return errorJson("No se han podido cargar las noticias.", 500);
+    }
+
+    return NextResponse.json(
+      { noticias: data ?? [] },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  } catch (error) {
+    console.error("Error en GET de noticias:", error);
+    return errorJson("Error interno del servidor.", 500);
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const usuario = await comprobarSuperAdmin();
+    const autenticacion = await comprobarSuperAdmin(request);
 
-    if (!usuario) {
-      return NextResponse.json(
-        {
-          error: "No autorizado.",
-        },
-        { status: 403 }
-      );
+    if (!autenticacion.ok) {
+      return autenticacion.respuesta;
     }
 
-    const body = await request.json();
+    const valor = await request.json();
 
-    const tipo =
-      typeof body.tipo === "string"
-        ? body.tipo.trim()
-        : "";
+    if (!esObjeto(valor)) {
+      return errorJson("Los datos de la noticia no son válidos.", 400);
+    }
 
+    const tipo = validarTipo(valor.tipo);
     const titulo =
-      typeof body.titulo === "string"
-        ? body.titulo.trim()
-        : "";
-
+      typeof valor.titulo === "string" ? valor.titulo.trim() : "";
     const contenido =
-      typeof body.contenido === "string"
-        ? body.contenido.trim()
+      typeof valor.contenido === "string"
+        ? valor.contenido.trim()
         : "";
-
-    const pilotoId =
-      body.piloto_id === null ||
-      body.piloto_id === undefined ||
-      body.piloto_id === ""
-        ? null
-        : Number(body.piloto_id);
-
+    const piloto = validarPilotoId(valor.piloto_id);
     const visible =
-      typeof body.visible === "boolean"
-        ? body.visible
-        : true;
+      valor.visible === undefined ? true : valor.visible;
 
-    if (!tipo || !titulo) {
-      return NextResponse.json(
-        {
-          error: "Tipo y título son obligatorios.",
-        },
-        { status: 400 }
+    if (!tipo) {
+      return errorJson("El tipo de noticia no es válido.", 400);
+    }
+
+    if (!titulo || titulo.length > 160) {
+      return errorJson(
+        "El título es obligatorio y no puede superar 160 caracteres.",
+        400
       );
     }
 
-    if (
-      pilotoId !== null &&
-      (!Number.isInteger(pilotoId) || pilotoId <= 0)
-    ) {
-      return NextResponse.json(
-        {
-          error: "Piloto no válido.",
-        },
-        { status: 400 }
+    if (contenido.length > 10000) {
+      return errorJson(
+        "El contenido no puede superar 10.000 caracteres.",
+        400
       );
     }
 
-    const { data, error } = await supabase
+    if (!piloto.valido) {
+      return errorJson("El piloto indicado no es válido.", 400);
+    }
+
+    if (typeof visible !== "boolean") {
+      return errorJson("El estado de publicación no es válido.", 400);
+    }
+
+    const { data, error } = await supabaseAdmin
       .from("noticias")
       .insert({
         tipo,
         titulo,
         contenido: contenido || null,
-        piloto_id: pilotoId,
+        piloto_id: piloto.id,
         visible,
       })
-      .select()
+      .select(`
+        id,
+        tipo,
+        titulo,
+        contenido,
+        fecha,
+        visible,
+        piloto_id,
+        piloto:pilotos (
+          id,
+          nombre,
+          miniatura
+        )
+      `)
       .single();
 
     if (error) {
-      console.error(
-        "Error creando noticia:",
-        error
-      );
-
-      return NextResponse.json(
-        {
-          error: error.message,
-        },
-        { status: 500 }
-      );
+      console.error("Error creando noticia:", error);
+      return errorJson("No se ha podido crear la noticia.", 500);
     }
 
-    return NextResponse.json({
-      noticia: data,
-    });
+    return NextResponse.json({ noticia: data });
   } catch (error) {
-    console.error(
-      "Error en API de noticias:",
-      error
-    );
-
-    return NextResponse.json(
-      {
-        error: "Error interno del servidor.",
-      },
-      { status: 500 }
-    );
+    console.error("Error en POST de noticias:", error);
+    return errorJson("Error interno del servidor.", 500);
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const usuario = await comprobarSuperAdmin();
+    const autenticacion = await comprobarSuperAdmin(request);
 
-    if (!usuario) {
-      return NextResponse.json(
-        {
-          error: "No autorizado.",
-        },
-        { status: 403 }
-      );
+    if (!autenticacion.ok) {
+      return autenticacion.respuesta;
     }
 
-    const body = await request.json();
+    const valor = await request.json();
 
-    const id = Number(body.id);
+    if (!esObjeto(valor)) {
+      return errorJson("Los datos de la noticia no son válidos.", 400);
+    }
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return NextResponse.json(
-        {
-          error: "ID de noticia no válido.",
-        },
-        { status: 400 }
-      );
+    const id = Number(valor.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return errorJson("El ID de noticia no es válido.", 400);
     }
 
     const actualizacion: Record<string, unknown> = {};
 
-    if (typeof body.tipo === "string") {
-      actualizacion.tipo = body.tipo.trim();
+    if (valor.tipo !== undefined) {
+      const tipo = validarTipo(valor.tipo);
+
+      if (!tipo) {
+        return errorJson("El tipo de noticia no es válido.", 400);
+      }
+
+      actualizacion.tipo = tipo;
     }
 
-    if (typeof body.titulo === "string") {
-      actualizacion.titulo = body.titulo.trim();
+    if (valor.titulo !== undefined) {
+      if (typeof valor.titulo !== "string") {
+        return errorJson("El título no es válido.", 400);
+      }
+
+      const titulo = valor.titulo.trim();
+
+      if (!titulo || titulo.length > 160) {
+        return errorJson(
+          "El título es obligatorio y no puede superar 160 caracteres.",
+          400
+        );
+      }
+
+      actualizacion.titulo = titulo;
     }
 
-    if (typeof body.contenido === "string") {
-      actualizacion.contenido =
-        body.contenido.trim() || null;
+    if (valor.contenido !== undefined) {
+      if (typeof valor.contenido !== "string") {
+        return errorJson("El contenido no es válido.", 400);
+      }
+
+      const contenido = valor.contenido.trim();
+
+      if (contenido.length > 10000) {
+        return errorJson(
+          "El contenido no puede superar 10.000 caracteres.",
+          400
+        );
+      }
+
+      actualizacion.contenido = contenido || null;
     }
 
-    if (
-      body.piloto_id === null ||
-      body.piloto_id === undefined ||
-      body.piloto_id === ""
-    ) {
-      actualizacion.piloto_id = null;
-    } else if (Number.isInteger(Number(body.piloto_id))) {
-      actualizacion.piloto_id = Number(body.piloto_id);
+    if (valor.piloto_id !== undefined) {
+      const piloto = validarPilotoId(valor.piloto_id);
+
+      if (!piloto.valido) {
+        return errorJson("El piloto indicado no es válido.", 400);
+      }
+
+      actualizacion.piloto_id = piloto.id;
     }
 
-    if (typeof body.visible === "boolean") {
-      actualizacion.visible = body.visible;
+    if (valor.visible !== undefined) {
+      if (typeof valor.visible !== "boolean") {
+        return errorJson("El estado de publicación no es válido.", 400);
+      }
+
+      actualizacion.visible = valor.visible;
     }
 
-    const { data, error } = await supabase
+    if (Object.keys(actualizacion).length === 0) {
+      return errorJson("No se han enviado cambios para guardar.", 400);
+    }
+
+    const { data, error } = await supabaseAdmin
       .from("noticias")
       .update(actualizacion)
       .eq("id", id)
-      .select()
-      .single();
+      .select(`
+        id,
+        tipo,
+        titulo,
+        contenido,
+        fecha,
+        visible,
+        piloto_id,
+        piloto:pilotos (
+          id,
+          nombre,
+          miniatura
+        )
+      `)
+      .maybeSingle();
 
     if (error) {
-      console.error(
-        "Error actualizando noticia:",
-        error
-      );
-
-      return NextResponse.json(
-        {
-          error: error.message,
-        },
-        { status: 500 }
-      );
+      console.error("Error actualizando noticia:", error);
+      return errorJson("No se ha podido actualizar la noticia.", 500);
     }
 
-    return NextResponse.json({
-      noticia: data,
-    });
-  } catch (error) {
-    console.error(
-      "Error en API de noticias:",
-      error
-    );
+    if (!data) {
+      return errorJson("No se ha encontrado la noticia.", 404);
+    }
 
-    return NextResponse.json(
-      {
-        error: "Error interno del servidor.",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ noticia: data });
+  } catch (error) {
+    console.error("Error en PATCH de noticias:", error);
+    return errorJson("Error interno del servidor.", 500);
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const usuario = await comprobarSuperAdmin();
+    const autenticacion = await comprobarSuperAdmin(request);
 
-    if (!usuario) {
-      return NextResponse.json(
-        {
-          error: "No autorizado.",
-        },
-        { status: 403 }
-      );
+    if (!autenticacion.ok) {
+      return autenticacion.respuesta;
     }
 
-    const body = await request.json();
+    const valor = await request.json();
 
-    const id = Number(body.id);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      return NextResponse.json(
-        {
-          error: "ID de noticia no válido.",
-        },
-        { status: 400 }
-      );
+    if (!esObjeto(valor)) {
+      return errorJson("Los datos de la noticia no son válidos.", 400);
     }
 
-    const { error } = await supabase
+    const id = Number(valor.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return errorJson("El ID de noticia no es válido.", 400);
+    }
+
+    const { data, error } = await supabaseAdmin
       .from("noticias")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("id")
+      .maybeSingle();
 
     if (error) {
-      console.error(
-        "Error eliminando noticia:",
-        error
-      );
-
-      return NextResponse.json(
-        {
-          error: error.message,
-        },
-        { status: 500 }
-      );
+      console.error("Error eliminando noticia:", error);
+      return errorJson("No se ha podido eliminar la noticia.", 500);
     }
 
-    return NextResponse.json({
-      ok: true,
-    });
-  } catch (error) {
-    console.error(
-      "Error en API de noticias:",
-      error
-    );
+    if (!data) {
+      return errorJson("No se ha encontrado la noticia.", 404);
+    }
 
-    return NextResponse.json(
-      {
-        error: "Error interno del servidor.",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Error en DELETE de noticias:", error);
+    return errorJson("Error interno del servidor.", 500);
   }
 }

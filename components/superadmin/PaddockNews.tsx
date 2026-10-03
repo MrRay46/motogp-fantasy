@@ -11,6 +11,12 @@ type Piloto = {
   orden: number;
 };
 
+type PilotoRelacionado = {
+  id: number;
+  nombre: string;
+  miniatura: string | null;
+};
+
 type Noticia = {
   id: number;
   tipo: string;
@@ -19,183 +25,155 @@ type Noticia = {
   fecha: string | null;
   visible: boolean | null;
   piloto_id: number | null;
-  piloto: {
-    id: number;
-    nombre: string;
-    miniatura: string | null;
-  } | null;
+  piloto: PilotoRelacionado | null;
 };
 
 const TIPOS_NOTICIA = [
-  {
-    valor: "motogp",
-    nombre: "🏁 MotoGP",
-  },
-  {
-    valor: "mercado",
-    nombre: "💰 Mercado",
-  },
-  {
-    valor: "fantasy",
-    nombre: "⭐ Fantasy",
-  },
-  {
-    valor: "lesión",
-    nombre: "🩺 Lesión",
-  },
-  {
-    valor: "calendario",
-    nombre: "📅 Calendario",
-  },
-  {
-    valor: "rumor",
-    nombre: "💬 Rumor",
-  },
+  { valor: "motogp", nombre: "🏁 MotoGP" },
+  { valor: "mercado", nombre: "💰 Mercado" },
+  { valor: "fantasy", nombre: "⭐ Fantasy" },
+  { valor: "lesión", nombre: "🩺 Lesión" },
+  { valor: "calendario", nombre: "📅 Calendario" },
+  { valor: "rumor", nombre: "💬 Rumor" },
 ];
 
+const API_NOTICIAS = "/api/superadmin/noticias";
+
+async function obtenerToken(): Promise<string> {
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
+  if (error || !session?.access_token) {
+    throw new Error("Tu sesión ha caducado. Inicia sesión de nuevo.");
+  }
+
+  return session.access_token;
+}
+
+function normalizarPiloto(valor: unknown): PilotoRelacionado | null {
+  if (Array.isArray(valor)) {
+    valor = valor[0] ?? null;
+  }
+
+  if (
+    typeof valor !== "object" ||
+    valor === null ||
+    !("id" in valor) ||
+    !("nombre" in valor)
+  ) {
+    return null;
+  }
+
+  const piloto = valor as Record<string, unknown>;
+
+  return {
+    id: Number(piloto.id),
+    nombre: String(piloto.nombre),
+    miniatura:
+      typeof piloto.miniatura === "string"
+        ? piloto.miniatura
+        : null,
+  };
+}
+
 export default function PaddockNews() {
-  const [noticias, setNoticias] =
-    useState<Noticia[]>([]);
-
-  const [pilotos, setPilotos] =
-    useState<Piloto[]>([]);
-
-  const [tipo, setTipo] =
-    useState("motogp");
-
-  const [pilotoId, setPilotoId] =
-    useState<number | null>(null);
-
-  const [titulo, setTitulo] =
-    useState("");
-
-  const [contenido, setContenido] =
-    useState("");
-
-  const [visible, setVisible] =
-    useState(true);
-
-  const [editandoId, setEditandoId] =
-    useState<number | null>(null);
-
-  const [cargando, setCargando] =
-    useState(true);
-
-  const [guardando, setGuardando] =
-    useState(false);
-
-  const [mensaje, setMensaje] =
-    useState("");
-
-  // -----------------------------------------
-  // CARGAR DATOS
-  // -----------------------------------------
+  const [noticias, setNoticias] = useState<Noticia[]>([]);
+  const [pilotos, setPilotos] = useState<Piloto[]>([]);
+  const [tipo, setTipo] = useState("motogp");
+  const [pilotoId, setPilotoId] = useState<number | null>(null);
+  const [titulo, setTitulo] = useState("");
+  const [contenido, setContenido] = useState("");
+  const [visible, setVisible] = useState(true);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [guardando, setGuardando] = useState(false);
+  const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
-    cargarDatos();
+    void cargarDatos();
   }, []);
 
   async function cargarDatos() {
     setCargando(true);
     setMensaje("");
 
-    const [
-      noticiasResponse,
-      pilotosResponse,
-    ] = await Promise.all([
-      supabase
-        .from("noticias")
-        .select(`
-          id,
-          tipo,
-          titulo,
-          contenido,
-          fecha,
-          visible,
-          piloto_id,
-          piloto:pilotos (
-            id,
-            nombre,
-            miniatura
-          )
-        `)
-        .order("fecha", {
-          ascending: false,
+    try {
+      const token = await obtenerToken();
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const [noticiasResponse, pilotosResponse] = await Promise.all([
+        fetch(API_NOTICIAS, {
+          method: "GET",
+          headers,
+          cache: "no-store",
         }),
+        supabase
+          .from("pilotos")
+          .select("id, nombre, miniatura, activo, orden")
+          .eq("activo", true)
+          .order("orden", { ascending: true }),
+      ]);
 
-      supabase
-        .from("pilotos")
-        .select(`
-          id,
-          nombre,
-          miniatura,
-          activo,
-          orden
-        `)
-        .eq("activo", true)
-        .order("orden", {
-          ascending: true,
-        }),
-    ]);
+      const resultadoNoticias = await noticiasResponse
+        .json()
+        .catch(() => null);
 
-    if (noticiasResponse.error) {
-      console.error(
-        noticiasResponse.error
+      if (!noticiasResponse.ok) {
+        throw new Error(
+          resultadoNoticias?.error ?? "No se han podido cargar las noticias."
+        );
+      }
+
+      if (pilotosResponse.error) {
+        throw new Error(pilotosResponse.error.message);
+      }
+
+      const cargadas = Array.isArray(resultadoNoticias?.noticias)
+        ? resultadoNoticias.noticias
+        : [];
+
+      setNoticias(
+        cargadas.map((noticia: Record<string, unknown>) => ({
+          id: Number(noticia.id),
+          tipo: String(noticia.tipo ?? ""),
+          titulo: String(noticia.titulo ?? ""),
+          contenido:
+            typeof noticia.contenido === "string"
+              ? noticia.contenido
+              : null,
+          fecha:
+            typeof noticia.fecha === "string"
+              ? noticia.fecha
+              : null,
+          visible:
+            typeof noticia.visible === "boolean"
+              ? noticia.visible
+              : null,
+          piloto_id:
+            noticia.piloto_id === null ||
+            noticia.piloto_id === undefined
+              ? null
+              : Number(noticia.piloto_id),
+          piloto: normalizarPiloto(noticia.piloto),
+        }))
       );
 
+      setPilotos(pilotosResponse.data ?? []);
+    } catch (error) {
+      console.error("Error cargando gestión del Paddock:", error);
       setMensaje(
-        `❌ Error cargando noticias: ${noticiasResponse.error.message}`
+        error instanceof Error
+          ? `❌ ${error.message}`
+          : "❌ Error cargando las noticias."
       );
-
+    } finally {
       setCargando(false);
-      return;
     }
-
-    if (pilotosResponse.error) {
-      console.error(
-        pilotosResponse.error
-      );
-
-      setMensaje(
-        `❌ Error cargando pilotos: ${pilotosResponse.error.message}`
-      );
-
-      setCargando(false);
-      return;
-    }
-
-    const noticiasCargadas: Noticia[] =
-      (noticiasResponse.data || []).map(
-        (noticia: any) => ({
-          id: noticia.id,
-          tipo: noticia.tipo,
-          titulo: noticia.titulo,
-          contenido: noticia.contenido,
-          fecha: noticia.fecha,
-          visible: noticia.visible,
-          piloto_id: noticia.piloto_id,
-          piloto: Array.isArray(
-            noticia.piloto
-          )
-            ? noticia.piloto[0] ?? null
-            : noticia.piloto ?? null,
-        })
-      );
-
-    setNoticias(
-      noticiasCargadas
-    );
-
-    setPilotos(
-      pilotosResponse.data || []
-    );
-
-    setCargando(false);
   }
-
-  // -----------------------------------------
-  // LIMPIAR FORMULARIO
-  // -----------------------------------------
 
   function limpiarFormulario() {
     setTipo("motogp");
@@ -207,22 +185,40 @@ export default function PaddockNews() {
     setMensaje("");
   }
 
-  // -----------------------------------------
-  // CREAR / EDITAR
-  // -----------------------------------------
+  async function enviarNoticia(
+    method: "POST" | "PATCH" | "DELETE",
+    datos: Record<string, unknown>
+  ) {
+    const token = await obtenerToken();
+
+    const response = await fetch(API_NOTICIAS, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(datos),
+    });
+
+    const resultado = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        resultado?.error ?? "No se ha podido guardar la noticia."
+      );
+    }
+
+    return resultado;
+  }
 
   async function guardarNoticia() {
     if (!titulo.trim()) {
-      setMensaje(
-        "❌ Escribe un título para la noticia."
-      );
+      setMensaje("❌ Escribe un título para la noticia.");
       return;
     }
 
     if (!contenido.trim()) {
-      setMensaje(
-        "❌ Escribe el contenido de la noticia."
-      );
+      setMensaje("❌ Escribe el contenido de la noticia.");
       return;
     }
 
@@ -238,125 +234,43 @@ export default function PaddockNews() {
         piloto_id: pilotoId,
       };
 
-      // ---------------------------------------
-      // EDITAR
-      // ---------------------------------------
-
       if (editandoId !== null) {
-        const response = await fetch(
-          "/api/superadmin/noticias",
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-            body: JSON.stringify({
-              id: editandoId,
-              ...datos,
-            }),
-          }
-        );
-
-        const resultado =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            resultado.error ||
-              "Error actualizando noticia."
-          );
-        }
-
-        setMensaje(
-          "✅ Noticia actualizada correctamente."
-        );
-
-        limpiarFormulario();
-
-        await cargarDatos();
-
-        return;
+        await enviarNoticia("PATCH", {
+          id: editandoId,
+          ...datos,
+        });
+        setMensaje("✅ Noticia actualizada correctamente.");
+      } else {
+        await enviarNoticia("POST", datos);
+        setMensaje("✅ Noticia publicada correctamente.");
       }
-
-      // ---------------------------------------
-      // CREAR
-      // ---------------------------------------
-
-      const response = await fetch(
-        "/api/superadmin/noticias",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify(datos),
-        }
-      );
-
-      const resultado =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          resultado.error ||
-            "Error creando noticia."
-        );
-      }
-
-      setMensaje(
-        "✅ Noticia publicada correctamente."
-      );
 
       limpiarFormulario();
-
       await cargarDatos();
-
     } catch (error) {
-      console.error(error);
-
-      const mensajeError =
-        error instanceof Error
-          ? error.message
-          : "Error desconocido.";
-
+      console.error("Error guardando noticia:", error);
       setMensaje(
-        `❌ ${mensajeError}`
+        error instanceof Error
+          ? `❌ ${error.message}`
+          : "❌ Error guardando la noticia."
       );
-
     } finally {
       setGuardando(false);
     }
   }
 
-  // -----------------------------------------
-  // EDITAR NOTICIA
-  // -----------------------------------------
-
-  function editarNoticia(
-    noticia: Noticia
-  ) {
+  function editarNoticia(noticia: Noticia) {
     setEditandoId(noticia.id);
     setTipo(noticia.tipo);
     setPilotoId(noticia.piloto_id);
     setTitulo(noticia.titulo);
-    setContenido(
-      noticia.contenido || ""
-    );
-    setVisible(
-      noticia.visible ?? true
-    );
-
+    setContenido(noticia.contenido ?? "");
+    setVisible(noticia.visible ?? true);
     setMensaje("");
 
-    // Esperamos a que React actualice
-    // el estado antes de desplazarnos.
     requestAnimationFrame(() => {
       document
-        .getElementById(
-          "paddock-news-form"
-        )
+        .getElementById("paddock-news-form")
         ?.scrollIntoView({
           behavior: "smooth",
           block: "start",
@@ -364,53 +278,20 @@ export default function PaddockNews() {
     });
   }
 
-  // -----------------------------------------
-  // MOSTRAR / OCULTAR
-  // -----------------------------------------
-
-  async function cambiarVisibilidad(
-    noticia: Noticia
-  ) {
-    const nuevaVisibilidad =
-      !(noticia.visible ?? false);
+  async function cambiarVisibilidad(noticia: Noticia) {
+    const nuevaVisibilidad = !(noticia.visible ?? false);
 
     try {
       setMensaje("");
+      await enviarNoticia("PATCH", {
+        id: noticia.id,
+        visible: nuevaVisibilidad,
+      });
 
-      const response = await fetch(
-        "/api/superadmin/noticias",
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            id: noticia.id,
-            visible:
-              nuevaVisibilidad,
-          }),
-        }
-      );
-
-      const resultado =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          resultado.error ||
-            "Error cambiando visibilidad."
-        );
-      }
-
-      setNoticias((prev) =>
-        prev.map((item) =>
+      setNoticias((actuales) =>
+        actuales.map((item) =>
           item.id === noticia.id
-            ? {
-                ...item,
-                visible:
-                  nuevaVisibilidad,
-              }
+            ? { ...item, visible: nuevaVisibilidad }
             : item
         )
       );
@@ -420,32 +301,20 @@ export default function PaddockNews() {
           ? "✅ Noticia publicada."
           : "✅ Noticia ocultada."
       );
-
     } catch (error) {
-      console.error(error);
-
-      const mensajeError =
-        error instanceof Error
-          ? error.message
-          : "Error desconocido.";
-
+      console.error("Error cambiando visibilidad:", error);
       setMensaje(
-        `❌ ${mensajeError}`
+        error instanceof Error
+          ? `❌ ${error.message}`
+          : "❌ Error cambiando la visibilidad."
       );
     }
   }
 
-  // -----------------------------------------
-  // ELIMINAR
-  // -----------------------------------------
-
-  async function eliminarNoticia(
-    noticia: Noticia
-  ) {
-    const confirmado =
-      window.confirm(
-        `¿Seguro que quieres eliminar la noticia "${noticia.titulo}"?`
-      );
+  async function eliminarNoticia(noticia: Noticia) {
+    const confirmado = window.confirm(
+      `¿Seguro que quieres eliminar la noticia "${noticia.titulo}"?`
+    );
 
     if (!confirmado) {
       return;
@@ -453,76 +322,33 @@ export default function PaddockNews() {
 
     try {
       setMensaje("");
+      await enviarNoticia("DELETE", { id: noticia.id });
 
-      const response = await fetch(
-        "/api/superadmin/noticias",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            id: noticia.id,
-          }),
-        }
+      setNoticias((actuales) =>
+        actuales.filter((item) => item.id !== noticia.id)
       );
 
-      const resultado =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          resultado.error ||
-            "Error eliminando noticia."
-        );
-      }
-
-      setNoticias((prev) =>
-        prev.filter(
-          (item) =>
-            item.id !== noticia.id
-        )
-      );
-
-      if (
-        editandoId === noticia.id
-      ) {
+      if (editandoId === noticia.id) {
         limpiarFormulario();
       }
 
-      setMensaje(
-        "✅ Noticia eliminada correctamente."
-      );
-
+      setMensaje("✅ Noticia eliminada correctamente.");
     } catch (error) {
-      console.error(error);
-
-      const mensajeError =
-        error instanceof Error
-          ? error.message
-          : "Error desconocido.";
-
+      console.error("Error eliminando noticia:", error);
       setMensaje(
-        `❌ ${mensajeError}`
+        error instanceof Error
+          ? `❌ ${error.message}`
+          : "❌ Error eliminando la noticia."
       );
     }
   }
 
-  // -----------------------------------------
-  // FECHA
-  // -----------------------------------------
-
-  function formatearFecha(
-    fecha: string | null
-  ) {
+  function formatearFecha(fecha: string | null) {
     if (!fecha) {
       return "Sin fecha";
     }
 
-    return new Date(
-      fecha
-    ).toLocaleString("es-ES", {
+    return new Date(fecha).toLocaleString("es-ES", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -531,643 +357,235 @@ export default function PaddockNews() {
     });
   }
 
-  // -----------------------------------------
-  // CARGANDO
-  // -----------------------------------------
-
   if (cargando) {
     return (
-      <section
-        className="
-          bg-zinc-900
-          border
-          border-zinc-700
-          rounded-3xl
-          p-8
-        "
-      >
-        <p className="text-zinc-400">
-          Cargando noticias...
-        </p>
+      <section className="rounded-3xl border border-zinc-700 bg-zinc-900 p-8">
+        <p className="text-zinc-400">Cargando noticias...</p>
       </section>
     );
   }
 
-  // -----------------------------------------
-  // RENDER
-  // -----------------------------------------
-
   return (
-    <section
-      className="
-        bg-zinc-900
-        border
-        border-zinc-700
-        rounded-3xl
-        overflow-hidden
-      "
-    >
-
-      {/* ---------------------------------- */}
-      {/* CABECERA */}
-      {/* ---------------------------------- */}
-
-      <div
-        className="
-          p-8
-          border-b
-          border-zinc-700
-        "
-      >
-        <h2 className="text-2xl font-bold">
-          📰 Gestión del Paddock
-        </h2>
-
-        <p className="text-zinc-400 mt-2">
-          Crea y gestiona las noticias que
-          aparecerán en el Paddock.
+    <section className="overflow-hidden rounded-3xl border border-zinc-700 bg-zinc-900">
+      <div className="border-b border-zinc-700 p-8">
+        <h2 className="text-2xl font-bold">📰 Gestión del Paddock</h2>
+        <p className="mt-2 text-zinc-400">
+          Crea y gestiona las noticias que aparecerán en el Paddock.
         </p>
       </div>
 
-      {/* ---------------------------------- */}
-      {/* FORMULARIO */}
-      {/* ---------------------------------- */}
-
       <div className="p-8">
-
         <div
           id="paddock-news-form"
-          className="
-            scroll-mt-24
-            bg-zinc-950
-            border
-            border-zinc-800
-            rounded-3xl
-            p-6
-          "
+          className="scroll-mt-24 rounded-3xl border border-zinc-800 bg-zinc-950 p-6"
         >
-
-          <h3 className="text-xl font-bold mb-6">
-            {editandoId !== null
-              ? "✏️ Editar noticia"
-              : "✍️ Nueva noticia"}
+          <h3 className="mb-6 text-xl font-bold">
+            {editandoId !== null ? "✏️ Editar noticia" : "✍️ Nueva noticia"}
           </h3>
 
-          <div
-            className="
-              grid
-              grid-cols-1
-              md:grid-cols-2
-              gap-6
-            "
-          >
-
-            {/* TIPO */}
-
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  text-zinc-400
-                  mb-2
-                "
-              >
+              <label className="mb-2 block text-sm text-zinc-400">
                 Tipo de noticia
               </label>
-
               <select
                 value={tipo}
-                onChange={(e) =>
-                  setTipo(
-                    e.target.value
-                  )
-                }
-                className="
-                  w-full
-                  bg-zinc-900
-                  border
-                  border-zinc-700
-                  rounded-xl
-                  px-4
-                  py-3
-                  text-white
-                  focus:outline-none
-                  focus:border-red-500
-                "
+                onChange={(event) => setTipo(event.target.value)}
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white focus:border-red-500 focus:outline-none"
               >
-                {TIPOS_NOTICIA.map(
-                  (item) => (
-                    <option
-                      key={item.valor}
-                      value={item.valor}
-                    >
-                      {item.nombre}
-                    </option>
-                  )
-                )}
+                {TIPOS_NOTICIA.map((item) => (
+                  <option key={item.valor} value={item.valor}>
+                    {item.nombre}
+                  </option>
+                ))}
               </select>
             </div>
-
-            {/* PILOTO */}
 
             <div>
-              <label
-                className="
-                  block
-                  text-sm
-                  text-zinc-400
-                  mb-2
-                "
-              >
+              <label className="mb-2 block text-sm text-zinc-400">
                 Piloto relacionado
               </label>
-
               <select
-                value={
-                  pilotoId ?? ""
-                }
-                onChange={(e) =>
+                value={pilotoId ?? ""}
+                onChange={(event) =>
                   setPilotoId(
-                    e.target.value
-                      ? Number(
-                          e.target.value
-                        )
-                      : null
+                    event.target.value ? Number(event.target.value) : null
                   )
                 }
-                className="
-                  w-full
-                  bg-zinc-900
-                  border
-                  border-zinc-700
-                  rounded-xl
-                  px-4
-                  py-3
-                  text-white
-                  focus:outline-none
-                  focus:border-red-500
-                "
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white focus:border-red-500 focus:outline-none"
               >
-                <option value="">
-                  Sin piloto relacionado
-                </option>
-
-                {pilotos.map(
-                  (piloto) => (
-                    <option
-                      key={piloto.id}
-                      value={piloto.id}
-                    >
-                      {piloto.nombre}
-                    </option>
-                  )
-                )}
+                <option value="">Sin piloto relacionado</option>
+                {pilotos.map((piloto) => (
+                  <option key={piloto.id} value={piloto.id}>
+                    {piloto.nombre}
+                  </option>
+                ))}
               </select>
             </div>
-
           </div>
 
-          {/* TÍTULO */}
-
           <div className="mt-6">
-
-            <label
-              className="
-                block
-                text-sm
-                text-zinc-400
-                mb-2
-              "
-            >
-              Título
-            </label>
-
+            <label className="mb-2 block text-sm text-zinc-400">Título</label>
             <input
               type="text"
               value={titulo}
-              onChange={(e) =>
-                setTitulo(
-                  e.target.value
-                )
-              }
+              onChange={(event) => setTitulo(event.target.value)}
+              maxLength={160}
               placeholder="Ej: Fermín Aldeguer ficha por VR46"
-              className="
-                w-full
-                bg-zinc-900
-                border
-                border-zinc-700
-                rounded-xl
-                px-4
-                py-3
-                text-white
-                placeholder:text-zinc-600
-                focus:outline-none
-                focus:border-red-500
-              "
+              className="w-full rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
-
           </div>
 
-          {/* CONTENIDO */}
-
           <div className="mt-6">
-
-            <label
-              className="
-                block
-                text-sm
-                text-zinc-400
-                mb-2
-              "
-            >
+            <label className="mb-2 block text-sm text-zinc-400">
               Contenido
             </label>
-
             <textarea
               value={contenido}
-              onChange={(e) =>
-                setContenido(
-                  e.target.value
-                )
-              }
+              onChange={(event) => setContenido(event.target.value)}
+              maxLength={10000}
               rows={5}
               placeholder="Escribe aquí el contenido de la noticia..."
-              className="
-                w-full
-                bg-zinc-900
-                border
-                border-zinc-700
-                rounded-xl
-                px-4
-                py-3
-                text-white
-                placeholder:text-zinc-600
-                resize-y
-                focus:outline-none
-                focus:border-red-500
-              "
+              className="w-full resize-y rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-600 focus:border-red-500 focus:outline-none"
             />
-
           </div>
 
-          {/* VISIBLE */}
-
           <div className="mt-6">
-
-            <label
-              className="
-                flex
-                items-center
-                gap-3
-                cursor-pointer
-              "
-            >
+            <label className="flex cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={visible}
-                onChange={(e) =>
-                  setVisible(
-                    e.target.checked
-                  )
-                }
-                className="
-                  w-5
-                  h-5
-                  accent-red-600
-                "
+                onChange={(event) => setVisible(event.target.checked)}
+                className="h-5 w-5 accent-red-600"
               />
-
-              <span className="text-white">
-                Publicar noticia
-              </span>
+              <span className="text-white">Publicar noticia</span>
             </label>
-
           </div>
 
-          {/* BOTONES */}
-
-          <div
-            className="
-              mt-8
-              flex
-              flex-wrap
-              gap-3
-            "
-          >
-
+          <div className="mt-8 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={
-                guardarNoticia
-              }
+              onClick={guardarNoticia}
               disabled={guardando}
-              className="
-                bg-red-600
-                hover:bg-red-500
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                px-6
-                py-3
-                rounded-xl
-                font-bold
-                transition
-              "
+              className="rounded-xl bg-red-600 px-6 py-3 font-bold transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {guardando
                 ? "Guardando..."
                 : editandoId !== null
-                ? "💾 Guardar cambios"
-                : "📰 Publicar noticia"}
+                  ? "💾 Guardar cambios"
+                  : "📰 Publicar noticia"}
             </button>
 
             {editandoId !== null && (
               <button
                 type="button"
-                onClick={
-                  limpiarFormulario
-                }
-                className="
-                  bg-zinc-800
-                  hover:bg-zinc-700
-                  px-6
-                  py-3
-                  rounded-xl
-                  font-bold
-                  transition
-                "
+                onClick={limpiarFormulario}
+                className="rounded-xl bg-zinc-800 px-6 py-3 font-bold transition hover:bg-zinc-700"
               >
                 Cancelar edición
               </button>
             )}
-
           </div>
-
         </div>
 
-        {/* -------------------------------- */}
-        {/* MENSAJE */}
-        {/* -------------------------------- */}
-
         {mensaje && (
-          <div
-            className="
-              mt-6
-              bg-zinc-950
-              border
-              border-zinc-700
-              rounded-2xl
-              p-5
-              whitespace-pre-line
-            "
-          >
+          <div className="mt-6 whitespace-pre-line rounded-2xl border border-zinc-700 bg-zinc-950 p-5">
             {mensaje}
           </div>
         )}
-
       </div>
 
-      {/* ---------------------------------- */}
-      {/* LISTADO */}
-      {/* ---------------------------------- */}
-
-      <div
-        className="
-          border-t
-          border-zinc-700
-          p-8
-        "
-      >
-
-        <h3 className="text-xl font-bold mb-6">
-          🗂️ Noticias existentes
-        </h3>
+      <div className="border-t border-zinc-700 p-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <h3 className="text-xl font-bold">🗂️ Noticias existentes</h3>
+          <button
+            type="button"
+            onClick={() => void cargarDatos()}
+            className="rounded-xl bg-zinc-800 px-4 py-2 font-semibold transition hover:bg-zinc-700"
+          >
+            Actualizar
+          </button>
+        </div>
 
         {noticias.length === 0 ? (
-          <div
-            className="
-              bg-zinc-950
-              border
-              border-zinc-800
-              rounded-2xl
-              p-6
-              text-zinc-400
-            "
-          >
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-400">
             No hay noticias creadas.
           </div>
         ) : (
           <div className="space-y-4">
+            {noticias.map((noticia) => (
+              <article
+                key={noticia.id}
+                className="rounded-2xl border border-zinc-800 bg-zinc-950 p-5"
+              >
+                <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="rounded-full bg-zinc-800 px-3 py-1 text-sm font-semibold text-zinc-300">
+                        {noticia.tipo}
+                      </span>
 
-            {noticias.map(
-              (noticia) => (
-                <article
-                  key={noticia.id}
-                  className="
-                    bg-zinc-950
-                    border
-                    border-zinc-800
-                    rounded-2xl
-                    p-5
-                  "
-                >
-
-                  <div
-                    className="
-                      flex
-                      flex-col
-                      lg:flex-row
-                      lg:items-center
-                      lg:justify-between
-                      gap-5
-                    "
-                  >
-
-                    {/* INFORMACIÓN */}
-
-                    <div className="flex-1">
-
-                      <div
-                        className="
-                          flex
-                          flex-wrap
-                          items-center
-                          gap-3
-                        "
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                          noticia.visible
+                            ? "bg-green-500/15 text-green-300"
+                            : "bg-red-500/15 text-red-300"
+                        }`}
                       >
+                        {noticia.visible ? "● Publicada" : "● Oculta"}
+                      </span>
 
-                        <span
-                          className="
-                            px-3
-                            py-1
-                            rounded-full
-                            bg-zinc-800
-                            text-zinc-300
-                            text-sm
-                            font-semibold
-                          "
-                        >
-                          {noticia.tipo}
+                      {noticia.piloto && (
+                        <span className="rounded-full bg-orange-500/10 px-3 py-1 text-sm font-semibold text-orange-300">
+                          🏍️ {noticia.piloto.nombre}
                         </span>
-
-                        <span
-                          className={`
-                            px-3
-                            py-1
-                            rounded-full
-                            text-sm
-                            font-semibold
-                            ${
-                              noticia.visible
-                                ? "bg-green-500/15 text-green-300"
-                                : "bg-red-500/15 text-red-300"
-                            }
-                          `}
-                        >
-                          {noticia.visible
-                            ? "● Publicada"
-                            : "● Oculta"}
-                        </span>
-
-                        {noticia.piloto && (
-                          <span
-                            className="
-                              px-3
-                              py-1
-                              rounded-full
-                              bg-orange-500/10
-                              text-orange-300
-                              text-sm
-                              font-semibold
-                            "
-                          >
-                            🏍️{" "}
-                            {noticia.piloto.nombre}
-                          </span>
-                        )}
-
-                      </div>
-
-                      <h4
-                        className="
-                          text-lg
-                          font-bold
-                          text-white
-                          mt-4
-                        "
-                      >
-                        {noticia.titulo}
-                      </h4>
-
-                      <p
-                        className="
-                          text-zinc-400
-                          mt-2
-                          line-clamp-2
-                        "
-                      >
-                        {noticia.contenido || ""}
-                      </p>
-
-                      <p
-                        className="
-                          text-zinc-600
-                          text-sm
-                          mt-3
-                        "
-                      >
-                        {formatearFecha(
-                          noticia.fecha
-                        )}
-                      </p>
-
+                      )}
                     </div>
 
-                    {/* ACCIONES */}
+                    <h4 className="mt-4 text-lg font-bold text-white">
+                      {noticia.titulo}
+                    </h4>
 
-                    <div
-                      className="
-                        flex
-                        flex-wrap
-                        gap-2
-                      "
-                    >
+                    <p className="mt-2 line-clamp-2 text-zinc-400">
+                      {noticia.contenido ?? ""}
+                    </p>
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          editarNoticia(
-                            noticia
-                          )
-                        }
-                        className="
-                          bg-blue-600
-                          hover:bg-blue-500
-                          px-4
-                          py-2
-                          rounded-xl
-                          font-semibold
-                          transition
-                        "
-                      >
-                        ✏️ Editar
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          cambiarVisibilidad(
-                            noticia
-                          )
-                        }
-                        className="
-                          bg-zinc-800
-                          hover:bg-zinc-700
-                          px-4
-                          py-2
-                          rounded-xl
-                          font-semibold
-                          transition
-                        "
-                      >
-                        {noticia.visible
-                          ? "🙈 Ocultar"
-                          : "👁️ Publicar"}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          eliminarNoticia(
-                            noticia
-                          )
-                        }
-                        className="
-                          bg-red-600
-                          hover:bg-red-500
-                          px-4
-                          py-2
-                          rounded-xl
-                          font-semibold
-                          transition
-                        "
-                      >
-                        🗑️ Eliminar
-                      </button>
-
-                    </div>
-
+                    <p className="mt-3 text-sm text-zinc-600">
+                      {formatearFecha(noticia.fecha)}
+                    </p>
                   </div>
 
-                </article>
-              )
-            )}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => editarNoticia(noticia)}
+                      className="rounded-xl bg-blue-600 px-4 py-2 font-semibold transition hover:bg-blue-500"
+                    >
+                      ✏️ Editar
+                    </button>
 
+                    <button
+                      type="button"
+                      onClick={() => void cambiarVisibilidad(noticia)}
+                      className="rounded-xl bg-zinc-800 px-4 py-2 font-semibold transition hover:bg-zinc-700"
+                    >
+                      {noticia.visible ? "🙈 Ocultar" : "👁️ Publicar"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => void eliminarNoticia(noticia)}
+                      className="rounded-xl bg-red-600 px-4 py-2 font-semibold transition hover:bg-red-500"
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         )}
-
       </div>
-
     </section>
   );
 }
