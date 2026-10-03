@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { supabase } from "@/lib/supabase";
-
 import StatCard from "./StatCard";
 
 type GanadorGP = {
@@ -14,150 +12,47 @@ type GanadorGP = {
 };
 
 export default function WinnerCard() {
-  const [ganador, setGanador] =
-    useState<GanadorGP | null>(null);
+  const [ganador, setGanador] = useState<GanadorGP | null>(null);
 
   useEffect(() => {
+    async function cargarGanador() {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError || !session?.access_token) {
+        console.error("No hay sesión autenticada.", sessionError);
+        return;
+      }
+
+      const respuesta = await fetch("/api/dashboard/resumen", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const resultado = await respuesta.json().catch(() => null);
+
+      if (!respuesta.ok) {
+        console.error(
+          "Error cargando ganador:",
+          resultado?.error ?? respuesta.statusText
+        );
+        return;
+      }
+
+      setGanador(resultado?.ganador ?? null);
+    }
+
     cargarGanador();
   }, []);
 
-  async function cargarGanador() {
-    // --------------------------------------
-    // USUARIO ACTUAL
-    // --------------------------------------
-
-    const sesion = JSON.parse(
-      localStorage.getItem("usuario") || "{}"
-    );
-
-    if (!sesion.id) return;
-
-    // --------------------------------------
-    // OBTENER LIGA ACTUAL
-    // --------------------------------------
-
-    const { data: usuario, error: usuarioError } =
-      await supabase
-        .from("usuarios")
-        .select("liga_actual_id")
-        .eq("id", sesion.id)
-        .single();
-
-    if (usuarioError || !usuario) {
-      console.error(
-        "Error obteniendo usuario:",
-        usuarioError
-      );
-
-      return;
-    }
-
-    if (!usuario.liga_actual_id) return;
-
-    // --------------------------------------
-    // ÚLTIMO GP PROCESADO
-    // --------------------------------------
-
-    const { data: gp, error: gpError } =
-      await supabase
-        .from("grandes_premios")
-        .select(`
-          nombre,
-          fantasy_procesado
-        `)
-        .eq("fantasy_procesado", true)
-        .order("orden", {
-          ascending: false,
-        })
-        .limit(1)
-        .single();
-
-    if (gpError || !gp) {
-      console.error(
-        "Error obteniendo último GP procesado:",
-        gpError
-      );
-
-      return;
-    }
-
-    // --------------------------------------
-    // GANADOR DEL GP EN LA LIGA ACTUAL
-    // --------------------------------------
-
-    const { data: equipo, error: equipoError } =
-      await supabase
-        .from("equipos")
-        .select(`
-          usuario_id,
-          usuario,
-          puntos_gp_actual
-        `)
-        .eq(
-          "liga_id",
-          usuario.liga_actual_id
-        )
-        .order("puntos_gp_actual", {
-          ascending: false,
-        })
-        .limit(1)
-        .single();
-
-    if (equipoError || !equipo) {
-      console.error(
-        "Error obteniendo equipo ganador:",
-        equipoError
-      );
-
-      return;
-    }
-
-    // --------------------------------------
-    // OBTENER AVATAR DEL USUARIO GANADOR
-    // --------------------------------------
-
-    const { data: usuarioGanador, error: avatarError } =
-      await supabase
-        .from("usuarios")
-        .select("avatar")
-        .eq("id", equipo.usuario_id)
-        .single();
-
-    if (avatarError) {
-      console.error(
-        "Error obteniendo avatar del ganador:",
-        avatarError
-      );
-    }
-
-    // --------------------------------------
-    // GUARDAR GANADOR
-    // --------------------------------------
-
-    setGanador({
-      nombreGP: gp.nombre,
-      usuario: equipo.usuario,
-      puntos: equipo.puntos_gp_actual ?? 0,
-      avatar:
-        usuarioGanador?.avatar ||
-        "avatar1.png",
-    });
-  }
-
-  // --------------------------------------
-  // SIN DATOS
-  // --------------------------------------
-
   if (!ganador) return null;
-
-  // --------------------------------------
-  // RENDER
-  // --------------------------------------
 
   return (
     <StatCard color="gold">
       <div className="flex flex-col items-center text-center">
-
         <h2 className="text-lg font-semibold text-yellow-300">
           🏆 Ganador del GP {ganador.nombreGP}
         </h2>
@@ -173,18 +68,8 @@ export default function WinnerCard() {
         <img
           src={`/avatars/${ganador.avatar}`}
           alt={ganador.usuario}
-          className="
-            mt-8
-            h-24
-            w-24
-            rounded-full
-            border-4
-            border-yellow-400
-            object-cover
-            shadow-lg
-          "
+          className="mt-8 h-24 w-24 rounded-full border-4 border-yellow-400 object-cover shadow-lg"
         />
-
       </div>
     </StatCard>
   );

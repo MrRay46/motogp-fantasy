@@ -13,133 +13,79 @@ type Equipo = {
 };
 
 export default function PerformanceCard() {
-  const [equipo, setEquipo] =
-    useState<Equipo | null>(null);
-
-  const [color, setColor] = useState<
-    "success" | "danger" | undefined
-  >();
-
-  const [mensaje, setMensaje] =
-    useState("");
-
-  const [flecha, setFlecha] =
-    useState("");
+  const [equipo, setEquipo] = useState<Equipo | null>(null);
+  const [color, setColor] = useState<"success" | "danger" | undefined>();
+  const [mensaje, setMensaje] = useState("");
+  const [flecha, setFlecha] = useState("");
 
   useEffect(() => {
-    cargarDatos();
-  }, []);
+    async function cargarDatos() {
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-  async function cargarDatos() {
-    const sesion = JSON.parse(
-      localStorage.getItem("usuario") ||
-        "{}"
-    );
+      if (sessionError || !session?.access_token) {
+        console.error("No hay sesión autenticada.", sessionError);
+        return;
+      }
 
-    if (!sesion.id) return;
+      const respuesta = await fetch("/api/dashboard/resumen", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-    //------------------------------------------------
-    // Obtener liga actual del usuario
-    //------------------------------------------------
+      const resultado = await respuesta.json().catch(() => null);
 
-    const { data: usuario } =
-      await supabase
-        .from("usuarios")
-        .select("liga_actual_id")
-        .eq("id", sesion.id)
-        .single();
+      if (!respuesta.ok) {
+        console.error(
+          "Error cargando rendimiento:",
+          resultado?.error ?? respuesta.statusText
+        );
+        return;
+      }
 
-    if (!usuario) return;
+      const datos = resultado?.rendimiento as Equipo | null;
+      if (!datos) return;
 
-    //------------------------------------------------
-    // Leer únicamente el equipo del usuario
-    //------------------------------------------------
+      setEquipo(datos);
 
-    const { data: miEquipo } =
-      await supabase
-        .from("equipos")
-        .select(`
-          puntos,
-          posicion_actual,
-          posicion_anterior,
-          diferencia_lider,
-          diferencia_lider_anterior
-        `)
-        .eq("usuario_id", sesion.id)
-        .eq(
-          "liga_id",
-          usuario.liga_actual_id
-        )
-        .single();
+      if (datos.posicion_anterior > 0) {
+        if (datos.posicion_actual < datos.posicion_anterior) {
+          setFlecha("▲");
+        } else if (datos.posicion_actual > datos.posicion_anterior) {
+          setFlecha("▼");
+        }
+      }
 
-    if (!miEquipo) return;
+      const cambio =
+        datos.diferencia_lider_anterior - datos.diferencia_lider;
 
-    setEquipo(miEquipo);
-
-    //-----------------------------------------
-    // Flecha posición
-    //-----------------------------------------
-
-    if (
-      miEquipo.posicion_anterior > 0
-    ) {
-      if (
-        miEquipo.posicion_actual <
-        miEquipo.posicion_anterior
-      ) {
-        setFlecha("▲");
-      } else if (
-        miEquipo.posicion_actual >
-        miEquipo.posicion_anterior
-      ) {
-        setFlecha("▼");
+      if (cambio > 0) {
+        setColor("success");
+        setMensaje(`Has recortado ${cambio} pts al líder`);
+      } else if (cambio < 0) {
+        setColor("danger");
+        setMensaje(`El líder te ha sacado ${Math.abs(cambio)} pts`);
       }
     }
 
-    //-----------------------------------------
-    // Diferencia líder
-    //-----------------------------------------
-
-    const cambio =
-      miEquipo.diferencia_lider_anterior -
-      miEquipo.diferencia_lider;
-
-    if (cambio > 0) {
-      setColor("success");
-      setMensaje(
-        `Has recortado ${cambio} pts al líder`
-      );
-    } else if (cambio < 0) {
-      setColor("danger");
-      setMensaje(
-        `El líder te ha sacado ${Math.abs(
-          cambio
-        )} pts`
-      );
-    }
-  }
+    cargarDatos();
+  }, []);
 
   if (!equipo) return null;
 
   return (
-    <StatCard
-      title="📊 Tu rendimiento"
-      color={color}
-    >
+    <StatCard title="📊 Tu rendimiento" color={color}>
       <div className="text-center">
         <h2 className="text-6xl font-black">
           #{equipo.posicion_actual}
-
           {flecha === "▲" && (
-            <span className="ml-2 text-green-400">
-              ▲
-            </span>
+            <span className="ml-2 text-green-400">▲</span>
           )}
-
           {flecha === "▼" && (
-            <span className="ml-2 text-red-500">
-              ▼
-            </span>
+            <span className="ml-2 text-red-500">▼</span>
           )}
         </h2>
 
@@ -148,9 +94,7 @@ export default function PerformanceCard() {
         </p>
 
         {mensaje && (
-          <p className="mt-6 text-zinc-300">
-            {mensaje}
-          </p>
+          <p className="mt-6 text-zinc-300">{mensaje}</p>
         )}
       </div>
     </StatCard>
