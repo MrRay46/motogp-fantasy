@@ -2,188 +2,82 @@ import { supabase } from "@/lib/supabase";
 
 export type EstadoCambiosVentana = {
   id: number;
-
   usuario_id: number;
   liga_id: number;
   ventana_id: number;
-
   cambios_pilotos: number;
-
   constructor_modificado: boolean;
   reserva_modificada: boolean;
 };
 
-// ==================================================
-// OBTENER ESTADO DE CAMBIOS DE LA VENTANA
-// ==================================================
+async function llamarApi(
+  datos: Record<string, number | string>
+): Promise<EstadoCambiosVentana> {
+  const {
+    data: { session },
+    error: sesionError,
+  } = await supabase.auth.getSession();
+
+  if (sesionError || !session?.access_token) {
+    throw new Error("Tu sesión ha caducado. Inicia sesión de nuevo.");
+  }
+
+  const respuesta = await fetch("/api/mercado/cambios", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(datos),
+  });
+
+  const resultado = await respuesta.json().catch(() => null);
+
+  if (!respuesta.ok) {
+    throw new Error(
+      resultado?.error ?? "No se ha podido actualizar el estado del mercado."
+    );
+  }
+
+  return resultado as EstadoCambiosVentana;
+}
 
 export async function obtenerEstadoCambiosVentana(
-  usuarioId: number,
+  _usuarioId: number,
   ligaId: number,
   ventanaId: number
 ): Promise<EstadoCambiosVentana> {
-  const { data, error } = await supabase
-    .from("equipos_ventanas")
-    .select("*")
-    .eq("usuario_id", usuarioId)
-    .eq("liga_id", ligaId)
-    .eq("ventana_id", ventanaId)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(
-      `Error obteniendo estado de cambios: ${error.message}`
-    );
-  }
-
-  // --------------------------------------------------
-  // YA EXISTE
-  // --------------------------------------------------
-
-  if (data) {
-    return data as EstadoCambiosVentana;
-  }
-
-  // --------------------------------------------------
-  // NO EXISTE → CREAR
-  // --------------------------------------------------
-
-  const { data: nuevoEstado, error: crearError } =
-    await supabase
-      .from("equipos_ventanas")
-      .insert({
-        usuario_id: usuarioId,
-        liga_id: ligaId,
-        ventana_id: ventanaId,
-        cambios_pilotos: 0,
-        constructor_modificado: false,
-        reserva_modificada: false,
-      })
-      .select("*")
-      .single();
-
-  if (crearError) {
-    throw new Error(
-      `Error creando estado de cambios: ${crearError.message}`
-    );
-  }
-
-  return nuevoEstado as EstadoCambiosVentana;
+  return llamarApi({
+    accion: "obtener",
+    liga_id: ligaId,
+    ventana_id: ventanaId,
+  });
 }
-
-// ==================================================
-// REGISTRAR CAMBIO DE PILOTO
-// ==================================================
 
 export async function registrarCambioPiloto(
   estadoId: number,
-  limite: number
+  _limite: number
 ): Promise<EstadoCambiosVentana> {
-  const { data: estado, error: lecturaError } =
-    await supabase
-      .from("equipos_ventanas")
-      .select("*")
-      .eq("id", estadoId)
-      .single();
-
-  if (lecturaError) {
-    throw new Error(
-      `Error leyendo estado de cambios: ${lecturaError.message}`
-    );
-  }
-
-  // --------------------------------------------------
-  // COMPROBAR LÍMITE
-  // --------------------------------------------------
-
-  if (
-    estado.cambios_pilotos >= limite
-  ) {
-    throw new Error(
-      "Se ha alcanzado el límite de cambios de pilotos de esta ventana."
-    );
-  }
-
-  // --------------------------------------------------
-  // INCREMENTAR
-  // --------------------------------------------------
-
-  const nuevosCambios =
-    estado.cambios_pilotos + 1;
-
-  const {
-    data: actualizado,
-    error: updateError,
-  } = await supabase
-    .from("equipos_ventanas")
-    .update({
-      cambios_pilotos: nuevosCambios,
-    })
-    .eq("id", estadoId)
-    .select("*")
-    .single();
-
-  if (updateError) {
-    throw new Error(
-      `Error registrando cambio de piloto: ${updateError.message}`
-    );
-  }
-
-  return actualizado as EstadoCambiosVentana;
+  return llamarApi({
+    accion: "registrar_piloto",
+    estado_id: estadoId,
+  });
 }
-
-// ==================================================
-// MARCAR CAMBIO DE CONSTRUCTOR
-// ==================================================
 
 export async function marcarConstructorModificado(
   estadoId: number
 ): Promise<EstadoCambiosVentana> {
-  const {
-    data: actualizado,
-    error,
-  } = await supabase
-    .from("equipos_ventanas")
-    .update({
-      constructor_modificado: true,
-    })
-    .eq("id", estadoId)
-    .select("*")
-    .single();
-
-  if (error) {
-    throw new Error(
-      `Error marcando constructor: ${error.message}`
-    );
-  }
-
-  return actualizado as EstadoCambiosVentana;
+  return llamarApi({
+    accion: "marcar_constructor",
+    estado_id: estadoId,
+  });
 }
-
-// ==================================================
-// MARCAR CAMBIO DE RESERVA
-// ==================================================
 
 export async function marcarReservaModificada(
   estadoId: number
 ): Promise<EstadoCambiosVentana> {
-  const {
-    data: actualizado,
-    error,
-  } = await supabase
-    .from("equipos_ventanas")
-    .update({
-      reserva_modificada: true,
-    })
-    .eq("id", estadoId)
-    .select("*")
-    .single();
-
-  if (error) {
-    throw new Error(
-      `Error marcando reserva: ${error.message}`
-    );
-  }
-
-  return actualizado as EstadoCambiosVentana;
+  return llamarApi({
+    accion: "marcar_reserva",
+    estado_id: estadoId,
+  });
 }
