@@ -1,3 +1,9 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { obtenerRankingPilotos } from "@/services/liga";
+
 import PilotCard from "./PilotCard";
 import { Piloto } from "./types";
 
@@ -25,11 +31,59 @@ export default function PilotsMarket({
   onFichar,
   onReserva,
 }: PilotsMarketProps) {
+  const [puntosActuales, setPuntosActuales] =
+    useState<Record<number, number>>({});
+
+  useEffect(() => {
+    let cancelado = false;
+
+    async function cargarPuntosActuales() {
+      try {
+        const ranking =
+          await obtenerRankingPilotos();
+
+        if (cancelado) {
+          return;
+        }
+
+        const puntosPorId: Record<number, number> = {};
+
+        for (const piloto of ranking) {
+          puntosPorId[piloto.id] =
+            piloto.puntos_totales;
+        }
+
+        setPuntosActuales(puntosPorId);
+      } catch (error) {
+        console.error(
+          "Error cargando los puntos actuales de los pilotos:",
+          error
+        );
+      }
+    }
+
+    cargarPuntosActuales();
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
   return (
     <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
       {pilotos.map((piloto) => {
-        const fichado = fichados.includes(piloto.nombre);
-        const esReserva = reserva === piloto.nombre;
+        const pilotoConPuntosActuales = {
+          ...piloto,
+          puntos:
+            puntosActuales[piloto.id] ??
+            piloto.puntos,
+        };
+
+        const fichado =
+          fichados.includes(piloto.nombre);
+
+        const esReserva =
+          reserva === piloto.nombre;
 
         const puedeModificarPiloto = fichado
           ? puedeQuitar
@@ -43,12 +97,13 @@ export default function PilotsMarket({
         return (
           <PilotCard
             key={piloto.nombre}
-            piloto={piloto}
+            piloto={pilotoConPuntosActuales}
             estado={{
               fichado,
               reserva: esReserva,
               puedeFichar: puedeModificarPiloto,
-              puedeReserva: puedeConvertirEnReserva,
+              puedeReserva:
+                puedeConvertirEnReserva,
             }}
             acciones={{
               fichar: () => onFichar(piloto),
