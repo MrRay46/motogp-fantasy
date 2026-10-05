@@ -35,6 +35,27 @@ export type EquipoJugador = {
 };
 
 // =====================================================
+// COMPROBAR SI EL EQUIPO ESTÁ COMPLETO
+// =====================================================
+
+function equipoCompleto(equipo: {
+  fichados: unknown;
+  reserva: unknown;
+  motor: unknown;
+  prediccion_piloto: unknown;
+  prediccion_motor: unknown;
+}): boolean {
+  return (
+    Array.isArray(equipo.fichados) &&
+    equipo.fichados.length === 6 &&
+    equipo.reserva !== null &&
+    equipo.motor !== null &&
+    equipo.prediccion_piloto !== null &&
+    equipo.prediccion_motor !== null
+  );
+}
+
+// =====================================================
 // CONTEXTO
 // =====================================================
 
@@ -222,6 +243,21 @@ export function FantasyProvider({
       if (!equipo) {
         console.log(
           "El usuario pertenece a la liga pero todavía no tiene equipo."
+        );
+
+        setEquipos({});
+        localStorage.removeItem("equipos");
+
+        return;
+      }
+
+      // -----------------------------------------------
+      // EQUIPO INCOMPLETO: TRATAR COMO CREACIÓN INICIAL
+      // -----------------------------------------------
+
+      if (!equipoCompleto(equipo)) {
+        console.log(
+          "El equipo existente está incompleto; se tratará como una creación inicial."
         );
 
         setEquipos({});
