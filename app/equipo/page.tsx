@@ -28,10 +28,6 @@ export default function EquipoPage() {
     cargando,
   } = useFantasy();
 
-  // --------------------------------------------------
-  // COMPROBAR SI EL USUARIO TIENE LIGA ACTIVA
-  // --------------------------------------------------
-
   useEffect(() => {
     const guardado =
       localStorage.getItem("usuario");
@@ -63,10 +59,6 @@ export default function EquipoPage() {
     }
   }, [router]);
 
-  // --------------------------------------------------
-  // COMPROBANDO LIGA
-  // --------------------------------------------------
-
   if (comprobandoLiga) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -76,10 +68,6 @@ export default function EquipoPage() {
       </main>
     );
   }
-
-  // --------------------------------------------------
-  // CARGANDO EQUIPO
-  // --------------------------------------------------
 
   if (cargando) {
     return (
@@ -91,10 +79,6 @@ export default function EquipoPage() {
     );
   }
 
-  // --------------------------------------------------
-  // EQUIPO ACTUAL
-  // --------------------------------------------------
-
   const equipoActual =
     equipos[jugadorActual] || {
       fichados: [],
@@ -103,15 +87,12 @@ export default function EquipoPage() {
       prediccionPiloto: null,
       prediccionMotor: null,
       puntos: 0,
+      puntosGPActual: 0,
     };
 
   const fichados = equipoActual.fichados;
   const reserva = equipoActual.reserva;
   const motor = equipoActual.motor;
-
-  // --------------------------------------------------
-  // USUARIO EN LIGA PERO SIN EQUIPO
-  // --------------------------------------------------
 
   if (fichados.length === 0) {
     return (
@@ -166,10 +147,6 @@ export default function EquipoPage() {
     );
   }
 
-  // --------------------------------------------------
-  // PREDICCIONES
-  // --------------------------------------------------
-
   const prediccionPiloto =
     equipoActual.prediccionPiloto;
 
@@ -183,10 +160,6 @@ export default function EquipoPage() {
   const prediccionMotorModificada =
     equipoActual.prediccionMotorModificada ??
     false;
-
-  // --------------------------------------------------
-  // PILOTOS DEL EQUIPO
-  // --------------------------------------------------
 
   const equipo = pilotos.filter(
     (piloto) =>
@@ -203,19 +176,11 @@ export default function EquipoPage() {
       piloto.nombre === reserva
   );
 
-  // --------------------------------------------------
-  // MOTOR
-  // --------------------------------------------------
-
   const motorSeleccionado =
     motores.find(
       (item) =>
         item.nombre === motor
     );
-
-  // --------------------------------------------------
-  // PRESUPUESTO
-  // --------------------------------------------------
 
   const presupuestoPilotos =
     equipo.reduce(
@@ -231,156 +196,51 @@ export default function EquipoPage() {
     presupuestoPilotos +
     precioMotor;
 
-  // --------------------------------------------------
-  // PUNTOS DE PILOTOS
-  // --------------------------------------------------
-
-  const puntosTitulares =
-    titulares.reduce(
-      (total, piloto) =>
-        total + piloto.puntosGP,
-      0
-    );
-
-  const titularConCero =
-    titulares.some(
-      (piloto) =>
-        piloto.puntosGP === 0
-    );
-
-  const puntosReserva =
-    titularConCero &&
-    pilotoReserva
-      ? pilotoReserva.puntosGP
-      : 0;
-
-  // --------------------------------------------------
-  // PUNTOS DE MOTORES
-  // --------------------------------------------------
-
-  const marcas = [
-    "Ducati",
-    "Aprilia",
-    "KTM",
-    "Honda",
-    "Yamaha",
-  ];
-
-  const resultadosMotores =
-    marcas.map((marca) => {
-      const pilotosMarca = pilotos
-        .filter(
-          (piloto) =>
-            piloto.marca === marca
-        )
-        .sort(
-          (a, b) =>
-            b.puntosGP -
-            a.puntosGP
-        );
-
-      const mejoresDos =
-        pilotosMarca.slice(0, 2);
-
-      const totalGP =
-        mejoresDos.reduce(
-          (total, piloto) =>
-            total +
-            piloto.puntosGP,
-          0
-        );
-
-      return {
-        marca,
-        totalGP,
-      };
-    });
-
-  const motoresOrdenados =
-    resultadosMotores.sort(
-      (a, b) =>
-        b.totalGP -
-        a.totalGP
-    );
-
-  const puntosMotorFantasy = {
-    0: 10,
-    1: 8,
-    2: 6,
-    3: 4,
-    4: 2,
-  };
-
-  const posicionMotor =
-    motoresOrdenados.findIndex(
-      (item) =>
-        item.marca === motor
-    );
-
-  const puntosMotor =
-    posicionMotor >= 0
-      ? puntosMotorFantasy[
-          posicionMotor as keyof typeof puntosMotorFantasy
-        ]
-      : 0;
-
-  // --------------------------------------------------
-  // PUNTOS TOTALES
-  // --------------------------------------------------
-
-  const puntosEquipo =
-    puntosTitulares +
-    puntosReserva +
-    puntosMotor;
+  const puntosGP =
+    equipoActual.puntosGPActual ?? 0;
 
   const puntosTotales =
     equipoActual.puntos ?? 0;
-
-  // --------------------------------------------------
-  // RENDER EQUIPO
-  // --------------------------------------------------
 
   return (
     <AppLayout>
       <div className="relative">
         <div className="relative z-10">
-
           <h1 className="text-4xl md:text-5xl font-bold text-red-500 mb-8">
           </h1>
 
-          {/* ---------------------------------------- */}
-          {/* PUNTOS */}
-          {/* ---------------------------------------- */}
-
           <div className="flex flex-wrap gap-6 mb-10">
-
-            <div className="
-              rounded-xl
-              border
-              border-zinc-800
-              bg-zinc-900/40
-              px-5
-              py-3
-              min-w-[180px]
-            ">
+            <div
+              className="
+                rounded-xl
+                border
+                border-zinc-800
+                bg-zinc-900/40
+                px-5
+                py-3
+                min-w-[180px]
+              "
+            >
               <div className="text-sm text-zinc-400">
                 🏆 Puntos GP
               </div>
 
               <div className="mt-1 text-3xl font-bold text-white">
-                {puntosEquipo}
+                {puntosGP}
               </div>
             </div>
 
-            <div className="
-              rounded-xl
-              border
-              border-zinc-800
-              bg-zinc-900/40
-              px-5
-              py-3
-              min-w-[180px]
-            ">
+            <div
+              className="
+                rounded-xl
+                border
+                border-zinc-800
+                bg-zinc-900/40
+                px-5
+                py-3
+                min-w-[180px]
+              "
+            >
               <div className="text-sm text-zinc-400">
                 ⭐ Puntos Totales
               </div>
@@ -389,46 +249,23 @@ export default function EquipoPage() {
                 {puntosTotales}
               </div>
             </div>
-
           </div>
-
-          {/* ---------------------------------------- */}
-          {/* PARRILLA */}
-          {/* ---------------------------------------- */}
 
           <StartingGrid
             titulares={titulares}
-            reserva={
-              pilotoReserva ?? null
-            }
+            reserva={pilotoReserva ?? null}
           />
 
-          {/* ---------------------------------------- */}
-          {/* MOTOR */}
-          {/* ---------------------------------------- */}
-
           <div className="mt-8">
-
             <MotorCard
-              motor={
-                motorSeleccionado ??
-                null
-              }
-              puntos={puntosMotor}
+              motor={motorSeleccionado ?? null}
+              puntos={0}
             />
-
-            {/* -------------------------------------- */}
-            {/* PREDICCIONES */}
-            {/* -------------------------------------- */}
 
             <div className="mt-6">
               <PredictionsCard
-                piloto={
-                  prediccionPiloto
-                }
-                motor={
-                  prediccionMotor
-                }
+                piloto={prediccionPiloto}
+                motor={prediccionMotor}
                 pilotoModificado={
                   prediccionPilotoModificada
                 }
@@ -437,9 +274,7 @@ export default function EquipoPage() {
                 }
               />
             </div>
-
           </div>
-
         </div>
       </div>
     </AppLayout>

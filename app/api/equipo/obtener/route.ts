@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
-
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET(request: Request) {
   try {
-    // --------------------------------------------------
-    // AUTENTICACIÓN
-    // --------------------------------------------------
-
-    const authorization = request.headers.get("authorization");
+    const authorization =
+      request.headers.get("authorization");
 
     if (!authorization?.startsWith("Bearer ")) {
       return NextResponse.json(
@@ -17,7 +13,8 @@ export async function GET(request: Request) {
       );
     }
 
-    const accessToken = authorization.replace("Bearer ", "").trim();
+    const accessToken =
+      authorization.replace("Bearer ", "").trim();
 
     if (!accessToken) {
       return NextResponse.json(
@@ -25,10 +22,6 @@ export async function GET(request: Request) {
         { status: 401 }
       );
     }
-
-    // --------------------------------------------------
-    // IDENTIFICAR USUARIO DE SUPABASE
-    // --------------------------------------------------
 
     const {
       data: { user },
@@ -41,10 +34,6 @@ export async function GET(request: Request) {
         { status: 401 }
       );
     }
-
-    // --------------------------------------------------
-    // OBTENER USUARIO PÚBLICO
-    // --------------------------------------------------
 
     const { data: usuario, error: usuarioError } =
       await supabaseAdmin
@@ -79,25 +68,21 @@ export async function GET(request: Request) {
       );
     }
 
-    // --------------------------------------------------
-    // OBTENER LIGA SOLICITADA
-    // --------------------------------------------------
-
     const url = new URL(request.url);
-    const ligaIdParam = url.searchParams.get("liga_id");
-
+    const ligaIdParam =
+      url.searchParams.get("liga_id");
     const ligaId = Number(ligaIdParam);
 
-    if (!ligaIdParam || !Number.isInteger(ligaId) || ligaId <= 0) {
+    if (
+      !ligaIdParam ||
+      !Number.isInteger(ligaId) ||
+      ligaId <= 0
+    ) {
       return NextResponse.json(
         { error: "Liga no válida." },
         { status: 400 }
       );
     }
-
-    // --------------------------------------------------
-    // COMPROBAR PERTENENCIA A LA LIGA
-    // --------------------------------------------------
 
     const { data: membresia, error: membresiaError } =
       await supabaseAdmin
@@ -126,10 +111,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // --------------------------------------------------
-    // OBTENER EQUIPO
-    // --------------------------------------------------
-
     const { data: equipo, error: equipoError } =
       await supabaseAdmin
         .from("equipos")
@@ -138,6 +119,7 @@ export async function GET(request: Request) {
           reserva,
           motor,
           puntos,
+          puntos_gp_actual,
           prediccion_piloto,
           prediccion_motor,
           prediccion_piloto_original,
@@ -164,10 +146,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // --------------------------------------------------
-    // USUARIO SIN EQUIPO
-    // --------------------------------------------------
-
     if (!equipo) {
       return NextResponse.json(
         {
@@ -180,10 +158,6 @@ export async function GET(request: Request) {
         { status: 200 }
       );
     }
-
-    // --------------------------------------------------
-    // RESPUESTA
-    // --------------------------------------------------
 
     return NextResponse.json({
       equipo,
