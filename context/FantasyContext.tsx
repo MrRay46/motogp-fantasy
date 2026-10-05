@@ -165,9 +165,6 @@ export function FantasyProvider({
         );
 
         setEquipos({});
-
-        // Limpiamos también el equipo cacheado
-        // porque pertenece a otra situación.
         localStorage.removeItem("equipos");
 
         return;
@@ -325,8 +322,6 @@ export function FantasyProvider({
         [sesion.usuario]: equipoCargado,
       });
 
-      // Guardamos también la versión correcta
-      // en localStorage.
       localStorage.setItem(
         "equipos",
         JSON.stringify({
@@ -422,25 +417,25 @@ export function FantasyProvider({
               sesion.liga_actual_id,
 
             fichados:
-              equipo.fichados,
+              equipo.fichados ?? [],
 
             reserva:
-              equipo.reserva,
+              equipo.reserva ?? null,
 
             motor:
-              equipo.motor,
+              equipo.motor ?? null,
 
             prediccion_piloto:
-              equipo.prediccionPiloto,
+              equipo.prediccionPiloto ?? null,
 
             prediccion_motor:
-              equipo.prediccionMotor,
+              equipo.prediccionMotor ?? null,
 
             prediccion_piloto_original:
-              equipo.prediccionPilotoOriginal,
+              equipo.prediccionPilotoOriginal ?? null,
 
             prediccion_motor_original:
-              equipo.prediccionMotorOriginal,
+              equipo.prediccionMotorOriginal ?? null,
 
             prediccion_piloto_modificada:
               equipo.prediccionPilotoModificada ??
@@ -505,19 +500,13 @@ export function FantasyProvider({
   useEffect(() => {
     if (cargando) return;
 
-    // -----------------------------------------------
     // GUARDAR CACHE LOCAL
-    // -----------------------------------------------
-
     localStorage.setItem(
       "equipos",
       JSON.stringify(equipos)
     );
 
-    // -----------------------------------------------
     // SI NO HAY EQUIPO, NO GUARDAR
-    // -----------------------------------------------
-
     if (
       Object.keys(equipos).length === 0
     ) {
@@ -548,17 +537,11 @@ export function FantasyProvider({
     <FantasyContext.Provider
       value={{
         equipos,
-
         setEquipos,
-
         jugadorActual,
-
         setJugadorActual,
-
         cargando,
-
-        recargarEquipo:
-          cargarEquipoActual,
+        recargarEquipo: cargarEquipoActual,
       }}
     >
       {children}
