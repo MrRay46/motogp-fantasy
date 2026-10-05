@@ -136,17 +136,29 @@ export default function MercadoPage() {
   } | null>(null);
 
   // =====================================================
-  // DETECTAR CREACIÓN INICIAL
+  // DETECTAR SI EL EQUIPO INICIAL ESTÁ COMPLETO
   // =====================================================
 
   useEffect(() => {
-    if (cargando) {
+    if (cargando || !jugadorActual) {
       return;
     }
 
-    setCreandoEquipoInicial(
-      !equipos[jugadorActual]
-    );
+    const equipoGuardado =
+      equipos[jugadorActual];
+
+    const equipoCompleto =
+      Boolean(
+        equipoGuardado &&
+          Array.isArray(equipoGuardado.fichados) &&
+          equipoGuardado.fichados.length === 6 &&
+          equipoGuardado.reserva !== null &&
+          equipoGuardado.motor !== null &&
+          equipoGuardado.prediccionPiloto !== null &&
+          equipoGuardado.prediccionMotor !== null
+      );
+
+    setCreandoEquipoInicial(!equipoCompleto);
   }, [
     cargando,
     jugadorActual,
@@ -164,10 +176,12 @@ export default function MercadoPage() {
 
         const estado =
           await obtenerEstadoMercado();
-console.log(
-  "ESTADO MERCADO:",
-  estado
-);
+
+        console.log(
+          "ESTADO MERCADO:",
+          estado
+        );
+
         if (!estado) {
           setEstadoMercado(null);
           setMercadoAbierto(false);
@@ -214,7 +228,6 @@ console.log(
         setEstadoCambiosVentana(
           estadoCambios
         );
-
       } catch (error) {
         console.error(
           "Error cargando estado del mercado:",
@@ -224,7 +237,6 @@ console.log(
         setEstadoMercado(null);
         setMercadoAbierto(false);
         setEstadoCambiosVentana(null);
-
       } finally {
         setCargandoEstadoCambios(false);
       }
@@ -619,7 +631,6 @@ console.log(
     // -------------------------------------------------
 
     if (fichado) {
-
       // -----------------------------------------------
       // CREACIÓN INICIAL
       // -----------------------------------------------
@@ -761,7 +772,6 @@ console.log(
         setPilotoPendienteCambio(
           null
         );
-
       } catch (error) {
         console.error(
           "Error registrando cambio de piloto:",
@@ -949,7 +959,6 @@ console.log(
               setMotor(
                 constructor.nombre
               );
-
             } catch (error) {
               console.error(
                 "Error registrando cambio de constructor:",
