@@ -36,7 +36,7 @@ export default function VersionPage() {
             </h2>
 
             <p className="text-zinc-300">
-              Julio de 2026
+              Octubre de 2026
             </p>
           </div>
 
