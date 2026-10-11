@@ -11,13 +11,35 @@ interface Participante {
   activo: boolean;
 }
 
+interface EstadoBonificaciones {
+  temporada: number;
+  puedeAplicar: boolean;
+  mensaje: string;
+  totalGP: number;
+  totalEquipos: number;
+  equiposPendientes: number;
+  yaAplicadas: boolean;
+}
+
 export default function AdminPage() {
   const [participantes, setParticipantes] =
     useState<Participante[]>([]);
-  const [codigoLiga, setCodigoLiga] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [procesandoBonificaciones, setProcesandoBonificaciones] =
-    useState(false);
+
+  const [codigoLiga, setCodigoLiga] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    procesandoBonificaciones,
+    setProcesandoBonificaciones,
+  ] = useState(false);
+
+  const [
+    estadoBonificaciones,
+    setEstadoBonificaciones,
+  ] = useState<EstadoBonificaciones | null>(null);
 
   useEffect(() => {
     void cargarDatos();
@@ -37,30 +59,93 @@ export default function AdminPage() {
         return;
       }
 
-      const respuesta = await fetch("/api/admin/participantes", {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      });
+      const respuestaParticipantes = await fetch(
+        "/api/admin/participantes",
+        {
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+        }
+      );
 
-      const resultado = await respuesta.json().catch(() => null);
+      const resultadoParticipantes =
+        await respuestaParticipantes
+          .json()
+          .catch(() => null);
 
-      if (!respuesta.ok) {
+      if (!respuestaParticipantes.ok) {
         console.error(
           "Error cargando participantes:",
-          resultado?.error ?? respuesta.statusText
+          resultadoParticipantes?.error ??
+            respuestaParticipantes.statusText
         );
+
         setParticipantes([]);
         setCodigoLiga("");
-        return;
+      } else {
+        setCodigoLiga(
+          resultadoParticipantes.codigo ?? ""
+        );
+
+        setParticipantes(
+          resultadoParticipantes.participantes ?? []
+        );
       }
 
-      setCodigoLiga(resultado.codigo ?? "");
-      setParticipantes(resultado.participantes ?? []);
+      const respuestaEstado = await fetch(
+        "/api/admin/bonificaciones",
+        {
+          method: "GET",
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+          cache: "no-store",
+        }
+      );
+
+      const resultadoEstado =
+        await respuestaEstado
+          .json()
+          .catch(() => null);
+
+      if (!respuestaEstado.ok) {
+        setEstadoBonificaciones({
+          temporada: resultadoEstado?.temporada ?? 2026,
+          puedeAplicar: false,
+          mensaje:
+            resultadoEstado?.error ??
+            "No se pudo comprobar si las bonificaciones están disponibles.",
+          totalGP: 0,
+          totalEquipos: 0,
+          equiposPendientes: 0,
+          yaAplicadas: false,
+        });
+      } else {
+        setEstadoBonificaciones(
+          resultadoEstado as EstadoBonificaciones
+        );
+      }
     } catch (error) {
-      console.error("Error cargando datos de administración:", error);
+      console.error(
+        "Error cargando datos de administración:",
+        error
+      );
+
       setParticipantes([]);
       setCodigoLiga("");
+
+      setEstadoBonificaciones({
+        temporada: 2026,
+        puedeAplicar: false,
+        mensaje:
+          "No se pudo verificar el estado de las bonificaciones.",
+        totalGP: 0,
+        totalEquipos: 0,
+        equiposPendientes: 0,
+        yaAplicadas: false,
+      });
     } finally {
       setLoading(false);
     }
@@ -71,9 +156,17 @@ export default function AdminPage() {
   }
 
   async function generarBonificaciones() {
+    if (!estadoBonificaciones?.puedeAplicar) {
+      alert(
+        estadoBonificaciones?.mensaje ??
+          "Las bonificaciones todavía no están disponibles."
+      );
+      return;
+    }
+
     const confirmar = window.confirm(
-      "¿Aplicar las bonificaciones finales de la temporada?\n\n" +
-        "Esta acción solo debería ejecutarse una vez para esta liga."
+      `¿Aplicar las bonificaciones finales de la temporada ${estadoBonificaciones.temporada} a los equipos de esta liga?\n\n` +
+        "Cada equipo solo puede recibirlas una vez."
     );
 
     if (!confirmar) return;
@@ -86,8 +179,11 @@ export default function AdminPage() {
         error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
-        alert("Tu sesión ha caducado. Inicia sesión de nuevo.");
+      if (sessionError || !session?.access_token) {
+        alert(
+          "Tu sesión ha caducado. Inicia sesión de nuevo."
+        );
+
         window.location.href = "/login";
         return;
       }
@@ -107,7 +203,8 @@ export default function AdminPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization:
+              `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             liga_id: sesion.liga_actual_id,
@@ -115,38 +212,41 @@ export default function AdminPage() {
         }
       );
 
-      const resultado = await respuesta.json().catch(() => null);
+      const resultado =
+        await respuesta.json().catch(() => null);
 
       if (!respuesta.ok) {
         alert(
           resultado?.error ??
             "No se pudieron aplicar las bonificaciones."
         );
+
+        await cargarDatos();
         return;
       }
 
-      if (resultado.equiposProcesados === 0) {
-        alert(
-          resultado.mensaje ??
-            "No había equipos pendientes de bonificación."
-        );
-      } else {
-        let mensaje =
-          "Proceso de bonificaciones finalizado.\n\n" +
-          `Equipos procesados: ${resultado.equiposProcesados}\n` +
-          `Equipos omitidos: ${resultado.equiposOmitidos}`;
+      let mensaje =
+        `${resultado.mensaje}\n\n` +
+        `Equipos bonificados: ${resultado.equiposProcesados}\n` +
+        `Equipos omitidos: ${resultado.equiposOmitidos}`;
 
-        if (resultado.errores?.length > 0) {
-          mensaje +=
-            "\n\nNo se pudieron actualizar los siguientes equipos: " +
-            resultado.errores.join(", ");
-        }
-
-        alert(mensaje);
+      if (resultado.errores?.length > 0) {
+        mensaje +=
+          "\n\nEquipos con error: " +
+          resultado.errores.join(", ");
       }
+
+      alert(mensaje);
+      await cargarDatos();
     } catch (error) {
-      console.error("Error aplicando las bonificaciones:", error);
-      alert("Error de conexión al aplicar las bonificaciones.");
+      console.error(
+        "Error aplicando las bonificaciones:",
+        error
+      );
+
+      alert(
+        "Error de conexión al aplicar las bonificaciones."
+      );
     } finally {
       setProcesandoBonificaciones(false);
     }
@@ -170,8 +270,11 @@ export default function AdminPage() {
         error: sessionError,
       } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
-        alert("Tu sesión ha caducado. Inicia sesión de nuevo.");
+      if (sessionError || !session?.access_token) {
+        alert(
+          "Tu sesión ha caducado. Inicia sesión de nuevo."
+        );
+
         window.location.href = "/login";
         return;
       }
@@ -191,7 +294,8 @@ export default function AdminPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+            Authorization:
+              `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             usuario_id: id,
@@ -201,7 +305,8 @@ export default function AdminPage() {
         }
       );
 
-      const resultado = await respuesta.json().catch(() => null);
+      const resultado =
+        await respuesta.json().catch(() => null);
 
       if (!respuesta.ok) {
         alert(
@@ -213,8 +318,14 @@ export default function AdminPage() {
 
       await cargarDatos();
     } catch (error) {
-      console.error("Error cambiando el estado del participante:", error);
-      alert("Error de conexión al actualizar el participante.");
+      console.error(
+        "Error cambiando el estado del participante:",
+        error
+      );
+
+      alert(
+        "Error de conexión al actualizar el participante."
+      );
     }
   }
 
@@ -235,6 +346,7 @@ export default function AdminPage() {
           <h1 className="text-4xl font-black mb-3">
             ⚙️ Panel de Administración
           </h1>
+
           <p className="text-zinc-400">
             Gestiona los participantes de tu liga.
           </p>
@@ -256,6 +368,7 @@ export default function AdminPage() {
             <p className="text-zinc-400 text-sm">
               Código de la liga
             </p>
+
             <p className="text-3xl font-black tracking-widest text-orange-400">
               {codigoLiga}
             </p>
@@ -284,6 +397,7 @@ export default function AdminPage() {
                     <h3 className="font-bold text-lg">
                       {participante.usuario}
                     </h3>
+
                     <p
                       className={
                         participante.activo
@@ -311,7 +425,9 @@ export default function AdminPage() {
                       : "bg-green-600 hover:bg-green-500 px-5 py-2 rounded-xl font-bold transition"
                   }
                 >
-                  {participante.activo ? "Desactivar" : "Activar"}
+                  {participante.activo
+                    ? "Desactivar"
+                    : "Activar"}
                 </button>
               </div>
             ))}
@@ -323,18 +439,45 @@ export default function AdminPage() {
             🎯 Bonificaciones de temporada
           </h2>
 
-          <p className="text-zinc-400 mb-6">
-            Aplica automáticamente las bonificaciones de las predicciones
-            acertadas al finalizar el campeonato.
+          <p className="text-zinc-400 mb-4">
+            Se habilitarán cuando estén configurados los campeones y todos los GP de la temporada {estadoBonificaciones?.temporada ?? 2026} hayan finalizado y sido procesados.
           </p>
+
+          <div className="mb-6 rounded-xl border border-zinc-700 bg-zinc-950 p-4">
+            <p
+              className={
+                estadoBonificaciones?.puedeAplicar
+                  ? "text-green-400"
+                  : "text-zinc-300"
+              }
+            >
+              {estadoBonificaciones?.mensaje ??
+                "Comprobando si las bonificaciones están disponibles..."}
+            </p>
+
+            {estadoBonificaciones && (
+              <p className="mt-2 text-sm text-zinc-500">
+                GP finalizados/procesados:{" "}
+                {estadoBonificaciones.totalGP}
+                {" · "}
+                Equipos pendientes:{" "}
+                {estadoBonificaciones.equiposPendientes}
+              </p>
+            )}
+          </div>
 
           <button
             onClick={generarBonificaciones}
-            disabled={procesandoBonificaciones}
-            className="bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-600 disabled:cursor-not-allowed px-6 py-3 rounded-xl font-bold transition"
+            disabled={
+              procesandoBonificaciones ||
+              !estadoBonificaciones?.puedeAplicar
+            }
+            className="bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-60 px-6 py-3 rounded-xl font-bold transition"
           >
             {procesandoBonificaciones
               ? "Aplicando bonificaciones..."
+              : estadoBonificaciones?.yaAplicadas
+              ? "Bonificaciones ya aplicadas"
               : "Generar bonificaciones"}
           </button>
         </div>
