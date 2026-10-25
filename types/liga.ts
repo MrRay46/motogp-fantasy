@@ -79,6 +79,7 @@ export interface DestacadosGP {
 
   sprintWinner: PilotoDB | null;
   raceWinner: PilotoDB | null;
+  raceCancelled: boolean;
   riderInForm: PilotoDB | null;
 }
 

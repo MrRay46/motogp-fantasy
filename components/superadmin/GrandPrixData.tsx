@@ -28,6 +28,7 @@ type GranPremio = {
   piloto_ganador_sprint: string | null;
   piloto_ganador_id: number | null;
   piloto_ganador: string | null;
+  carrera_suspendida: boolean;
   piloto_forma_id: number | null;
   piloto_forma: string | null;
   constructor_ganador: string | null;
@@ -54,6 +55,9 @@ export default function GrandPrixData() {
 
   const [ganadorCarrera, setGanadorCarrera] =
     useState<number | null>(null);
+
+  const [carreraSuspendida, setCarreraSuspendida] =
+    useState(false);
 
   const [pilotoForma, setPilotoForma] =
     useState<number | null>(null);
@@ -101,6 +105,7 @@ export default function GrandPrixData() {
           piloto_ganador_sprint,
           piloto_ganador_id,
           piloto_ganador,
+          carrera_suspendida,
           piloto_forma_id,
           piloto_forma,
           constructor_ganador,
@@ -237,6 +242,10 @@ export default function GrandPrixData() {
       gp.piloto_ganador_id
     );
 
+    setCarreraSuspendida(
+      gp.carrera_suspendida === true
+    );
+
     setPilotoForma(
       gp.piloto_forma_id
     );
@@ -333,11 +342,15 @@ export default function GrandPrixData() {
               null,
 
             piloto_ganador_id:
-              ganadorCarrera,
+              carreraSuspendida ? null : ganadorCarrera,
 
             piloto_ganador:
-              pilotoCarrera?.nombre ??
-              null,
+              carreraSuspendida
+                ? null
+                : pilotoCarrera?.nombre ?? null,
+
+            carrera_suspendida:
+              carreraSuspendida,
 
             piloto_forma_id:
               pilotoForma,
@@ -385,11 +398,15 @@ export default function GrandPrixData() {
                   null,
 
                 piloto_ganador_id:
-                  ganadorCarrera,
+                  carreraSuspendida ? null : ganadorCarrera,
 
                 piloto_ganador:
-                  pilotoCarrera?.nombre ??
-                  null,
+                  carreraSuspendida
+                    ? null
+                    : pilotoCarrera?.nombre ?? null,
+
+                carrera_suspendida:
+                  carreraSuspendida,
 
                 piloto_forma_id:
                   pilotoForma,
@@ -590,17 +607,25 @@ export default function GrandPrixData() {
 
           <select
             value={
-              ganadorCarrera ?? ""
+              carreraSuspendida
+                ? "suspendida"
+                : ganadorCarrera ?? ""
             }
-            onChange={(e) =>
+            onChange={(e) => {
+              const valor = e.target.value;
+
+              if (valor === "suspendida") {
+                setCarreraSuspendida(true);
+                setGanadorCarrera(null);
+                setConstructorGanador("");
+                return;
+              }
+
+              setCarreraSuspendida(false);
               setGanadorCarrera(
-                e.target.value
-                  ? Number(
-                      e.target.value
-                    )
-                  : null
-              )
-            }
+                valor ? Number(valor) : null
+              );
+            }}
             className="
               w-full
               bg-zinc-950
@@ -616,6 +641,9 @@ export default function GrandPrixData() {
 
             <option value="">
               Seleccionar piloto
+            </option>
+            <option value="suspendida">
+              Carrera suspendida
             </option>
 
             {pilotos.map(
@@ -702,13 +730,23 @@ export default function GrandPrixData() {
 
           <select
             value={
-              constructorGanador
+              carreraSuspendida
+                ? "suspendida"
+                : constructorGanador
             }
-            onChange={(e) =>
-              setConstructorGanador(
-                e.target.value
-              )
-            }
+            onChange={(e) => {
+              const valor = e.target.value;
+
+              if (valor === "suspendida") {
+                setCarreraSuspendida(true);
+                setGanadorCarrera(null);
+                setConstructorGanador("");
+                return;
+              }
+
+              setCarreraSuspendida(false);
+              setConstructorGanador(valor);
+            }}
             className="
               w-full
               bg-zinc-950
@@ -724,6 +762,9 @@ export default function GrandPrixData() {
 
             <option value="">
               Seleccionar constructor
+            </option>
+            <option value="suspendida">
+              Carrera suspendida
             </option>
 
             {constructores.map(

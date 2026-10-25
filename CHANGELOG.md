@@ -95,6 +95,7 @@ Historial de cambios del proyecto.
 - El botón de bonificaciones permanece bloqueado hasta que haya campeones registrados y todos los GP de la temporada estén finalizados y procesados.
 - La API vuelve a comprobar esas condiciones al recibir la solicitud, aunque se intente llamar sin usar el botón.
 - Se conservan las bonificaciones definidas por las reglas para las predicciones originales y modificadas.
+- Se admite registrar un GP con el Sprint disputado y la carrera suspendida, sin asignar un ganador ficticio.
 
 ### Verificación
 

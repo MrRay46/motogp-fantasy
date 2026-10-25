@@ -55,20 +55,26 @@ export async function obtenerDestacadosGP(): Promise<
       throw sprintError;
     }
 
-    const {
-      data: raceWinner,
-      error: raceError,
-    } = await supabase
-      .from("pilotos")
-      .select("*")
-      .eq(
-        "id",
-        gp.piloto_ganador_id
-      )
-      .maybeSingle();
+    let raceWinner: PilotoDB | null = null;
 
-    if (raceError) {
-      throw raceError;
+    if (gp.piloto_ganador_id !== null) {
+      const {
+        data: raceWinnerData,
+        error: raceError,
+      } = await supabase
+        .from("pilotos")
+        .select("*")
+        .eq(
+          "id",
+          gp.piloto_ganador_id
+        )
+        .maybeSingle();
+
+      if (raceError) {
+        throw raceError;
+      }
+
+      raceWinner = raceWinnerData;
     }
 
     const {
@@ -101,6 +107,9 @@ export async function obtenerDestacadosGP(): Promise<
 
       raceWinner:
         raceWinner ?? null,
+
+      raceCancelled:
+        gp.carrera_suspendida === true,
 
       riderInForm:
         riderInForm ?? null,

@@ -122,8 +122,13 @@ export async function POST(
     const pilotoGanadorSprint =
       body.piloto_ganador_sprint;
 
+    const carreraSuspendida =
+      body.carrera_suspendida === true;
+
     const ganadorCarrera =
-      body.piloto_ganador_id;
+      carreraSuspendida
+        ? null
+        : body.piloto_ganador_id;
 
     const pilotoGanador =
       body.piloto_ganador;
@@ -291,8 +296,12 @@ export async function POST(
             : null,
 
         piloto_ganador:
-          pilotoGanador ??
-          null,
+          carreraSuspendida
+            ? null
+            : pilotoGanador ?? null,
+
+        carrera_suspendida:
+          carreraSuspendida,
 
         piloto_forma_id:
           pilotoForma !== undefined
@@ -323,6 +332,7 @@ export async function POST(
           piloto_ganador_sprint,
           piloto_ganador_id,
           piloto_ganador,
+          carrera_suspendida,
           piloto_forma_id,
           piloto_forma,
           constructor_ganador,

@@ -12,6 +12,7 @@ interface HighlightCardProps {
   pilot: PilotoDB | null;
   accent: "cyan" | "orange" | "yellow";
   subtitle: string;
+  emptyMessage?: string;
 }
 
 function HighlightCard({
@@ -20,6 +21,7 @@ function HighlightCard({
   pilot,
   accent,
   subtitle,
+  emptyMessage,
 }: HighlightCardProps) {
   const colors = {
     cyan: {
@@ -64,8 +66,8 @@ function HighlightCard({
       </div>
 
       {!pilot ? (
-        <div className="mt-8 text-zinc-500">
-          Sin datos
+        <div className="mt-8 text-zinc-400">
+          {emptyMessage ?? "Sin datos"}
         </div>
       ) : (
         <div className="mt-5 flex items-center justify-between gap-4">
@@ -198,6 +200,11 @@ export default function GPHighlights() {
           subtitle={
             destacados.raceWinner?.equipo ??
             "-"
+          }
+          emptyMessage={
+            destacados.raceCancelled
+              ? "Carrera suspendida"
+              : "Sin datos del ganador"
           }
         />
 
