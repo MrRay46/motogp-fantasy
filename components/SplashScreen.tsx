@@ -14,15 +14,6 @@ export default function SplashScreen() {
   "
 />
 
-<div
-  className="
-    absolute
-    inset-0
-    opacity-[0.04]
-    bg-[url('/images/carbon.png')]
-    bg-repeat
-  "
-/>
       {/* Halo animado */}
       <motion.div
         className="absolute w-80 h-80 rounded-full bg-red-600/20 blur-[90px]"
