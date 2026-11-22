@@ -50,7 +50,7 @@ function HighlightCard({
         ${style.border}
         rounded-2xl
         border
-        p-5
+        min-w-0 p-3 sm:p-5
         transition-all
         duration-300
         hover:-translate-y-1
@@ -70,9 +70,9 @@ function HighlightCard({
           {emptyMessage ?? "Sin datos"}
         </div>
       ) : (
-        <div className="mt-5 flex items-center justify-between gap-4">
+        <div className="mt-5 flex items-center justify-between gap-2 sm:gap-4">
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-xl font-black text-white">
+            <h3 className="wrap-break-word text-lg font-black sm:text-xl text-white">
               {pilot.nombre}
             </h3>
 
@@ -81,11 +81,11 @@ function HighlightCard({
             </p>
           </div>
 
-          <div className="relative -translate-y-3 h-28 w-28 shrink-0 drop-shadow-xl transition-transform">
+          <div className="relative h-16 w-16 shrink-0 sm:-translate-y-3 sm:h-28 sm:w-28 drop-shadow-xl transition-transform">
            <img
             src={pilot.miniatura}
             alt={pilot.nombre}
-            className="h-24 w-24 object-contain"
+            className="h-full w-full object-contain sm:h-24 sm:w-24"
           />
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function GPHighlights() {
 
   if (loading) {
     return (
-      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4 sm:p-8">
         <h2 className="mb-6 text-3xl font-black">
           🏍 Últimos destacados
         </h2>
@@ -140,7 +140,7 @@ export default function GPHighlights() {
   }
     if (error) {
     return (
-      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4 sm:p-8">
         <h2 className="mb-6 text-3xl font-black">
           🏍 Últimos destacados
         </h2>
@@ -154,7 +154,7 @@ export default function GPHighlights() {
 
   if (!destacados) {
     return (
-      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+      <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4 sm:p-8">
         <h2 className="mb-6 text-3xl font-black">
           🏍 Últimos destacados
         </h2>
@@ -167,7 +167,7 @@ export default function GPHighlights() {
   }
 
   return (
-    <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-8">
+    <section className="rounded-3xl border border-zinc-800 bg-zinc-900 p-4 sm:p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-black text-white">
@@ -180,7 +180,7 @@ export default function GPHighlights() {
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
         <HighlightCard
           icon="🏁"
           title="Ganador Sprint"
